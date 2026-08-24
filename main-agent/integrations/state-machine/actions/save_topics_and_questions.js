@@ -321,30 +321,138 @@ const KnowledgeRetentionUtils = {
     return result && result.value && result.value.length > 0 ? result.value[0] : null;
   },
 
+  // One FetchXML join (SE-3215) instead of three child GETs. FetchXML omits
+  // attributes whose value is null; OData returns null — coerce missing aliases
+  // to null so computeState / topicQnA see the same shape as the 3-GET loader.
+  // Gate: admin_spike_joined_read → parity.readyToReplaceLoadChildren.
   async loadChildren(data, token, interviewId) {
     const S = KnowledgeRetentionUtils.SCHEMA;
-    const topicFilter = `${S.topic.interviewLookupValue} eq ${interviewId}`;
-    const questionFilter = `${S.question.interviewLookupValue} eq ${interviewId}`;
-    const answerJoinFilter = `${S.answer.interviewLookupValue} eq ${interviewId}`;
-
-    const topicsResult = await KnowledgeRetentionUtils.dv(data, token, {
-      method: 'GET',
-      path: `/${S.entitySets.topics}?$filter=${encodeURIComponent(topicFilter)}&$orderby=${S.topic.order} asc`,
-    });
-    const questionsResult = await KnowledgeRetentionUtils.dv(data, token, {
-      method: 'GET',
-      path: `/${S.entitySets.questions}?$filter=${encodeURIComponent(questionFilter)}&$orderby=${S.question.order} asc`,
-    });
-    const answersResult = await KnowledgeRetentionUtils.dv(data, token, {
-      method: 'GET',
-      path: `/${S.entitySets.answers}?$filter=${encodeURIComponent(answerJoinFilter)}`,
-    });
-
-    return {
-      topics: (topicsResult && topicsResult.value) || [],
-      questions: (questionsResult && questionsResult.value) || [],
-      answers: (answersResult && answersResult.value) || [],
+    const alias = (row, prefix, field) => {
+      if (!row) return undefined;
+      const key = `${prefix}.${field}`;
+      if (Object.prototype.hasOwnProperty.call(row, key)) return row[key];
+      // Root entity id may arrive unprefixed on some FetchXML responses.
+      if (prefix === 'topic' && field === S.topic.id && row[S.topic.id]) return row[S.topic.id];
+      return undefined;
     };
+    const aliasOrNull = (row, prefix, field) => {
+      const value = alias(row, prefix, field);
+      return value === undefined ? null : value;
+    };
+    const uniqueBy = (rows, idField) => {
+      const map = new Map();
+      for (const row of rows) {
+        const id = row[idField];
+        if (id && !map.has(id)) map.set(id, row);
+      }
+      return Array.from(map.values());
+    };
+
+    const fetchXml = `
+<fetch>
+  <entity name="ckr_interview">
+    <attribute name="${S.interview.id}" />
+    <filter type="and">
+      <condition attribute="${S.interview.id}" operator="eq" value="${interviewId}" />
+    </filter>
+    <link-entity name="ckr_interviewtopic" from="ckr_interview" to="${S.interview.id}" link-type="outer" alias="topic">
+      <attribute name="${S.topic.id}" />
+      <attribute name="${S.topic.name}" />
+      <attribute name="${S.topic.order}" />
+      <attribute name="${S.topic.status}" />
+      <attribute name="${S.topic.summary}" />
+      <attribute name="${S.topic.summaryStatus}" />
+      <link-entity name="ckr_question" from="ckr_topic" to="${S.topic.id}" link-type="outer" alias="question">
+        <attribute name="${S.question.id}" />
+        <attribute name="${S.question.text}" />
+        <attribute name="${S.question.order}" />
+        <attribute name="${S.question.status}" />
+        <attribute name="${S.question.isAnswered}" />
+        <link-entity name="ckr_answer" from="ckr_question" to="${S.question.id}" link-type="outer" alias="answer">
+          <attribute name="${S.answer.id}" />
+          <attribute name="${S.answer.confirmedAnswer}" />
+          <attribute name="${S.answer.rawUserMessages}" />
+          <attribute name="${S.answer.sequence}" />
+          <attribute name="${S.answer.isLatest}" />
+        </link-entity>
+      </link-entity>
+    </link-entity>
+  </entity>
+</fetch>`.trim();
+
+    const result = await KnowledgeRetentionUtils.dv(data, token, {
+      method: 'GET',
+      path: `/${S.entitySets.interviews}?fetchXml=${encodeURIComponent(fetchXml)}`,
+    });
+    const rows = (result && result.value) || [];
+
+    const topics = uniqueBy(
+      rows
+        .map((r) => {
+          const id = alias(r, 'topic', S.topic.id);
+          if (!id) return null;
+          return {
+            [S.topic.id]: id,
+            [S.topic.name]: aliasOrNull(r, 'topic', S.topic.name),
+            [S.topic.order]: aliasOrNull(r, 'topic', S.topic.order),
+            [S.topic.status]: aliasOrNull(r, 'topic', S.topic.status),
+            [S.topic.summary]: aliasOrNull(r, 'topic', S.topic.summary),
+            [S.topic.summaryStatus]: aliasOrNull(r, 'topic', S.topic.summaryStatus),
+            [S.topic.interviewLookupValue]: interviewId,
+          };
+        })
+        .filter(Boolean),
+      S.topic.id,
+    ).sort((a, b) => Number(a[S.topic.order]) - Number(b[S.topic.order]));
+
+    const questions = uniqueBy(
+      rows
+        .map((r) => {
+          const questionId = alias(r, 'question', S.question.id);
+          const topicId = alias(r, 'topic', S.topic.id);
+          if (!questionId) return null;
+          return {
+            [S.question.id]: questionId,
+            [S.question.text]: aliasOrNull(r, 'question', S.question.text),
+            [S.question.order]: aliasOrNull(r, 'question', S.question.order),
+            [S.question.status]: aliasOrNull(r, 'question', S.question.status),
+            [S.question.isAnswered]: aliasOrNull(r, 'question', S.question.isAnswered),
+            [S.question.interviewLookupValue]: interviewId,
+            [S.question.topicLookupValue]: topicId || null,
+          };
+        })
+        .filter(Boolean),
+      S.question.id,
+    ).sort((a, b) => Number(a[S.question.order]) - Number(b[S.question.order]));
+
+    const answers = uniqueBy(
+      rows
+        .map((r) => {
+          const id = alias(r, 'answer', S.answer.id);
+          const questionId = alias(r, 'question', S.question.id);
+          if (!id) return null;
+          return {
+            [S.answer.id]: id,
+            [S.answer.confirmedAnswer]: aliasOrNull(r, 'answer', S.answer.confirmedAnswer),
+            [S.answer.rawUserMessages]: aliasOrNull(r, 'answer', S.answer.rawUserMessages),
+            [S.answer.sequence]: aliasOrNull(r, 'answer', S.answer.sequence),
+            [S.answer.isLatest]: aliasOrNull(r, 'answer', S.answer.isLatest),
+            [S.answer.interviewLookupValue]: interviewId,
+            [S.answer.questionLookupValue]: questionId || null,
+          };
+        })
+        .filter(Boolean),
+      S.answer.id,
+    );
+
+    return { topics, questions, answers };
+  },
+
+  needsChildren(interview) {
+    const S = KnowledgeRetentionUtils.SCHEMA;
+    const ST = KnowledgeRetentionUtils.STATUS;
+    if (!interview) return false;
+    return Number(interview[S.interview.status]) === ST.interview.generated;
   },
 
   // ===========================================================================
@@ -661,9 +769,29 @@ const KnowledgeRetentionUtils = {
 // Persists generated topics + questions, then flips the interview to the
 // interview stage. Idempotent by retry: if a prior run partially wrote rows,
 // they are deleted and recreated; the status flips to "generated" only last.
-// Creates each topic, then each question bound to BOTH its topic (ckr_Topic) and
-// the interview (ckr_Interview) — mirrors the original generate flow. For ~6
-// topics x ~6 questions this is well inside the 120s/128MB sandbox budget.
+// Creates use one Dataverse $batch changeset (SE-3215): client-assigned topic
+// GUIDs so questions can bind in the same changeset. Gate:
+// admin_spike_batch_create → parity.readyToReplaceGenerationCreates PASS.
+function newGuid() {
+  const hex = [];
+  for (let i = 0; i < 36; i++) {
+    if (i === 8 || i === 13 || i === 18 || i === 23) hex[i] = '-';
+    else if (i === 14) hex[i] = '4';
+    else if (i === 19) hex[i] = ((Math.random() * 4) | 8).toString(16);
+    else hex[i] = ((Math.random() * 16) | 0).toString(16);
+  }
+  return hex.join('');
+}
+
+function parseBatchStatusLines(text) {
+  const statuses = [];
+  for (const line of String(text || '').split(/\r?\n/)) {
+    const m = line.match(/^HTTP\/1\.1\s+(\d+)/);
+    if (m) statuses.push(Number(m[1]));
+  }
+  return statuses;
+}
+
 const email = KnowledgeRetentionUtils.resolveIdentity(data);
 const token = await KnowledgeRetentionUtils.dataverseToken(data);
 const S = KnowledgeRetentionUtils.SCHEMA;
@@ -745,11 +873,18 @@ for (const topic of existing.topics) {
 }
 
 const interviewRef = `/${S.entitySets.interviews}(${interviewId})`;
+const batchBoundary = `batch_${newGuid()}`;
+const changesetBoundary = `changeset_${newGuid()}`;
+const parts = [];
+let contentId = 1;
 let totalQuestions = 0;
+
 for (const topic of topics) {
   const questions = Array.isArray(topic.questions) ? topic.questions : [];
   const questionOrders = questions.map((question) => Number(question.order)).filter((n) => !Number.isNaN(n));
+  const topicId = newGuid();
   const topicBody = {};
+  topicBody[S.topic.id] = topicId;
   topicBody[S.topic.name] = topic.name;
   if (topic.description) {
     topicBody[S.topic.description] = topic.description;
@@ -765,14 +900,18 @@ for (const topic of topics) {
   }
   topicBody[`${S.topic.interviewBind}@odata.bind`] = interviewRef;
 
-  const createdTopic = await KnowledgeRetentionUtils.dv(data, token, {
-    method: 'POST',
-    path: `/${S.entitySets.topics}`,
-    body: topicBody,
-    prefer: 'return=representation',
-  });
-  const topicRef = `/${S.entitySets.topics}(${createdTopic[S.topic.id]})`;
+  parts.push(
+    `--${changesetBoundary}\r\n` +
+      `Content-Type: application/http\r\n` +
+      `Content-Transfer-Encoding: binary\r\n` +
+      `Content-ID: ${contentId}\r\n\r\n` +
+      `POST ${KnowledgeRetentionUtils.SCHEMA.apiPath}/${S.entitySets.topics} HTTP/1.1\r\n` +
+      `Content-Type: application/json;type=entry\r\n\r\n` +
+      `${JSON.stringify(topicBody)}\r\n`,
+  );
+  contentId += 1;
 
+  const topicRef = `/${S.entitySets.topics}(${topicId})`;
   for (const question of questions) {
     const questionText = question.questionText;
     const questionBody = {};
@@ -785,13 +924,94 @@ for (const topic of topics) {
     questionBody[S.question.isMandatory] = question.mandatory === false ? false : true;
     questionBody[`${S.question.interviewBind}@odata.bind`] = interviewRef;
     questionBody[`${S.question.topicBind}@odata.bind`] = topicRef;
-    await KnowledgeRetentionUtils.dv(data, token, {
-      method: 'POST',
-      path: `/${S.entitySets.questions}`,
-      body: questionBody,
-    });
+
+    parts.push(
+      `--${changesetBoundary}\r\n` +
+        `Content-Type: application/http\r\n` +
+        `Content-Transfer-Encoding: binary\r\n` +
+        `Content-ID: ${contentId}\r\n\r\n` +
+        `POST ${KnowledgeRetentionUtils.SCHEMA.apiPath}/${S.entitySets.questions} HTTP/1.1\r\n` +
+        `Content-Type: application/json;type=entry\r\n\r\n` +
+        `${JSON.stringify(questionBody)}\r\n`,
+    );
+    contentId += 1;
     totalQuestions += 1;
   }
+}
+
+const batchBody =
+  `--${batchBoundary}\r\n` +
+  `Content-Type: multipart/mixed;boundary=${changesetBoundary}\r\n\r\n` +
+  parts.join('') +
+  `--${changesetBoundary}--\r\n` +
+  `--${batchBoundary}--\r\n`;
+
+const MAX_RATE_LIMIT_RETRIES = 3;
+const RETRY_FALLBACK_SECONDS = 2;
+const MAX_WAIT_MS = 30000;
+let rateLimitRetries = 0;
+let batchResponse;
+while (true) {
+  batchResponse = await ld.request({
+    url: `${data.auth.dataverseUrl}${KnowledgeRetentionUtils.SCHEMA.apiPath}/$batch`,
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/json',
+      'OData-MaxVersion': '4.0',
+      'OData-Version': '4.0',
+      'Content-Type': `multipart/mixed;boundary=${batchBoundary}`,
+    },
+    body: batchBody,
+  });
+
+  if (batchResponse.status === 429) {
+    if (rateLimitRetries >= MAX_RATE_LIMIT_RETRIES) {
+      const detail =
+        (batchResponse.json && batchResponse.json.error && batchResponse.json.error.message) ||
+        batchResponse.text ||
+        '';
+      throw new Error(KnowledgeRetentionUtils.failureMessage(429, detail));
+    }
+    rateLimitRetries++;
+    const retryAfter = parseInt(
+      (batchResponse.headers &&
+        (batchResponse.headers['Retry-After'] || batchResponse.headers['retry-after'])) ||
+        '',
+      10,
+    );
+    await ld.wait(
+      Math.min((retryAfter && retryAfter > 0 ? retryAfter : RETRY_FALLBACK_SECONDS) * 1000, MAX_WAIT_MS),
+    );
+    continue;
+  }
+  break;
+}
+
+if (batchResponse.status === 401 || batchResponse.status === 403) {
+  const detail =
+    (batchResponse.json && batchResponse.json.error && batchResponse.json.error.message) ||
+    batchResponse.text ||
+    '';
+  throw new Error(KnowledgeRetentionUtils.failureMessage(batchResponse.status, detail));
+}
+
+const partStatuses = parseBatchStatusLines(batchResponse.text);
+const operationCount = parts.length;
+const allPartsOk =
+  batchResponse.status >= 200 &&
+  batchResponse.status < 300 &&
+  partStatuses.length === operationCount &&
+  partStatuses.every((s) => s >= 200 && s < 300);
+
+if (!allPartsOk) {
+  const detail = String(batchResponse.text || '').slice(0, 800);
+  throw new Error(
+    KnowledgeRetentionUtils.failureMessage(
+      batchResponse.status,
+      `Batch create failed (parts=${partStatuses.join(',') || 'none'}): ${detail}`,
+    ),
+  );
 }
 
 // Flip status last so a mid-run failure leaves the interview re-generatable.

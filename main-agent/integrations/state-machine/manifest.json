@@ -714,7 +714,7 @@
     {
       "slug": "admin_spike_joined_read",
       "name": "Admin: spike joined read",
-      "description": "SE-3215 spike: compare the baseline multi-GET child loader against FetchXML and $expand joined reads for one interview. Uses the same Dataverse connection auth as the rest of this integration. Not for employee interviews. Provide interviewId or employeeEmail.",
+      "description": "SE-3215 spike: compare baseline 3-GET loadChildren against FetchXML+adapter for one interview, including SCHEMA field shape parity and a computeState-style fingerprint (active topic/question, topicQnA). Returns readyToReplaceLoadChildren. Same Dataverse connection auth. Not for employee interviews. Provide interviewId or employeeEmail.",
       "nativeActionType": "NONE",
       "actionType": "API",
       "requiresConfirmation": false,
@@ -750,7 +750,7 @@
     {
       "slug": "admin_spike_batch_create",
       "name": "Admin: spike batch create",
-      "description": "SE-3215 spike: create throwaway topics and questions on a disposable interview via one Dataverse $batch changeset, then optionally delete them. Uses the same Dataverse connection auth as the rest of this integration. Not for employee interviews.",
+      "description": "SE-3215 spike: create throwaway topics/questions via one Dataverse $batch changeset on a disposable interview, then verify post-create SCHEMA shape/lookups/statuses (shapeMatch / readyToReplaceGenerationCreates) before optional cleanup. Same Dataverse connection auth. Not for employee interviews.",
       "nativeActionType": "NONE",
       "actionType": "API",
       "requiresConfirmation": true,

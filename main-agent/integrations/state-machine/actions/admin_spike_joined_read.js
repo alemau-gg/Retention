@@ -1,7 +1,46 @@
-// Admin spike (SE-3215 item 7): compare today's multi-GET child loader against
-// FetchXML / $expand joined reads for one interview. Uses the same Dataverse
-// connection auth as every other Knowledge Retention Backend action.
-// Not part of the employee interview path.
+// Admin spike (SE-3215 item 7): FetchXML vs 3-GET loadChildren shape parity.
+// Gate PASS → FetchXML adapter is wired into KnowledgeRetentionUtils.loadChildren.
+// Keep this probe for regressions. Same Dataverse auth as
+// every other Knowledge Retention Backend action. Not on the employee path.
+
+const SCHEMA = {
+  topic: {
+    id: 'ckr_interviewtopicid',
+    name: 'ckr_name',
+    order: 'ckr_order',
+    status: 'ckr_topicstatus',
+    summary: 'ckr_summarytext',
+    summaryStatus: 'ckr_summarystatus',
+    interviewLookupValue: '_ckr_interview_value',
+  },
+  question: {
+    id: 'ckr_questionid',
+    text: 'ckr_questiontext',
+    order: 'ckr_order',
+    status: 'ckr_status',
+    isAnswered: 'ckr_isanswered',
+    interviewLookupValue: '_ckr_interview_value',
+    topicLookupValue: '_ckr_topic_value',
+  },
+  answer: {
+    id: 'ckr_answerid',
+    text: 'ckr_confirmedanswer',
+    rawUserMessages: 'ckr_rawusermessages',
+    sequence: 'ckr_answersequence',
+    isLatest: 'ckr_islatest',
+    questionLookupValue: '_ckr_question_value',
+    interviewLookupValue: '_ckr_interview_value',
+  },
+};
+
+const STATUS = {
+  topic: { summarized: 30 },
+  question: { answered: 40 },
+};
+
+const TOPIC_FIELDS = Object.values(SCHEMA.topic);
+const QUESTION_FIELDS = Object.values(SCHEMA.question);
+const ANSWER_FIELDS = Object.values(SCHEMA.answer);
 
 function failureMessage(status, detail) {
   const code = status === null || status === undefined || status === '' ? 'not reported' : String(status);
@@ -14,6 +53,14 @@ function failureMessage(status, detail) {
 
 function escapeOData(value) {
   return String(value).replace(/'/g, "''");
+}
+
+function norm(value) {
+  if (value === null || value === undefined) return null;
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'number') return value;
+  const s = String(value);
+  return s === '' ? null : s;
 }
 
 async function getToken(data, resource) {
@@ -37,7 +84,7 @@ async function getToken(data, resource) {
 }
 
 async function dv(data, token, { method = 'GET', path }) {
-  const response = await ld.request({
+  return ld.request({
     url: `${data.auth.dataverseUrl}/api/data/v9.2${path}`,
     method,
     headers: {
@@ -47,23 +94,18 @@ async function dv(data, token, { method = 'GET', path }) {
       'OData-Version': '4.0',
     },
   });
-  return response;
 }
 
 async function resolveInterviewId(data, token) {
   const interviewId = data.input.interviewId;
   if (interviewId) return interviewId;
-
   const employeeEmail = data.input.employeeEmail;
-  if (!employeeEmail) {
-    throw new Error('Provide interviewId or employeeEmail');
-  }
-
+  if (!employeeEmail) throw new Error('Provide interviewId or employeeEmail');
   const filter = encodeURIComponent(
     `ckr_employeeemail eq '${escapeOData(employeeEmail)}' and ckr_interviewstatus lt 60`,
   );
   const res = await dv(data, token, {
-    path: `/ckr_interviews?$filter=${filter}&$orderby=createdon desc&$top=1&$select=ckr_interviewid,ckr_interviewnumber,ckr_interviewstatus,ckr_employeeemail`,
+    path: `/ckr_interviews?$filter=${filter}&$orderby=createdon desc&$top=1&$select=ckr_interviewid`,
   });
   if (res.status !== 200 || !res.json || !res.json.value || !res.json.value.length) {
     const detail = (res.json && res.json.error && res.json.error.message) || res.text || '';
@@ -72,31 +114,40 @@ async function resolveInterviewId(data, token) {
   return res.json.value[0].ckr_interviewid;
 }
 
-async function baselineLoader(data, token, interviewId) {
+function pick(row, fields) {
+  const out = {};
+  for (const field of fields) out[field] = row ? row[field] : undefined;
+  return out;
+}
+
+async function baselineLoadChildren(data, token, interviewId) {
   const t0 = Date.now();
-  const interview = await dv(data, token, { path: `/ckr_interviews(${interviewId})` });
+  const topicSelect = TOPIC_FIELDS.join(',');
+  const questionSelect = QUESTION_FIELDS.join(',');
+  const answerSelect = ANSWER_FIELDS.join(',');
   const topics = await dv(data, token, {
-    path: `/ckr_interviewtopics?$filter=${encodeURIComponent(`_ckr_interview_value eq ${interviewId}`)}`,
+    path: `/ckr_interviewtopics?$filter=${encodeURIComponent(`_ckr_interview_value eq ${interviewId}`)}&$orderby=ckr_order asc&$select=${topicSelect}`,
   });
   const questions = await dv(data, token, {
-    path: `/ckr_questions?$filter=${encodeURIComponent(`_ckr_interview_value eq ${interviewId}`)}`,
+    path: `/ckr_questions?$filter=${encodeURIComponent(`_ckr_interview_value eq ${interviewId}`)}&$orderby=ckr_order asc&$select=${questionSelect}`,
   });
   const answers = await dv(data, token, {
-    path: `/ckr_answers?$filter=${encodeURIComponent(`_ckr_interview_value eq ${interviewId}`)}`,
+    path: `/ckr_answers?$filter=${encodeURIComponent(`_ckr_interview_value eq ${interviewId}`)}&$select=${answerSelect}`,
   });
+  if (topics.status !== 200 || questions.status !== 200 || answers.status !== 200) {
+    throw new Error(
+      failureMessage(
+        topics.status !== 200 ? topics.status : questions.status !== 200 ? questions.status : answers.status,
+        'Baseline loadChildren failed',
+      ),
+    );
+  }
   return {
-    httpCalls: 4,
     ms: Date.now() - t0,
-    interviewOk: interview.status === 200,
-    topics: topics.json && topics.json.value ? topics.json.value.length : null,
-    questions: questions.json && questions.json.value ? questions.json.value.length : null,
-    answers: answers.json && answers.json.value ? answers.json.value.length : null,
-    statuses: {
-      interview: interview.status,
-      topics: topics.status,
-      questions: questions.status,
-      answers: answers.status,
-    },
+    httpCalls: 3,
+    topics: (topics.json && topics.json.value) || [],
+    questions: (questions.json && questions.json.value) || [],
+    answers: (answers.json && answers.json.value) || [],
   };
 }
 
@@ -109,28 +160,29 @@ function uniqueBy(rows, idField) {
   return Array.from(map.values());
 }
 
-async function fetchXmlJoined(data, token, interviewId, withAnswers) {
-  const answersLink = withAnswers
-    ? `
-      <link-entity name="ckr_answer" from="ckr_question" to="ckr_questionid" link-type="outer" alias="answer">
-        <attribute name="ckr_answerid" />
-        <attribute name="ckr_confirmedanswer" />
-        <attribute name="ckr_rawusermessages" />
-        <attribute name="ckr_answersequence" />
-        <attribute name="ckr_islatest" />
-      </link-entity>`
-    : '';
+function alias(row, prefix, field) {
+  if (!row) return undefined;
+  if (Object.prototype.hasOwnProperty.call(row, `${prefix}.${field}`)) {
+    return row[`${prefix}.${field}`];
+  }
+  if (prefix === 'topic' && field === 'ckr_interviewtopicid' && row.ckr_interviewtopicid) {
+    return row.ckr_interviewtopicid;
+  }
+  return undefined;
+}
 
+// FetchXML omits attributes whose value is null; OData $select returns null.
+// Coerce missing aliases to null so shape parity matches the 3-GET loader.
+function aliasOrNull(row, prefix, field) {
+  const value = alias(row, prefix, field);
+  return value === undefined ? null : value;
+}
+
+async function fetchXmlLoadChildren(data, token, interviewId) {
   const fetchXml = `
 <fetch>
   <entity name="ckr_interview">
     <attribute name="ckr_interviewid" />
-    <attribute name="ckr_interviewnumber" />
-    <attribute name="ckr_interviewstatus" />
-    <attribute name="ckr_employeeemail" />
-    <attribute name="ckr_language" />
-    <attribute name="ckr_sharepointfolderurl" />
-    <attribute name="ckr_knowledgeprefillconsent" />
     <filter type="and">
       <condition attribute="ckr_interviewid" operator="eq" value="${interviewId}" />
     </filter>
@@ -144,10 +196,16 @@ async function fetchXmlJoined(data, token, interviewId, withAnswers) {
       <link-entity name="ckr_question" from="ckr_topic" to="ckr_interviewtopicid" link-type="outer" alias="question">
         <attribute name="ckr_questionid" />
         <attribute name="ckr_questiontext" />
-        <attribute name="ckr_status" />
         <attribute name="ckr_order" />
+        <attribute name="ckr_status" />
         <attribute name="ckr_isanswered" />
-        ${answersLink}
+        <link-entity name="ckr_answer" from="ckr_question" to="ckr_questionid" link-type="outer" alias="answer">
+          <attribute name="ckr_answerid" />
+          <attribute name="ckr_confirmedanswer" />
+          <attribute name="ckr_rawusermessages" />
+          <attribute name="ckr_answersequence" />
+          <attribute name="ckr_islatest" />
+        </link-entity>
       </link-entity>
     </link-entity>
   </entity>
@@ -157,110 +215,289 @@ async function fetchXmlJoined(data, token, interviewId, withAnswers) {
   const res = await dv(data, token, {
     path: `/ckr_interviews?fetchXml=${encodeURIComponent(fetchXml)}`,
   });
+  if (res.status !== 200) {
+    return {
+      ms: Date.now() - t0,
+      httpCalls: 1,
+      status: res.status,
+      error: String(res.text || '').slice(0, 800),
+      topics: [],
+      questions: [],
+      answers: [],
+    };
+  }
+
   const rows = (res.json && res.json.value) || [];
   const topics = uniqueBy(
     rows
-      .map((r) => ({
-        ckr_interviewtopicid: r['topic.ckr_interviewtopicid'] || r.ckr_interviewtopicid,
-        ckr_name: r['topic.ckr_name'],
-        ckr_order: r['topic.ckr_order'],
-        ckr_topicstatus: r['topic.ckr_topicstatus'],
-      }))
-      .filter((t) => t.ckr_interviewtopicid),
+      .map((r) => {
+        const id = alias(r, 'topic', 'ckr_interviewtopicid');
+        if (!id) return null;
+        return {
+          ckr_interviewtopicid: id,
+          ckr_name: aliasOrNull(r, 'topic', 'ckr_name'),
+          ckr_order: aliasOrNull(r, 'topic', 'ckr_order'),
+          ckr_topicstatus: aliasOrNull(r, 'topic', 'ckr_topicstatus'),
+          ckr_summarytext: aliasOrNull(r, 'topic', 'ckr_summarytext'),
+          ckr_summarystatus: aliasOrNull(r, 'topic', 'ckr_summarystatus'),
+          _ckr_interview_value: interviewId,
+        };
+      })
+      .filter(Boolean),
     'ckr_interviewtopicid',
   );
+
   const questions = uniqueBy(
     rows
-      .map((r) => ({
-        ckr_questionid: r['question.ckr_questionid'],
-        ckr_questiontext: r['question.ckr_questiontext'],
-        ckr_status: r['question.ckr_status'],
-        ckr_order: r['question.ckr_order'],
-        ckr_isanswered: r['question.ckr_isanswered'],
-      }))
-      .filter((q) => q.ckr_questionid),
+      .map((r) => {
+        const questionId = alias(r, 'question', 'ckr_questionid');
+        const topicId = alias(r, 'topic', 'ckr_interviewtopicid');
+        if (!questionId) return null;
+        return {
+          ckr_questionid: questionId,
+          ckr_questiontext: aliasOrNull(r, 'question', 'ckr_questiontext'),
+          ckr_order: aliasOrNull(r, 'question', 'ckr_order'),
+          ckr_status: aliasOrNull(r, 'question', 'ckr_status'),
+          ckr_isanswered: aliasOrNull(r, 'question', 'ckr_isanswered'),
+          _ckr_interview_value: interviewId,
+          _ckr_topic_value: topicId || null,
+        };
+      })
+      .filter(Boolean),
     'ckr_questionid',
   );
-  const answers = withAnswers
-    ? uniqueBy(
-        rows
-          .map((r) => ({
-            ckr_answerid: r['answer.ckr_answerid'],
-            ckr_confirmedanswer: r['answer.ckr_confirmedanswer'],
-            ckr_rawusermessages: r['answer.ckr_rawusermessages'],
-            ckr_answersequence: r['answer.ckr_answersequence'],
-            ckr_islatest: r['answer.ckr_islatest'],
-          }))
-          .filter((a) => a.ckr_answerid),
-        'ckr_answerid',
-      )
-    : null;
+
+  const answers = uniqueBy(
+    rows
+      .map((r) => {
+        const id = alias(r, 'answer', 'ckr_answerid');
+        const questionId = alias(r, 'question', 'ckr_questionid');
+        if (!id) return null;
+        return {
+          ckr_answerid: id,
+          ckr_confirmedanswer: aliasOrNull(r, 'answer', 'ckr_confirmedanswer'),
+          ckr_rawusermessages: aliasOrNull(r, 'answer', 'ckr_rawusermessages'),
+          ckr_answersequence: aliasOrNull(r, 'answer', 'ckr_answersequence'),
+          ckr_islatest: aliasOrNull(r, 'answer', 'ckr_islatest'),
+          _ckr_interview_value: interviewId,
+          _ckr_question_value: questionId || null,
+        };
+      })
+      .filter(Boolean),
+    'ckr_answerid',
+  );
 
   return {
-    label: withAnswers ? 'FetchXML + answers' : 'FetchXML topics+questions (Copilot-style)',
-    status: res.status,
-    httpCalls: 1,
     ms: Date.now() - t0,
-    error: res.status !== 200 ? String(res.text || '').slice(0, 800) : null,
-    rowCount: rows.length,
-    topics: topics.length,
-    questions: questions.length,
-    answers: answers ? answers.length : 'n/a',
-    sampleAliases: rows[0]
-      ? Object.keys(rows[0])
-          .filter((k) => k.indexOf('.') >= 0)
-          .slice(0, 20)
-      : [],
+    httpCalls: 1,
+    status: 200,
+    error: null,
+    topics,
+    questions,
+    answers,
   };
 }
 
-async function expandAttempt(data, token, interviewId, expandExpr) {
-  const t0 = Date.now();
-  const res = await dv(data, token, {
-    path: `/ckr_interviews(${interviewId})?$expand=${encodeURIComponent(expandExpr)}`,
-  });
+function compareCollections(kind, fields, idField, baselineRows, candidateRows) {
+  const baseMap = new Map(baselineRows.map((r) => [String(r[idField]), r]));
+  const candMap = new Map(candidateRows.map((r) => [String(r[idField]), r]));
+  const missingInCandidate = [];
+  const missingInBaseline = [];
+  const fieldDiffs = [];
+
+  for (const id of baseMap.keys()) {
+    if (!candMap.has(id)) missingInCandidate.push(id);
+  }
+  for (const id of candMap.keys()) {
+    if (!baseMap.has(id)) missingInBaseline.push(id);
+  }
+
+  for (const [id, baseRow] of baseMap.entries()) {
+    const candRow = candMap.get(id);
+    if (!candRow) continue;
+    const differingFields = [];
+    for (const field of fields) {
+      // FetchXML may omit nulls; treat missing as null for parity with OData.
+      const candValue = candRow[field] === undefined ? null : candRow[field];
+      const baseValue = baseRow[field] === undefined ? null : baseRow[field];
+      if (norm(baseValue) !== norm(candValue)) {
+        differingFields.push({
+          field,
+          baseline: baseRow[field],
+          fetchXml: candRow[field],
+        });
+      }
+    }
+    if (differingFields.length) {
+      fieldDiffs.push({
+        id,
+        differingFields: differingFields.slice(0, 12),
+      });
+    }
+  }
+
   return {
-    label: `$expand ${expandExpr}`,
-    status: res.status,
-    httpCalls: 1,
-    ms: Date.now() - t0,
-    error:
-      res.status !== 200
-        ? String((res.json && res.json.error && res.json.error.message) || res.text || '').slice(0, 800)
-        : null,
-    keys:
-      res.status === 200 && res.json
-        ? Object.keys(res.json).filter((k) => k.charAt(0) !== '@')
-        : [],
+    kind,
+    baselineCount: baselineRows.length,
+    fetchXmlCount: candidateRows.length,
+    countsMatch: baselineRows.length === candidateRows.length,
+    missingInCandidate: missingInCandidate.slice(0, 20),
+    missingInBaseline: missingInBaseline.slice(0, 20),
+    mismatchedRows: fieldDiffs.slice(0, 20),
+    shapeMatch:
+      missingInCandidate.length === 0 &&
+      missingInBaseline.length === 0 &&
+      fieldDiffs.length === 0,
   };
+}
+
+function isAnswered(question, answers) {
+  if (Number(question[SCHEMA.question.status]) === STATUS.question.answered) return true;
+  return answers.some(
+    (answer) => answer[SCHEMA.answer.questionLookupValue] === question[SCHEMA.question.id],
+  );
+}
+
+function latestAnswer(answers, questionId) {
+  const rows = answers.filter((row) => row[SCHEMA.answer.questionLookupValue] === questionId);
+  if (!rows.length) return null;
+  const bySequenceDesc = (a, b) =>
+    Number(b[SCHEMA.answer.sequence] || 0) - Number(a[SCHEMA.answer.sequence] || 0);
+  const flagged = rows.filter((row) => row[SCHEMA.answer.isLatest] === true);
+  return (flagged.length ? flagged : rows).sort(bySequenceDesc)[0];
+}
+
+function questionsForTopic(questions, topicId) {
+  return questions
+    .filter((q) => q[SCHEMA.question.topicLookupValue] === topicId)
+    .sort((a, b) => Number(a[SCHEMA.question.order]) - Number(b[SCHEMA.question.order]));
+}
+
+function activeTopic(topics) {
+  const pending = topics
+    .filter((topic) => Number(topic[SCHEMA.topic.status]) < STATUS.topic.summarized)
+    .sort((a, b) => Number(a[SCHEMA.topic.order]) - Number(b[SCHEMA.topic.order]));
+  return pending[0] || null;
+}
+
+function activeQuestion(questions, answers, topicId) {
+  return (
+    questionsForTopic(questions, topicId).find((q) => !isAnswered(q, answers)) || null
+  );
+}
+
+function topicQnA(questions, answers, topicId) {
+  return questionsForTopic(questions, topicId).map((question) => {
+    const answer = latestAnswer(answers, question[SCHEMA.question.id]);
+    return {
+      order: Number(question[SCHEMA.question.order]),
+      question: question[SCHEMA.question.text],
+      answer: answer ? answer[SCHEMA.answer.text] : null,
+      rawUserMessages: answer ? answer[SCHEMA.answer.rawUserMessages] || null : null,
+    };
+  });
+}
+
+function stateFingerprint(children) {
+  const topic = activeTopic(children.topics);
+  const question = topic
+    ? activeQuestion(children.questions, children.answers, topic[SCHEMA.topic.id])
+    : null;
+  return {
+    topicCount: children.topics.length,
+    questionCount: children.questions.length,
+    answerCount: children.answers.length,
+    answeredQuestionCount: children.questions.filter((q) =>
+      isAnswered(q, children.answers),
+    ).length,
+    activeTopic: topic
+      ? {
+          id: topic[SCHEMA.topic.id],
+          order: Number(topic[SCHEMA.topic.order]),
+          status: Number(topic[SCHEMA.topic.status]),
+          name: topic[SCHEMA.topic.name],
+          summaryStatus: topic[SCHEMA.topic.summaryStatus],
+        }
+      : null,
+    activeQuestion: question
+      ? {
+          id: question[SCHEMA.question.id],
+          order: Number(question[SCHEMA.question.order]),
+          text: question[SCHEMA.question.text],
+          status: Number(question[SCHEMA.question.status]),
+          topicId: question[SCHEMA.question.topicLookupValue],
+        }
+      : null,
+    topicQnA: topic ? topicQnA(children.questions, children.answers, topic[SCHEMA.topic.id]) : null,
+  };
+}
+
+function fingerprintsMatch(a, b) {
+  return JSON.stringify(a) === JSON.stringify(b);
 }
 
 const dataverseUrl = (data.auth.dataverseUrl || '').replace(/\/+$/, '');
 const token = await getToken(data, dataverseUrl);
 const interviewId = await resolveInterviewId(data, token);
 
-const expandCandidates = [
-  'ckr_interviewtopics',
-  'ckr_InterviewTopics',
-  'ckr_ckr_interview_ckr_interviewtopic',
-  'ckr_interview_ckr_interviewtopic',
-];
+const baseline = await baselineLoadChildren(data, token, interviewId);
+const fetchXml = await fetchXmlLoadChildren(data, token, interviewId);
 
-const expandResults = [];
-for (const expr of expandCandidates) {
-  expandResults.push(await expandAttempt(data, token, interviewId, expr));
-}
+const topicCompare = compareCollections(
+  'topics',
+  TOPIC_FIELDS,
+  SCHEMA.topic.id,
+  baseline.topics,
+  fetchXml.topics,
+);
+const questionCompare = compareCollections(
+  'questions',
+  QUESTION_FIELDS,
+  SCHEMA.question.id,
+  baseline.questions,
+  fetchXml.questions,
+);
+const answerCompare = compareCollections(
+  'answers',
+  ANSWER_FIELDS,
+  SCHEMA.answer.id,
+  baseline.answers,
+  fetchXml.answers,
+);
+
+const baselineFp = stateFingerprint(baseline);
+const fetchXmlFp = stateFingerprint(fetchXml);
+const shapeMatch =
+  fetchXml.status === 200 &&
+  topicCompare.shapeMatch &&
+  questionCompare.shapeMatch &&
+  answerCompare.shapeMatch;
+const fingerprintMatch = fingerprintsMatch(baselineFp, fetchXmlFp);
 
 return {
   interviewId,
   dataverseUrl,
-  baseline: await baselineLoader(data, token, interviewId),
-  fetchXmlTopicsQuestions: await fetchXmlJoined(data, token, interviewId, false),
-  fetchXmlWithAnswers: await fetchXmlJoined(data, token, interviewId, true),
-  expandProbes: expandResults,
-  passCriteria: [
-    'FetchXML topics+questions status 200 and topic/question counts match baseline',
-    'FetchXML + answers either matches answers count OR fails with a clear relationship error',
-    'Note which $expand candidate (if any) works for wiring into get_runtime_state later',
-  ],
+  timing: {
+    baselineMs: baseline.ms,
+    baselineHttpCalls: baseline.httpCalls,
+    fetchXmlMs: fetchXml.ms,
+    fetchXmlHttpCalls: fetchXml.httpCalls,
+    fetchXmlStatus: fetchXml.status,
+    fetchXmlError: fetchXml.error,
+  },
+  parity: {
+    shapeMatch,
+    fingerprintMatch,
+    readyToReplaceLoadChildren: shapeMatch && fingerprintMatch,
+    topics: topicCompare,
+    questions: questionCompare,
+    answers: answerCompare,
+  },
+  fingerprints: {
+    baseline: baselineFp,
+    fetchXml: fetchXmlFp,
+  },
+  gate: shapeMatch && fingerprintMatch
+    ? 'PASS — FetchXML adapter matches baseline loadChildren shape and state fingerprint; safe to wire into loadChildren after sync_helpers.'
+    : 'FAIL — do not replace loadChildren yet; inspect parity.*.mismatchedRows / missingFields and fingerprint deltas.',
 };

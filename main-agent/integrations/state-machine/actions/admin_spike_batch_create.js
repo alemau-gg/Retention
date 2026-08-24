@@ -1,7 +1,35 @@
-// Admin spike (SE-3215 item 8): create throwaway topics + questions via one
-// Dataverse $batch changeset, optionally clean them up. Uses the same
-// Dataverse connection auth as every other Knowledge Retention Backend action.
-// Not part of the employee interview path. Use a disposable interview only.
+// Admin spike (SE-3215 item 8): $batch create + post-create shape parity.
+// Gate PASS → $batch creates are wired into save_topics_and_questions.
+// Keep this probe for regressions. Same Dataverse
+// auth as every other Knowledge Retention Backend action. Disposable
+// interviews only.
+
+const SCHEMA = {
+  topic: {
+    id: 'ckr_interviewtopicid',
+    name: 'ckr_name',
+    order: 'ckr_order',
+    status: 'ckr_topicstatus',
+    interviewLookupValue: '_ckr_interview_value',
+  },
+  question: {
+    id: 'ckr_questionid',
+    text: 'ckr_questiontext',
+    order: 'ckr_order',
+    status: 'ckr_status',
+    isAnswered: 'ckr_isanswered',
+    interviewLookupValue: '_ckr_interview_value',
+    topicLookupValue: '_ckr_topic_value',
+  },
+};
+
+const STATUS = {
+  topic: { pending: 10 },
+  question: { pending: 10 },
+};
+
+const TOPIC_FIELDS = Object.values(SCHEMA.topic);
+const QUESTION_FIELDS = Object.values(SCHEMA.question);
 
 function failureMessage(status, detail) {
   const code = status === null || status === undefined || status === '' ? 'not reported' : String(status);
@@ -15,17 +43,20 @@ function failureMessage(status, detail) {
 function guid() {
   const hex = [];
   for (let i = 0; i < 36; i++) {
-    if (i === 8 || i === 13 || i === 18 || i === 23) {
-      hex[i] = '-';
-    } else if (i === 14) {
-      hex[i] = '4';
-    } else if (i === 19) {
-      hex[i] = ((Math.random() * 4) | 8).toString(16);
-    } else {
-      hex[i] = ((Math.random() * 16) | 0).toString(16);
-    }
+    if (i === 8 || i === 13 || i === 18 || i === 23) hex[i] = '-';
+    else if (i === 14) hex[i] = '4';
+    else if (i === 19) hex[i] = ((Math.random() * 4) | 8).toString(16);
+    else hex[i] = ((Math.random() * 16) | 0).toString(16);
   }
   return hex.join('');
+}
+
+function norm(value) {
+  if (value === null || value === undefined) return null;
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'number') return value;
+  const s = String(value);
+  return s === '' ? null : s;
 }
 
 async function getToken(data, resource) {
@@ -79,7 +110,7 @@ function buildBatch({ topics, questions, interviewId, questionsPerTopic }) {
       ckr_name: topic.name,
       ckr_description: topic.description,
       ckr_order: topic.order,
-      ckr_topicstatus: 10,
+      ckr_topicstatus: STATUS.topic.pending,
       ckr_totalquestions: questionsPerTopic,
       ckr_answeredquestions: 0,
       'ckr_Interview@odata.bind': `/${interviewRef}`,
@@ -101,7 +132,7 @@ function buildBatch({ topics, questions, interviewId, questionsPerTopic }) {
       ckr_name: String(question.text).slice(0, 100),
       ckr_questiontext: question.text,
       ckr_order: question.order,
-      ckr_status: 10,
+      ckr_status: STATUS.question.pending,
       ckr_isanswered: false,
       ckr_ismandatory: true,
       'ckr_Interview@odata.bind': `/${interviewRef}`,
@@ -136,6 +167,26 @@ function parseBatchStatusLines(text) {
     if (m) statuses.push(Number(m[1]));
   }
   return statuses;
+}
+
+function rowShapeIssues(kind, fields, row, expected) {
+  const missingFields = [];
+  const differingFields = [];
+  for (const field of fields) {
+    if (row[field] === undefined || row[field] === null) {
+      // Allow null summary-like absences only when not in expected
+      if (expected[field] !== undefined && expected[field] !== null) missingFields.push(field);
+      else if (expected[field] === undefined) {
+        // required SCHEMA fields must be present even if value is false/0
+        if (row[field] === undefined) missingFields.push(field);
+      }
+      continue;
+    }
+    if (expected[field] !== undefined && norm(row[field]) !== norm(expected[field])) {
+      differingFields.push({ field, expected: expected[field], actual: row[field] });
+    }
+  }
+  return { missingFields, differingFields };
 }
 
 const interviewId = data.input.interviewId;
@@ -183,9 +234,7 @@ const t0 = Date.now();
 const batchRes = await dv(data, token, {
   method: 'POST',
   path: '/$batch',
-  headers: {
-    'Content-Type': `multipart/mixed;boundary=${batchBoundary}`,
-  },
+  headers: { 'Content-Type': `multipart/mixed;boundary=${batchBoundary}` },
   body,
   rawBody: true,
 });
@@ -199,15 +248,112 @@ const batchResult = {
   bodyPreview: String(batchRes.text || '').slice(0, 1500),
 };
 
+const topicSelect = TOPIC_FIELDS.join(',');
+const questionSelect = QUESTION_FIELDS.join(',');
 const topicFilter = encodeURIComponent(
   topics.map((t) => `ckr_interviewtopicid eq ${t.id}`).join(' or '),
 );
 const confirmTopics = await dv(data, token, {
-  path: `/ckr_interviewtopics?$filter=${topicFilter}&$select=ckr_interviewtopicid,ckr_name,ckr_order`,
+  path: `/ckr_interviewtopics?$filter=${topicFilter}&$select=${topicSelect}&$orderby=ckr_order asc`,
 });
-const confirmOneQuestion = await dv(data, token, {
-  path: `/ckr_questions?$filter=${encodeURIComponent(`_ckr_topic_value eq ${topics[0].id}`)}&$select=ckr_questionid,ckr_questiontext,ckr_order,_ckr_topic_value`,
-});
+
+const topicRows = (confirmTopics.json && confirmTopics.json.value) || [];
+const questionRowsByTopic = {};
+for (const topic of topics) {
+  const qs = await dv(data, token, {
+    path: `/ckr_questions?$filter=${encodeURIComponent(`_ckr_topic_value eq ${topic.id}`)}&$select=${questionSelect}&$orderby=ckr_order asc`,
+  });
+  questionRowsByTopic[topic.id] = {
+    status: qs.status,
+    rows: (qs.json && qs.json.value) || [],
+  };
+}
+
+const topicIssues = [];
+for (const planned of topics) {
+  const row = topicRows.find((r) => String(r[SCHEMA.topic.id]) === String(planned.id));
+  if (!row) {
+    topicIssues.push({ id: planned.id, error: 'missing after batch' });
+    continue;
+  }
+  const expected = {
+    [SCHEMA.topic.id]: planned.id,
+    [SCHEMA.topic.name]: planned.name,
+    [SCHEMA.topic.order]: planned.order,
+    [SCHEMA.topic.status]: STATUS.topic.pending,
+    [SCHEMA.topic.interviewLookupValue]: interviewId,
+  };
+  const issues = rowShapeIssues('topic', TOPIC_FIELDS, row, expected);
+  if (issues.missingFields.length || issues.differingFields.length) {
+    topicIssues.push({ id: planned.id, ...issues, row });
+  }
+}
+
+const questionIssues = [];
+let questionCountOk = true;
+for (const planned of topics) {
+  const pack = questionRowsByTopic[planned.id] || { rows: [] };
+  if (pack.rows.length !== questionsPerTopic) questionCountOk = false;
+  const plannedQs = questions.filter((q) => q.topicId === planned.id);
+  for (const pq of plannedQs) {
+    const row = pack.rows.find((r) => Number(r[SCHEMA.question.order]) === pq.order);
+    if (!row) {
+      questionIssues.push({ topicId: planned.id, order: pq.order, error: 'missing after batch' });
+      continue;
+    }
+    const expected = {
+      [SCHEMA.question.text]: pq.text,
+      [SCHEMA.question.order]: pq.order,
+      [SCHEMA.question.status]: STATUS.question.pending,
+      [SCHEMA.question.isAnswered]: false,
+      [SCHEMA.question.interviewLookupValue]: interviewId,
+      [SCHEMA.question.topicLookupValue]: planned.id,
+    };
+    // id must exist but is server/client assigned — require presence only
+    const fieldsForDiff = QUESTION_FIELDS.filter((f) => f !== SCHEMA.question.id);
+    const issues = rowShapeIssues('question', fieldsForDiff, row, expected);
+    if (row[SCHEMA.question.id] === undefined || row[SCHEMA.question.id] === null) {
+      issues.missingFields.push(SCHEMA.question.id);
+    }
+    if (issues.missingFields.length || issues.differingFields.length) {
+      questionIssues.push({
+        topicId: planned.id,
+        questionId: row[SCHEMA.question.id],
+        order: pq.order,
+        ...issues,
+      });
+    }
+  }
+}
+
+const shapeMatch =
+  batchResult.allPartsOk &&
+  topicRows.length === topicCount &&
+  questionCountOk &&
+  topicIssues.length === 0 &&
+  questionIssues.length === 0;
+
+const fingerprint = {
+  topicCount: topicRows.length,
+  expectedTopicCount: topicCount,
+  questionsPerTopic,
+  topics: topicRows.map((t) => ({
+    id: t[SCHEMA.topic.id],
+    order: Number(t[SCHEMA.topic.order]),
+    status: Number(t[SCHEMA.topic.status]),
+    interviewLookup: t[SCHEMA.topic.interviewLookupValue],
+    questionCount: (questionRowsByTopic[t[SCHEMA.topic.id]] || { rows: [] }).rows.length,
+    questionLookups: ((questionRowsByTopic[t[SCHEMA.topic.id]] || { rows: [] }).rows || []).map(
+      (q) => ({
+        id: q[SCHEMA.question.id],
+        order: Number(q[SCHEMA.question.order]),
+        status: Number(q[SCHEMA.question.status]),
+        topicLookup: q[SCHEMA.question.topicLookupValue],
+        interviewLookup: q[SCHEMA.question.interviewLookupValue],
+      }),
+    ),
+  })),
+};
 
 const cleanupLog = [];
 if (cleanup) {
@@ -239,27 +385,15 @@ return {
     cleanup,
   },
   batch: batchResult,
-  confirm: {
-    topics: {
-      status: confirmTopics.status,
-      count: confirmTopics.json && confirmTopics.json.value ? confirmTopics.json.value.length : null,
-      rows: confirmTopics.json && confirmTopics.json.value,
-    },
-    questionsTopic1: {
-      status: confirmOneQuestion.status,
-      count:
-        confirmOneQuestion.json && confirmOneQuestion.json.value
-          ? confirmOneQuestion.json.value.length
-          : null,
-      rows: confirmOneQuestion.json && confirmOneQuestion.json.value,
-    },
+  parity: {
+    shapeMatch,
+    readyToReplaceGenerationCreates: shapeMatch,
+    topicIssues: topicIssues.slice(0, 20),
+    questionIssues: questionIssues.slice(0, 20),
   },
+  fingerprint,
   cleanupLog: cleanup ? cleanupLog : null,
-  passCriteria: [
-    'batchHttpStatus === 200',
-    'allPartsOk === true',
-    `confirmed topic count === ${topicCount}`,
-    `questions per topic === ${questionsPerTopic}`,
-    cleanup ? 'cleanup deleted rows' : 'cleanup skipped (rows left in place)',
-  ],
+  gate: shapeMatch
+    ? 'PASS — $batch rows have the SCHEMA fields / lookups / statuses generation needs; safe to wire into save_topics_and_questions after a Dev smoke test.'
+    : 'FAIL — do not replace sequential creates yet; inspect parity.topicIssues / questionIssues.',
 };
