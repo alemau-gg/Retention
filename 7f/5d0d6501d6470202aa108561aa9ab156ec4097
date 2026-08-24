@@ -1,0 +1,37 @@
+main-agent/integrations/state-machine/actions/admin_spike_joined_read.js
+  s_550488af68d39d::t_79c7aafeb00a72 1-266
+main-agent/integrations/state-machine/actions/admin_spike_batch_create.js
+  s_550488af68d39d::t_63c0d0a9377af2 1-265
+handover-agent/integrations/coding-tools/actions/verify_helpers.js
+  s_550488af68d39d::t_69717c7662d71a 7-12
+main-agent/integrations/state-machine/manifest.json
+  s_550488af68d39d::t_a38249e0c4b8ca 711-808
+main-agent/CHANGELOG-SLIM.md
+  s_550488af68d39d::t_152ec7dea27188 15,17,19-20,23-24
+handover-agent/skills/knowledge-retention-contributing/scripts/verify-helpers.js
+  s_550488af68d39d::t_b29ac6f8e004e3 40-41
+  s_550488af68d39d::t_afb41dfe67892e 160-165
+README.md
+  s_550488af68d39d::t_b9d498ef06892e 10
+handover-agent/skills/knowledge-retention-contributing/scripts/sync-helpers.js
+  s_550488af68d39d::t_6c1cc79451bc47 42-43
+  s_550488af68d39d::t_40a070f8fd8ef1 62-67
+handover-agent/integrations/coding-tools/actions/sync_helpers.js
+  s_550488af68d39d::t_db32d3db0a282b 6-11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "7f5d0d6501d6470202aa108561aa9ab156ec4097",
+  "prompts": {},
+  "sessions": {
+    "s_550488af68d39d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b37faa1a-23ad-401a-949f-95d1fc10319a",
+        "model": "grok-4.5"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
