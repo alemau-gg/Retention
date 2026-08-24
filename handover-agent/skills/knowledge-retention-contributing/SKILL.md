@@ -57,7 +57,7 @@ Read these before acting, then follow the routing table:
   verification, give the human the exact actions, inputs, expected results,
   and edge cases to test. Promotion still requires the human to state that
   Dev testing is satisfactory.
-- **HOW is read-only here:** `HOW-THE-AGENT-WORKS.md` is setup documentation.
+- **HOW is read-only here:** `how-the-agent-works.md` is setup documentation.
   Report a separate follow-up instead of editing it.
 - **Scope is narrow:** only the KR Backend, KR skills/prompt, and the five
   custom Langdock development actions are in scope. Refuse other integrations
