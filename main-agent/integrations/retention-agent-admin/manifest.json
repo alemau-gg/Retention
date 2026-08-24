@@ -1,0 +1,147 @@
+{
+  "id": "a1b2c3d4-e5f6-4789-a012-3456789abcde",
+  "name": "Retention Agent Admin",
+  "color": "#6B7280",
+  "description": "Admin-only Dataverse probes for Knowledge Retention (parity spikes, regression checks). Not attached to the employee interview agent.",
+  "authType": "API_KEY",
+  "integrationType": "API",
+  "authFields": [
+    {
+      "slug": "clientId",
+      "label": "Client ID",
+      "description": "Application (client) ID of the Azure app registration used for app-only access to Dataverse.",
+      "placeholder": "00000000-0000-0000-0000-000000000000",
+      "type": "TEXT",
+      "required": true,
+      "maxLength": 100
+    },
+    {
+      "slug": "clientSecret",
+      "label": "Client secret",
+      "description": "Client secret of the Azure app registration.",
+      "placeholder": "",
+      "type": "PASSWORD",
+      "required": true,
+      "maxLength": 4096
+    },
+    {
+      "slug": "dataverseUrl",
+      "label": "Dataverse environment URL",
+      "description": "Base URL of the Dataverse environment, with no trailing slash (e.g. https://org12345.crm4.dynamics.com).",
+      "placeholder": "https://org12345.crm4.dynamics.com",
+      "type": "TEXT",
+      "required": true,
+      "maxLength": 2048
+    },
+    {
+      "slug": "tenantId",
+      "label": "Tenant ID",
+      "description": "Microsoft Entra tenant ID (GUID) of the BASF tenant that hosts the Dataverse environment.",
+      "placeholder": "00000000-0000-0000-0000-000000000000",
+      "type": "TEXT",
+      "required": true,
+      "maxLength": 100
+    }
+  ],
+  "actions": [
+    {
+      "slug": "admin_spike_joined_read",
+      "name": "Admin: spike joined read",
+      "description": "SE-3215 spike: compare baseline 3-GET loadChildren against FetchXML+adapter for one interview, including SCHEMA field shape parity and a computeState-style fingerprint (active topic/question, topicQnA). Returns readyToReplaceLoadChildren. Retention Agent Admin integration (Dataverse app-only auth). Not for employee interviews. Provide interviewId or employeeEmail.",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": [
+        {
+          "slug": "interviewId",
+          "label": "Interview ID",
+          "description": "Optional. GUID of the interview to probe. If omitted, employeeEmail must resolve an open interview.",
+          "placeholder": "00000000-0000-0000-0000-000000000000",
+          "type": "TEXT",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        },
+        {
+          "slug": "employeeEmail",
+          "label": "Employee email",
+          "description": "Optional. Used only when interviewId is omitted: picks the newest open interview (status < 60) for this email.",
+          "placeholder": "user@example.com",
+          "type": "TEXT",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        }
+      ]
+    },
+    {
+      "slug": "admin_spike_batch_create",
+      "name": "Admin: spike batch create",
+      "description": "SE-3215 spike: create throwaway topics/questions via one Dataverse $batch changeset on a disposable interview, then verify post-create SCHEMA shape/lookups/statuses (shapeMatch / readyToReplaceGenerationCreates) before optional cleanup. Retention Agent Admin integration (Dataverse app-only auth). Not for employee interviews.",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": true,
+      "inputFields": [
+        {
+          "slug": "interviewId",
+          "label": "Interview ID",
+          "description": "GUID of a disposable open interview that may receive throwaway spike rows.",
+          "placeholder": "00000000-0000-0000-0000-000000000000",
+          "type": "TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        },
+        {
+          "slug": "topicCount",
+          "label": "Topic count",
+          "description": "How many throwaway topics to create. Defaults to 2.",
+          "placeholder": "2",
+          "type": "NUMBER",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        },
+        {
+          "slug": "questionsPerTopic",
+          "label": "Questions per topic",
+          "description": "How many throwaway questions to create under each topic. Defaults to 2.",
+          "placeholder": "2",
+          "type": "NUMBER",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        },
+        {
+          "slug": "cleanup",
+          "label": "Cleanup after",
+          "description": "When true (default), delete the created spike rows after confirmation. Set false to leave them for inspection.",
+          "placeholder": null,
+          "type": "BOOLEAN",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        }
+      ]
+    }
+  ],
+  "triggers": []
+}

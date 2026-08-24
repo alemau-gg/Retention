@@ -1,8 +1,7 @@
-// Admin spike (SE-3215 item 8): $batch create + post-create shape parity.
-// Gate PASS → $batch creates are wired into save_topics_and_questions.
-// Keep this probe for regressions. Same Dataverse
-// auth as every other Knowledge Retention Backend action. Disposable
-// interviews only.
+// Retention Agent Admin — SE-3215 item 8: $batch create + post-create shape parity.
+// Gate PASS → wired into save_topics_and_questions. Keep for regressions after
+// generation changes. Dataverse app-only auth on this integration only.
+// Disposable interviews only; not on the employee interview path.
 
 const SCHEMA = {
   topic: {

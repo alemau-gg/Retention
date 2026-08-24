@@ -14,7 +14,9 @@ Applied the clear-path load reductions from SE-3215 on top of the restructured `
 | Prompt | Topic summaries must use `topicQnA` (prefer `rawUserMessages`); `get_answers` only for final handover / revise / fallback. |
 | Rate-limit UX | System prompt: on 429, do not claim saved; re-present answer recap; retry once. `failureMessage` 429 branch across all actions. |
 
-## Spikes (same integration, same auth)
+## Spikes (Retention Agent Admin integration)
+
+Parity probes live in `main-agent/integrations/retention-agent-admin/` (separate Langdock integration, Dataverse app-only auth only). Attach to an admin agent — not the employee interview agent.
 
 | Item | Action | Status |
 | --- | --- | --- |
@@ -22,7 +24,7 @@ Applied the clear-path load reductions from SE-3215 on top of the restructured `
 | 8 — `$batch` generation | `admin_spike_batch_create` | PASS → wired into `save_topics_and_questions` |
 | 9 — Index `ckr_employeeemail` | Deferred (Dataverse ALM / maker portal) | — |
 
-These are admin actions on the Knowledge Retention Backend connection (`data.auth.clientId` / `clientSecret` / `dataverseUrl` / `tenantId`). They are not on the employee interview path.
+Auth placeholders: `data.auth.clientId` / `clientSecret` / `dataverseUrl` / `tenantId`.
 
 ## Expected hot-path shape after this copy
 

@@ -1,7 +1,7 @@
-// Admin spike (SE-3215 item 7): FetchXML vs 3-GET loadChildren shape parity.
-// Gate PASS → FetchXML adapter is wired into KnowledgeRetentionUtils.loadChildren.
-// Keep this probe for regressions. Same Dataverse auth as
-// every other Knowledge Retention Backend action. Not on the employee path.
+// Retention Agent Admin — SE-3215 item 7: FetchXML vs 3-GET loadChildren parity.
+// Gate PASS → wired into KnowledgeRetentionUtils.loadChildren. Keep for regressions
+// after schema / loader changes. Dataverse app-only auth on this integration only.
+// Not on the employee interview path.
 
 const SCHEMA = {
   topic: {
