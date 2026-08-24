@@ -1,0 +1,39 @@
+main-agent/integrations/retention-agent-admin/authTest.js
+  s_550488af68d39d::t_8bf84143273bfc 1-50
+main-agent/integrations/retention-agent-admin/actions/admin_spike_joined_read.js
+  s_550488af68d39d::t_d3101c79ec9014 1-4
+handover-agent/skills/knowledge-retention-contributing/scripts/verify-helpers.js
+  s_550488af68d39d::t_2912178196f549 158
+handover-agent/integrations/coding-tools/actions/verify_helpers.js
+  s_550488af68d39d::t_3c0a6100af6ed2 7
+README.md
+  s_550488af68d39d::t_f27228b1aba262 10-11
+handover-agent/skills/knowledge-retention-contributing/scripts/sync-helpers.js
+  s_550488af68d39d::t_55d665dc4b9b16 60
+main-agent/integrations/retention-agent-admin/actions/admin_spike_batch_create.js
+  s_550488af68d39d::t_1344229e551d15 1-4
+main-agent/integrations/state-machine/manifest.json
+  s_550488af68d39d::t_14a06b94e68efc 734
+main-agent/CHANGELOG-SLIM.md
+  s_550488af68d39d::t_a16059f89ab3b2 17-19,27
+main-agent/integrations/retention-agent-admin/manifest.json
+  s_550488af68d39d::t_14a06b94e68efc 1-147
+handover-agent/integrations/coding-tools/actions/sync_helpers.js
+  s_550488af68d39d::t_f481b098575bdb 6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "2018afd6824feaf951a11a743a3b2205affcf67c",
+  "prompts": {},
+  "sessions": {
+    "s_550488af68d39d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b37faa1a-23ad-401a-949f-95d1fc10319a",
+        "model": "grok-4.5"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
