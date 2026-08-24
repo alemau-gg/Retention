@@ -39,6 +39,8 @@ const REQUIRED_ACTION_SLUGS = [
   'abandon_interview',
   'admin_describe_schema',
   'admin_query_records',
+  'admin_spike_joined_read',
+  'admin_spike_batch_create',
 ];
 
 function extractHelper(source) {
@@ -57,7 +59,12 @@ function syncHelpers(input) {
   const actions = (input && input.actions) || {};
   const canonicalSlug = (input && input.canonicalSlug) || 'get_runtime_state';
   const adminSlugs = new Set(
-    (input && input.adminSlugs) || ['admin_describe_schema', 'admin_query_records'],
+    (input && input.adminSlugs) || [
+      'admin_describe_schema',
+      'admin_query_records',
+      'admin_spike_joined_read',
+      'admin_spike_batch_create',
+    ],
   );
 
   const blockers = [];

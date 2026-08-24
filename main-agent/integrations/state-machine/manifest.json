@@ -712,6 +712,104 @@
       ]
     },
     {
+      "slug": "admin_spike_joined_read",
+      "name": "Admin: spike joined read",
+      "description": "SE-3215 spike: compare the baseline multi-GET child loader against FetchXML and $expand joined reads for one interview. Uses the same Dataverse connection auth as the rest of this integration. Not for employee interviews. Provide interviewId or employeeEmail.",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": [
+        {
+          "slug": "interviewId",
+          "label": "Interview ID",
+          "description": "Optional. GUID of the interview to probe. If omitted, employeeEmail must resolve an open interview.",
+          "placeholder": "00000000-0000-0000-0000-000000000000",
+          "type": "TEXT",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        },
+        {
+          "slug": "employeeEmail",
+          "label": "Employee email",
+          "description": "Optional. Used only when interviewId is omitted: picks the newest open interview (status < 60) for this email.",
+          "placeholder": "user@example.com",
+          "type": "TEXT",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        }
+      ]
+    },
+    {
+      "slug": "admin_spike_batch_create",
+      "name": "Admin: spike batch create",
+      "description": "SE-3215 spike: create throwaway topics and questions on a disposable interview via one Dataverse $batch changeset, then optionally delete them. Uses the same Dataverse connection auth as the rest of this integration. Not for employee interviews.",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": true,
+      "inputFields": [
+        {
+          "slug": "interviewId",
+          "label": "Interview ID",
+          "description": "GUID of a disposable open interview that may receive throwaway spike rows.",
+          "placeholder": "00000000-0000-0000-0000-000000000000",
+          "type": "TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        },
+        {
+          "slug": "topicCount",
+          "label": "Topic count",
+          "description": "How many throwaway topics to create. Defaults to 2.",
+          "placeholder": "2",
+          "type": "NUMBER",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        },
+        {
+          "slug": "questionsPerTopic",
+          "label": "Questions per topic",
+          "description": "How many throwaway questions to create under each topic. Defaults to 2.",
+          "placeholder": "2",
+          "type": "NUMBER",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        },
+        {
+          "slug": "cleanup",
+          "label": "Cleanup after",
+          "description": "When true (default), delete the created spike rows after confirmation. Set false to leave them for inspection.",
+          "placeholder": null,
+          "type": "BOOLEAN",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        }
+      ]
+    },
+    {
       "slug": "get_discovery",
       "name": "Get discovery profile",
       "description": "Reads back the caller's saved pre-interview discovery profile (role, business unit, responsibilities, tools, focus topics, KPIs/constraints). Read-only; use this when building the final summary document, since finalize_interview's cover metadata only carries role and business unit.",

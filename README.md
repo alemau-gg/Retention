@@ -7,9 +7,8 @@ BASF Knowledge Retention agent sources, split by agent.
 - **`main-agent/`** — employee-facing interview agent
   - `system-prompt.md` — interview system prompt
   - `skills/` — `knowledge-retention-interviewing`, `knowledge-retention-reporting`
-  - `integrations/state-machine/` — Knowledge Retention Backend actions + manifest
+  - `integrations/state-machine/` — Knowledge Retention Backend actions + manifest (incl. SE-3215 slim path and `admin_spike_*` probes)
   - `CHANGELOG-SLIM.md` — Dataverse load-reduction notes (SE-3215)
-  - `spikes/` — non-prod spikes for joined reads / `$batch` (not wired yet)
 
 - **`handover-agent/`** — administrator-facing handover agent
   - `system-prompt.md` — handover system prompt

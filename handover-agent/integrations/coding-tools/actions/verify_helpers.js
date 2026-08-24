@@ -4,7 +4,12 @@ const helperStart = 'const KnowledgeRetentionUtils = {';
 const helperEnd = '\n};\n';
 const actionSlugPattern = /ACTION_SLUG: '([a-z_]+)',/;
 const forbidden = ['require(', 'import ', 'module.exports', 'exports.'];
-const adminSlugs = new Set(['admin_describe_schema', 'admin_query_records']);
+const adminSlugs = new Set([
+  'admin_describe_schema',
+  'admin_query_records',
+  'admin_spike_joined_read',
+  'admin_spike_batch_create',
+]);
 
 function verifyHelpersFormatError(response) {
   const json = response.json;

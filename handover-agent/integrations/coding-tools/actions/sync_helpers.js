@@ -3,7 +3,12 @@ const syncHelpersBaseUrl = (data.auth.baseUrl || 'https://api.langdock.com').rep
 const helperStart = 'const KnowledgeRetentionUtils = {';
 const helperEnd = '\n};\n';
 const actionSlugPattern = /ACTION_SLUG: '([a-z_]+)',/;
-const adminSlugs = new Set(['admin_describe_schema', 'admin_query_records']);
+const adminSlugs = new Set([
+  'admin_describe_schema',
+  'admin_query_records',
+  'admin_spike_joined_read',
+  'admin_spike_batch_create',
+]);
 
 function syncHelpersFormatError(response) {
   const json = response.json;
