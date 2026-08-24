@@ -1,0 +1,67 @@
+main-agent/integrations/state-machine/actions/create_interview.js
+  s_550488af68d39d::t_af5fd74a9cb3b8 163-167,350-356,678-680
+main-agent/spikes/01-joined-read-spike.js
+  s_550488af68d39d::t_af5fd74a9cb3b8 1-302
+main-agent/spikes/02-batch-create-spike.js
+  s_550488af68d39d::t_af5fd74a9cb3b8 1-310
+main-agent/system-prompt.md
+  s_550488af68d39d::t_af5fd74a9cb3b8 47-49,95-96
+main-agent/integrations/state-machine/actions/admin_query_records.js
+  s_550488af68d39d::t_af5fd74a9cb3b8 69-72
+main-agent/integrations/state-machine/actions/save_consent.js
+  s_550488af68d39d::t_af5fd74a9cb3b8 163-167,681-683
+main-agent/integrations/state-machine/actions/get_discovery.js
+  s_550488af68d39d::t_af5fd74a9cb3b8 162-166
+main-agent/integrations/state-machine/actions/save_topics_and_questions.js
+  s_550488af68d39d::t_af5fd74a9cb3b8 163-167,812,814
+main-agent/integrations/state-machine/actions/save_feedback.js
+  s_550488af68d39d::t_af5fd74a9cb3b8 163-167
+main-agent/integrations/state-machine/actions/get_answers.js
+  s_550488af68d39d::t_af5fd74a9cb3b8 162-166
+main-agent/integrations/state-machine/actions/finalize_interview.js
+  s_550488af68d39d::t_af5fd74a9cb3b8 163-167
+main-agent/integrations/state-machine/actions/revise_answer.js
+  s_550488af68d39d::t_af5fd74a9cb3b8 163-167,834-855
+main-agent/integrations/state-machine/actions/save_discovery.js
+  s_550488af68d39d::t_af5fd74a9cb3b8 163-167,711-712
+main-agent/integrations/state-machine/actions/save_topic_summary.js
+  s_550488af68d39d::t_af5fd74a9cb3b8 163-167,718-720
+main-agent/integrations/state-machine/actions/admin_describe_schema.js
+  s_550488af68d39d::t_af5fd74a9cb3b8 64-67
+main-agent/integrations/state-machine/actions/abandon_interview.js
+  s_550488af68d39d::t_af5fd74a9cb3b8 162-166
+main-agent/integrations/state-machine/actions/set_up_interview_folder.js
+  s_550488af68d39d::t_af5fd74a9cb3b8 163-167,350-356,674,776-780
+README.md
+  s_550488af68d39d::t_ef578db7a74a36 11-12
+main-agent/CHANGELOG-SLIM.md
+  s_550488af68d39d::t_6ac9cce49041f2 3
+  s_550488af68d39d::t_af5fd74a9cb3b8 1-2,4-18,21-27
+  s_550488af68d39d::t_faed7b0aa25ad0 19-20
+main-agent/integrations/state-machine/actions/save_answer.js
+  s_550488af68d39d::t_af5fd74a9cb3b8 163-167,762-763,773-789,791
+main-agent/spikes/README.md
+  s_550488af68d39d::t_3ccca0051ceabb 3
+  s_550488af68d39d::t_1bb33151150f62 20-21
+  s_550488af68d39d::t_af5fd74a9cb3b8 1-2,4-19,22-40
+main-agent/integrations/state-machine/actions/get_runtime_state.js
+  s_550488af68d39d::t_af5fd74a9cb3b8 163-167,350-356,705-707
+main-agent/integrations/state-machine/actions/upload_document.js
+  s_550488af68d39d::t_af5fd74a9cb3b8 163-167,350-356,764-766
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "280d409d963f3813fe423067cf3419a565c5bae7",
+  "prompts": {},
+  "sessions": {
+    "s_550488af68d39d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b37faa1a-23ad-401a-949f-95d1fc10319a",
+        "model": "grok-4.5"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
