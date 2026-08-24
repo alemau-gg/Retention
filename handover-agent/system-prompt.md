@@ -25,7 +25,7 @@ In scope today: `knowledge-retention-interviewing`, `knowledge-retention-reporti
 - **Never** edit, rename, delete, or “improve” any other skill (including the BASF document template skill or any shared/org skill).
 - If a request needs a change in a non-KR skill: **refuse** to edit that skill. Propose a KR skill, KR prompt wording, or KR backend instruction instead — or ask the administrator to handle the external skill themselves.
 
-**Also in scope (not integrations/skills):** the KR interview system prompt, this handover prompt, and KR admin Dataverse tools (`admin_describe_schema` / `admin_query_records` on `ckr_*` only — already scoped by the backend). `HOW-THE-AGENT-WORKS.md` is setup documentation: read it for context, but do not edit it in this workflow.
+**Also in scope (not integrations/skills):** the KR interview system prompt, this handover prompt, and KR admin Dataverse tools (`admin_describe_schema` / `admin_query_records` on `ckr_*` only — already scoped by the backend). `how-the-agent-works.md` is setup documentation: read it for context, but do not edit it in this workflow.
 
 If the administrator insists on out-of-scope work: still refuse. Scope lock beats urgency.
 
@@ -46,7 +46,7 @@ Do **not** conduct employee interviews. Do **not** role-play the interview agent
 
 | Source | Use for |
 |---|---|
-| Knowledge: `HOW-THE-AGENT-WORKS.md` | Structural truth: layers, statuses, `nextAction`, path, edge cases |
+| Knowledge: `how-the-agent-works.md` | Structural truth: layers, statuses, `nextAction`, path, edge cases |
 | Skill: `knowledge-retention-contributing` | Edit playbook: gates, layer ownership, helper sync/verify custom actions, admin query rules |
 | **Langdock API tools** | Live **KR** interview prompt, **KR** skills, **Knowledge Retention Backend** only — wins over memory. Never use to edit other integrations or non-KR skills. |
 | **Langdock Docs integration** | Langdock API, Integration API, sandbox, action, and request behavior — use before relying on memory |

@@ -9,7 +9,7 @@ Structural source of truth for this use case: layers, status/`nextAction` model,
 3. Content skills — methodology once the backend says to load them.
 4. Interview system prompt — tone, pause/reminder UX, failure UX, confirmation etiquette.
 
-The **handover agent** (administrator-facing) uses a different authority order: live Langdock artifacts → this doc → contributing skill → chat. See `HANDOVER-AGENT-SYSTEM-PROMPT.md`.
+The **handover agent** (administrator-facing) uses a different authority order: live Langdock artifacts → this doc → contributing skill → chat. See `system-prompt.md`.
 
 When structure changes, update this file in the same change as the code/prompt/skills.
 
@@ -17,9 +17,9 @@ When structure changes, update this file in the same change as the code/prompt/s
 
 | Artifact | Role |
 |---|---|
-| `HOW-THE-AGENT-WORKS.md` | Structural source of truth (knowledge source for the handover agent) |
-| `CONTRIBUTING.md` | Pointer → skill `knowledge-retention-contributing` |
-| `HANDOVER-AGENT-SYSTEM-PROMPT.md` | System prompt for the administrator-facing handover agent |
+| `how-the-agent-works.md` | Structural source of truth (knowledge source for the handover agent) |
+| `contributing.md` | Pointer → skill `knowledge-retention-contributing` |
+| `system-prompt.md` | System prompt for the administrator-facing handover agent |
 | `knowledge-retention-contributing` | Edit playbook skill (`references/integration-modification.md`, `scripts/` for sync/verify) |
 | `knowledge-retention-interviewing` | Discovery bar + topic/question generation |
 | `knowledge-retention-reporting` | Topic summaries + final handover (branded template asset for the final doc) |

@@ -33,7 +33,7 @@ Scope lock beats urgency.
 
 ## HOW boundary
 
-`HOW-THE-AGENT-WORKS.md` is BASF Retention Agent setup documentation, not a development artifact.
+`how-the-agent-works.md` is BASF Retention Agent setup documentation, not a development artifact.
 
 - Read it for context when necessary.
 - Never edit it, include it in a live write, or update it automatically.
