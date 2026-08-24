@@ -158,10 +158,13 @@ const KnowledgeRetentionUtils = {
   // guidance but also hands over the two things an administrator needs to act:
   // which action failed, and what the API actually returned.
   failureMessage(status, detail) {
-    // Pass the API body through unchanged. Do not rephrase, wrap, or invent a message —
-    // the administrator needs exactly what Dataverse / Graph / Azure AD returned.
     const code = status === null || status === undefined || status === '' ? 'not reported' : String(status);
     const message = detail === null || detail === undefined ? '' : String(detail);
+    if (status === 429 || Number(status) === 429) {
+      return `The save or request was not completed due to temporary rate limiting. Please retry shortly. When you contact your administrator, please pass on these details: the action that returned the error is "${KnowledgeRetentionUtils.ACTION_SLUG}", the error code is ${code}, and the error returned by the API is: ${message}`;
+    }
+    // Pass the API body through unchanged. Do not rephrase, wrap, or invent a message —
+    // the administrator needs exactly what Dataverse / Graph / Azure AD returned.
     return `${KnowledgeRetentionUtils.MESSAGES.credentialError} When you contact them, please pass on these details: the action that returned the error is "${KnowledgeRetentionUtils.ACTION_SLUG}", the error code is ${code}, and the error returned by the API is: ${message}`;
   },
 
@@ -756,7 +759,8 @@ const stillOpen = topicQuestions.filter(
     other[S.question.id] !== question[S.question.id] &&
     !KnowledgeRetentionUtils.isAnswered(other, children.answers),
 );
-if (stillOpen.length === 0) {
+const topicReadyForSummary = stillOpen.length === 0;
+if (topicReadyForSummary) {
   const topicStatusBody = {};
   topicStatusBody[S.topic.status] = ST.topic.readyForSummary;
   await KnowledgeRetentionUtils.dv(data, token, {
@@ -766,42 +770,25 @@ if (stillOpen.length === 0) {
   });
 }
 
-const refreshedChildren = await KnowledgeRetentionUtils.loadChildren(data, token, interviewId);
+// Reflect the write in memory so computeState sees the saved answer without
+// reloading children or patching denormalized counters (other actions own those).
+const syntheticAnswer = {};
+syntheticAnswer[S.answer.text] = data.input.finalAnswer;
+syntheticAnswer[S.answer.confirmedAnswer] = data.input.finalAnswer;
+syntheticAnswer[S.answer.rawUserMessages] = data.input.rawUserMessages || null;
+syntheticAnswer[S.answer.sequence] = 1;
+syntheticAnswer[S.answer.isLatest] = true;
+syntheticAnswer[S.answer.questionLookupValue] = question[S.question.id];
+children.answers.push(syntheticAnswer);
 
-// Maintain BASF's denormalized counters/cursors (read by their Power BI). Derive
-// them from the refreshed child rows rather than incrementing stored values, so
-// the columns are self-correcting on any retry.
-const answeredTotal = KnowledgeRetentionUtils.answeredQuestionCount(refreshedChildren.questions, refreshedChildren.answers);
-const questionsTotal = refreshedChildren.questions.length;
-const nextTopic = KnowledgeRetentionUtils.activeTopic(refreshedChildren.topics);
-const nextQuestion = nextTopic
-  ? KnowledgeRetentionUtils.activeQuestion(refreshedChildren.questions, refreshedChildren.answers, nextTopic[S.topic.id])
-  : null;
-const interviewCounters = {};
-interviewCounters[S.interview.answeredQuestions] = answeredTotal;
-interviewCounters[S.interview.openQuestionCount] = Math.max(questionsTotal - answeredTotal, 0);
-interviewCounters[S.interview.progress] = answeredTotal;
-interviewCounters[S.interview.currentTopicOrder] = nextTopic ? Number(nextTopic[S.topic.order]) : null;
-interviewCounters[S.interview.currentQuestionOrder] = nextQuestion ? Number(nextQuestion[S.question.order]) : null;
-interviewCounters[S.interview.lastCheckpointOn] = now;
-await KnowledgeRetentionUtils.dv(data, token, {
-  method: 'PATCH',
-  path: `/${S.entitySets.interviews}(${interviewId})`,
-  body: interviewCounters,
-});
+question[S.question.status] = ST.question.answered;
+question[S.question.isAnswered] = true;
 
-const topicAnswered = KnowledgeRetentionUtils.questionsForTopic(refreshedChildren.questions, topic[S.topic.id]).filter(
-  (q) => KnowledgeRetentionUtils.isAnswered(q, refreshedChildren.answers),
-).length;
-const topicCounters = {};
-topicCounters[S.topic.answeredQuestions] = topicAnswered;
-await KnowledgeRetentionUtils.dv(data, token, {
-  method: 'PATCH',
-  path: `/${S.entitySets.topics}(${topic[S.topic.id]})`,
-  body: topicCounters,
-});
+if (topicReadyForSummary) {
+  topic[S.topic.status] = ST.topic.readyForSummary;
+}
 
-const state = KnowledgeRetentionUtils.computeState(data, interview, refreshedChildren);
+const state = KnowledgeRetentionUtils.computeState(data, interview, children);
 return {
   conflict: false,
   nextAction: state.nextAction,

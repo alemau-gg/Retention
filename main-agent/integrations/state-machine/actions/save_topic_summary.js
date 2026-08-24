@@ -158,10 +158,13 @@ const KnowledgeRetentionUtils = {
   // guidance but also hands over the two things an administrator needs to act:
   // which action failed, and what the API actually returned.
   failureMessage(status, detail) {
-    // Pass the API body through unchanged. Do not rephrase, wrap, or invent a message —
-    // the administrator needs exactly what Dataverse / Graph / Azure AD returned.
     const code = status === null || status === undefined || status === '' ? 'not reported' : String(status);
     const message = detail === null || detail === undefined ? '' : String(detail);
+    if (status === 429 || Number(status) === 429) {
+      return `The save or request was not completed due to temporary rate limiting. Please retry shortly. When you contact your administrator, please pass on these details: the action that returned the error is "${KnowledgeRetentionUtils.ACTION_SLUG}", the error code is ${code}, and the error returned by the API is: ${message}`;
+    }
+    // Pass the API body through unchanged. Do not rephrase, wrap, or invent a message —
+    // the administrator needs exactly what Dataverse / Graph / Azure AD returned.
     return `${KnowledgeRetentionUtils.MESSAGES.credentialError} When you contact them, please pass on these details: the action that returned the error is "${KnowledgeRetentionUtils.ACTION_SLUG}", the error code is ${code}, and the error returned by the API is: ${message}`;
   },
 
@@ -712,8 +715,9 @@ await KnowledgeRetentionUtils.dv(data, token, {
   body: interviewCursor,
 });
 
-const refreshedChildren = await KnowledgeRetentionUtils.loadChildren(data, token, interviewId);
-const state = KnowledgeRetentionUtils.computeState(data, interview, refreshedChildren);
+Object.assign(topic, body);
+const interviewForState = Object.assign({}, interview, interviewCursor);
+const state = KnowledgeRetentionUtils.computeState(data, interviewForState, children);
 
 // The topic is now summarized, so computeState has already moved on to the next
 // topic and no longer mentions the upload. Nothing records whether the file was

@@ -64,9 +64,12 @@ const OPERATORS_BY_TYPE = {
 // guidance and hands over what the administrator needs — the failing action and
 // what the API returned.
 function failureMessage(status, detail) {
-  // Pass the API body through unchanged. Do not rephrase, wrap, or invent a message.
   const code = status === null || status === undefined || status === '' ? 'not reported' : String(status);
   const message = detail === null || detail === undefined ? '' : String(detail);
+  if (status === 429 || Number(status) === 429) {
+    return `The save or request was not completed due to temporary rate limiting. Please retry shortly. When you contact your administrator, please pass on these details: the action that returned the error is "admin_query_records", the error code is ${code}, and the error returned by the API is: ${message}`;
+  }
+  // Pass the API body through unchanged. Do not rephrase, wrap, or invent a message.
   return `An error occurred while connecting to the knowledge retention system. Please contact your administrator. When you contact them, please pass on these details: the action that returned the error is "admin_query_records", the error code is ${code}, and the error returned by the API is: ${message}`;
 }
 

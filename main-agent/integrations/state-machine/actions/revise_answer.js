@@ -158,10 +158,13 @@ const KnowledgeRetentionUtils = {
   // guidance but also hands over the two things an administrator needs to act:
   // which action failed, and what the API actually returned.
   failureMessage(status, detail) {
-    // Pass the API body through unchanged. Do not rephrase, wrap, or invent a message —
-    // the administrator needs exactly what Dataverse / Graph / Azure AD returned.
     const code = status === null || status === undefined || status === '' ? 'not reported' : String(status);
     const message = detail === null || detail === undefined ? '' : String(detail);
+    if (status === 429 || Number(status) === 429) {
+      return `The save or request was not completed due to temporary rate limiting. Please retry shortly. When you contact your administrator, please pass on these details: the action that returned the error is "${KnowledgeRetentionUtils.ACTION_SLUG}", the error code is ${code}, and the error returned by the API is: ${message}`;
+    }
+    // Pass the API body through unchanged. Do not rephrase, wrap, or invent a message —
+    // the administrator needs exactly what Dataverse / Graph / Azure AD returned.
     return `${KnowledgeRetentionUtils.MESSAGES.credentialError} When you contact them, please pass on these details: the action that returned the error is "${KnowledgeRetentionUtils.ACTION_SLUG}", the error code is ${code}, and the error returned by the API is: ${message}`;
   },
 
@@ -828,8 +831,28 @@ await KnowledgeRetentionUtils.dv(data, token, {
   body: checkpoint,
 });
 
-const refreshed = await KnowledgeRetentionUtils.loadChildren(data, token, interviewId);
-const state = KnowledgeRetentionUtils.computeState(data, interview, refreshed);
+if (prior) {
+  prior[S.answer.isLatest] = false;
+}
+const newAnswer = {};
+newAnswer[S.answer.questionLookupValue] = question[S.question.id];
+newAnswer[S.answer.interviewLookupValue] = interviewId;
+newAnswer[S.answer.confirmedAnswer] = data.input.finalAnswer;
+newAnswer[S.answer.text] = data.input.finalAnswer;
+newAnswer[S.answer.answerText] = data.input.finalAnswer;
+newAnswer[S.answer.answeredOn] = now;
+newAnswer[S.answer.sequence] = priorSequence + 1;
+newAnswer[S.answer.isLatest] = true;
+children.answers.push(newAnswer);
+
+if (summaryReopened && topic) {
+  topic[S.topic.summaryStatus] = ST.summary.needsReview;
+  topic[S.topic.status] = ST.topic.readyForSummary;
+  topic[S.topic.isCompleted] = false;
+}
+
+const interviewForState = Object.assign({}, interview, checkpoint);
+const state = KnowledgeRetentionUtils.computeState(data, interviewForState, children);
 const savedNote = `Saved the corrected answer as version ${priorSequence + 1}; the previous version is kept as history.`;
 const cascadeNote = summaryReopened
   ? ` The summary for topic "${topic[S.topic.name]}" was already approved, so it has been reopened and must be regenerated from the updated answers.`
