@@ -1,0 +1,31 @@
+handover-agent/how-the-agent-works.md
+  s_550488af68d39d::t_fe8900d90324f3 20-22
+  s_550488af68d39d::t_16a568439a1f17 12
+handover-agent/system-prompt.md
+  s_550488af68d39d::t_4151d561d275db 49
+  s_550488af68d39d::t_f59c73ef25b9a0 28
+handover-agent/skills/knowledge-retention-contributing/SKILL.md
+  s_550488af68d39d::t_ff032f10f0f8a8 60
+handover-agent/skills/knowledge-retention-contributing/references/scope-and-regression.md
+  s_550488af68d39d::t_140f9ec6bd686d 36
+handover-agent/contributing.md
+  s_550488af68d39d::t_090e572f16b107 7
+README.md
+  s_550488af68d39d::t_6c852174a00450 2-19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "4c7f1760b85e7ff6d795e1429b79861880daa921",
+  "prompts": {},
+  "sessions": {
+    "s_550488af68d39d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b37faa1a-23ad-401a-949f-95d1fc10319a",
+        "model": "grok-4.5"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
