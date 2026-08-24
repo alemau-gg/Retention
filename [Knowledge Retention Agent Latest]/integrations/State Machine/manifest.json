@@ -1,0 +1,734 @@
+{
+  "id": "eaf02a4e-7d25-41e1-b66d-4ba9b8d95ec6",
+  "name": "Knowledge Retention Backend V5.0",
+  "color": "#004A96",
+  "description": "Backend state machine for guided knowledge-retention interviews over Dataverse and SharePoint",
+  "authType": "API_KEY",
+  "integrationType": "API",
+  "authFields": [
+    {
+      "slug": "clientId",
+      "label": "Client ID",
+      "description": "Application (client) ID of the Azure app registration used for app-only access to Dataverse and Microsoft Graph.",
+      "placeholder": "00000000-0000-0000-0000-000000000000",
+      "type": "TEXT",
+      "required": true,
+      "maxLength": 100
+    },
+    {
+      "slug": "clientSecret",
+      "label": "Client secret",
+      "description": "Client secret of the Azure app registration. Rotate before the configured expiry; expiry surfaces to interviewees as a contact-your-administrator error.",
+      "placeholder": "",
+      "type": "PASSWORD",
+      "required": true,
+      "maxLength": 4096
+    },
+    {
+      "slug": "dataverseUrl",
+      "label": "Dataverse environment URL",
+      "description": "Base URL of the Dataverse environment, with no trailing slash (e.g. https://org12345.crm4.dynamics.com).",
+      "placeholder": "https://org12345.crm4.dynamics.com",
+      "type": "TEXT",
+      "required": true,
+      "maxLength": 2048
+    },
+    {
+      "slug": "prefillEnabled",
+      "label": "Knowledge prefill enabled",
+      "description": "Set to true only once the delegated WorkIQ prefill (v1.1) is provisioned. While false, the consent step is skipped server-side, matching the original WorkIQEnabled=false behavior.",
+      "placeholder": "false",
+      "type": "TEXT",
+      "required": true,
+      "maxLength": 8
+    },
+    {
+      "slug": "sharepointSiteId",
+      "label": "SharePoint site ID",
+      "description": "Microsoft Graph site ID of the central CKR team site that stores interview folders. Format: host,siteCollectionId,webId.",
+      "placeholder": "contoso.sharepoint.com,00000000-...,00000000-...",
+      "type": "TEXT",
+      "required": true,
+      "maxLength": 512
+    },
+    {
+      "slug": "tenantId",
+      "label": "Tenant ID",
+      "description": "Microsoft Entra tenant ID (GUID) of the BASF tenant that hosts the Dataverse environment and the CKR SharePoint site.",
+      "placeholder": "00000000-0000-0000-0000-000000000000",
+      "type": "TEXT",
+      "required": true,
+      "maxLength": 100
+    }
+  ],
+  "actions": [
+    {
+      "slug": "get_runtime_state",
+      "name": "Get runtime state",
+      "description": "Loads the caller's interview, topics, and questions and returns the computed next action plus a backend-authored instruction. Call once at the start of a conversation.",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": []
+    },
+    {
+      "slug": "create_interview",
+      "name": "Create interview",
+      "description": "Starts a new knowledge-retention interview for the caller in the chosen language. Refuses server-side if the caller already has an open interview.",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": [
+        {
+          "slug": "language",
+          "label": "Interview language",
+          "description": "Language the interview is conducted in. The backend stores it and every later instruction is rendered in this language.",
+          "placeholder": null,
+          "type": "SELECT",
+          "required": true,
+          "options": [
+            {
+              "label": "English",
+              "value": "en"
+            },
+            {
+              "label": "German",
+              "value": "de"
+            },
+            {
+              "label": "Chinese",
+              "value": "zh"
+            },
+            {
+              "label": "French",
+              "value": "fr"
+            },
+            {
+              "label": "Spanish",
+              "value": "es"
+            },
+            {
+              "label": "Portuguese",
+              "value": "pt"
+            }
+          ],
+          "allowMultiSelect": false,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        }
+      ]
+    },
+    {
+      "slug": "save_discovery",
+      "name": "Save discovery",
+      "description": "Saves the pre-interview discovery profile for the caller's open interview and advances it to the topic-generation stage.",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": [
+        {
+          "slug": "businessUnit",
+          "label": "Business unit",
+          "description": "The employee's department, business unit, or team.",
+          "placeholder": null,
+          "type": "TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 400,
+          "jsonSchema": null
+        },
+        {
+          "slug": "focusTopics",
+          "label": "Focus topics",
+          "description": "Topics the employee considers most important to capture before they leave.",
+          "placeholder": null,
+          "type": "MULTI_LINE_TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 8000,
+          "jsonSchema": null
+        },
+        {
+          "slug": "responsibilities",
+          "label": "Responsibilities",
+          "description": "The employee's core responsibilities and recurring tasks, in their own words.",
+          "placeholder": null,
+          "type": "MULTI_LINE_TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 8000,
+          "jsonSchema": null
+        },
+        {
+          "slug": "role",
+          "label": "Role",
+          "description": "The departing employee's role or job title.",
+          "placeholder": null,
+          "type": "TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 400,
+          "jsonSchema": null
+        },
+        {
+          "slug": "tools",
+          "label": "Tools and systems",
+          "description": "Tools, systems, and applications the employee works with day to day.",
+          "placeholder": null,
+          "type": "MULTI_LINE_TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 8000,
+          "jsonSchema": null
+        },
+        {
+          "slug": "kpisAndConstraints",
+          "label": "KPIs and constraints",
+          "description": "Optional. KPIs the employee owns and any constraints or dependencies worth recording. Send only when the employee provides them.",
+          "placeholder": null,
+          "type": "MULTI_LINE_TEXT",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 8000,
+          "jsonSchema": null
+        }
+      ]
+    },
+    {
+      "slug": "save_topics_and_questions",
+      "name": "Save topics and questions",
+      "description": "Persists the generated interview topics and their questions for the caller's open interview, then advances it to the interview stage. Idempotent on retry.",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": [
+        {
+          "slug": "topics",
+          "label": "Topics",
+          "description": "The ordered list of interview topics, each with its ordered questions. Generate 4-6 topics with 3-6 questions each per the methodology skill.",
+          "placeholder": null,
+          "type": "OBJECT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": "{\"type\":\"array\",\"minItems\":4,\"maxItems\":6,\"items\":{\"type\":\"object\",\"properties\":{\"order\":{\"type\":\"integer\",\"description\":\"1-based topic order, most critical first\"},\"name\":{\"type\":\"string\",\"description\":\"Topic name shown in bold to the interviewee\"},\"description\":{\"type\":\"string\",\"description\":\"Optional one-line summary of what the topic covers\"},\"questions\":{\"type\":\"array\",\"minItems\":3,\"maxItems\":6,\"items\":{\"type\":\"object\",\"properties\":{\"order\":{\"type\":\"integer\",\"description\":\"1-based question order within the topic\"},\"questionText\":{\"type\":\"string\",\"description\":\"Verbatim question text, in the interview language, asked exactly as written\"},\"mandatory\":{\"type\":\"boolean\",\"description\":\"Whether the question must be answered (default true)\"}},\"required\":[\"order\",\"questionText\"]}}},\"required\":[\"order\",\"name\",\"questions\"]}}"
+        }
+      ]
+    },
+    {
+      "slug": "set_up_interview_folder",
+      "name": "Set up interview folder",
+      "description": "Creates the SharePoint folder for the caller's interview on the central CKR site and grants edit access to the employee and their manager. Idempotent.",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": []
+    },
+    {
+      "slug": "save_consent",
+      "name": "Save consent",
+      "description": "Records the interviewee's explicit decision on knowledge prefill for the caller's open interview.",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": [
+        {
+          "slug": "consentGranted",
+          "label": "Consent granted",
+          "description": "True only if the interviewee explicitly confirmed prefill. False if they declined. Never infer from a soft or implicit reply.",
+          "placeholder": null,
+          "type": "BOOLEAN",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        }
+      ]
+    },
+    {
+      "slug": "save_answer",
+      "name": "Save answer",
+      "description": "Saves the interviewee's confirmed answer to the current question and returns the next state. Rejects the write with a conflict if the expected question order, or the expected topic order when supplied, no longer matches the backend.",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": [
+        {
+          "slug": "expectedQuestionOrder",
+          "label": "Expected question order",
+          "description": "The order number of the question the answer is for, taken verbatim from the last state. Used for optimistic concurrency; a mismatch returns a conflict and no write.",
+          "placeholder": null,
+          "type": "NUMBER",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        },
+        {
+          "slug": "expectedTopicOrder",
+          "label": "Expected topic order",
+          "description": "The order number of the topic the question belongs to, taken verbatim from the last state. Question order restarts at 1 in every topic, so this stops a stale answer from landing on a same-numbered question in a later topic; a mismatch returns a conflict and no write.",
+          "placeholder": null,
+          "type": "NUMBER",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        },
+        {
+          "slug": "finalAnswer",
+          "label": "Final answer",
+          "description": "The interviewee's confirmed, final answer to the current question. It should capture the essence of the answer, and reassure the user a more extensive summary will be generated later. Do not over-summarize. Save only after explicit confirmation.",
+          "placeholder": null,
+          "type": "MULTI_LINE_TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 10000,
+          "jsonSchema": null
+        },
+        {
+          "slug": "rawUserMessages",
+          "label": "Raw user messages",
+          "description": "Required. The interviewee's own messages for this question, in chronological order: the initial answer plus every follow-up, copied verbatim. Do not EVER paraphrase, condense, omit, or substitute the cleaned finalAnswer. This is of utmost importance.",
+          "placeholder": null,
+          "type": "MULTI_LINE_TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 10000,
+          "jsonSchema": null
+        }
+      ]
+    },
+    {
+      "slug": "save_topic_summary",
+      "name": "Save topic summary",
+      "description": "Saves the approved summary for the current topic and advances it to completed. Rejects the write with a conflict if the expected topic order no longer matches the backend.",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": [
+        {
+          "slug": "expectedTopicOrder",
+          "label": "Expected topic order",
+          "description": "The order number of the topic the summary is for, taken verbatim from the last state. Used for optimistic concurrency; a mismatch returns a conflict and no write.",
+          "placeholder": null,
+          "type": "NUMBER",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        },
+        {
+          "slug": "summaryText",
+          "label": "Summary text",
+          "description": "The user-approved summary for the current topic. Save only after explicit approval.",
+          "placeholder": null,
+          "type": "MULTI_LINE_TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 32000,
+          "jsonSchema": null
+        }
+      ]
+    },
+    {
+      "slug": "upload_document",
+      "name": "Upload document",
+      "description": "Uploads a topic summary, final handover, or user-confirmed supporting file into the caller's interview folder on the central CKR site. The destination folder is resolved server-side from the caller's identity. Uploading with docType \"final\" also advances a finalized interview to Document Generated, which is what tells a later session the handover file was filed.",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": [
+        {
+          "slug": "docType",
+          "label": "Document type",
+          "description": "Whether this is a per-topic summary, final interview summary, or optional supporting file.",
+          "placeholder": null,
+          "type": "SELECT",
+          "required": true,
+          "options": [
+            {
+              "label": "Topic summary",
+              "value": "topic"
+            },
+            {
+              "label": "Final summary",
+              "value": "final"
+            },
+            {
+              "label": "Supporting file",
+              "value": "supporting"
+            }
+          ],
+          "allowMultiSelect": false,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        },
+        {
+          "slug": "file",
+          "label": "File",
+          "description": "The single user-confirmed file to upload. Topic and final documents are generated .docx files; supporting files may use their original format.",
+          "placeholder": null,
+          "type": "FILE",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        },
+        {
+          "slug": "fileName",
+          "label": "File name",
+          "description": "The unique file name to store, including its extension (e.g. Topic-1 Stakeholder map.docx, InterviewFinalSummary_42.docx, or Process-Checklist.pdf).",
+          "placeholder": null,
+          "type": "TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 400,
+          "jsonSchema": null
+        }
+      ]
+    },
+    {
+      "slug": "finalize_interview",
+      "name": "Finalize interview",
+      "description": "Completes the caller's interview once every topic is summarized and every canonical Topic-n-{slug}.docx is present in the interview SharePoint folder (a previously uploaded Topic-n {topic name}.docx also counts). If a topic file is missing, nothing is finalized; the missing file names and stored summaries are returned so those files can be uploaded first.",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": true,
+      "inputFields": []
+    },
+    {
+      "slug": "save_feedback",
+      "name": "Save feedback",
+      "description": "Saves the interviewee's three feedback answers on the most recently completed interview. Works after the interview is finalized.",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": [
+        {
+          "slug": "q1",
+          "label": "Helpfulness rating",
+          "description": "Answer to: how helpful was the agent in documenting your knowledge? A rating from 1 to 5, captured as text.",
+          "placeholder": null,
+          "type": "TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 100,
+          "jsonSchema": null
+        },
+        {
+          "slug": "q3",
+          "label": "Improvement feedback",
+          "description": "Answer to: what would you like to improve, which functionality did you miss? Free text.",
+          "placeholder": null,
+          "type": "MULTI_LINE_TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 16000,
+          "jsonSchema": null
+        },
+        {
+          "slug": "q2",
+          "label": "Intuitiveness rating",
+          "description": "Answer to: how intuitive was the agent to use? A rating from 1 to 5, captured as text.",
+          "placeholder": null,
+          "type": "TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 100,
+          "jsonSchema": null
+        }
+      ]
+    },
+    {
+      "slug": "revise_answer",
+      "name": "Revise answer",
+      "description": "Records a new version of the interviewee's answer to an EARLIER, already-answered question (not the question currently being asked). The previous version is kept as history. If that question's topic summary was already approved, the summary is flagged for regeneration. Only works before the interview is finalized; identify the question by its topic and question order from the current state, never by an ID.",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": [
+        {
+          "slug": "finalAnswer",
+          "label": "Final answer",
+          "description": "The interviewee's confirmed corrected answer. Save only after explicit confirmation.",
+          "placeholder": null,
+          "type": "MULTI_LINE_TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 16000,
+          "jsonSchema": null
+        },
+        {
+          "slug": "targetQuestionOrder",
+          "label": "Target question order",
+          "description": "The order number (from the current state) of the earlier, already-answered question being corrected. Pair it with topicOrder when that order exists in more than one topic.",
+          "placeholder": null,
+          "type": "NUMBER",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        },
+        {
+          "slug": "expectedSequence",
+          "label": "Expected answer version",
+          "description": "Optional. The latest known answer-version number for that question, used as a concurrency token. A mismatch returns a conflict and no write.",
+          "placeholder": null,
+          "type": "NUMBER",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        },
+        {
+          "slug": "topicOrder",
+          "label": "Topic order",
+          "description": "Optional. The order number of the topic the question belongs to. Question order repeats across topics, so send this whenever the question order alone matches more than one answered question; a conflict response names the candidate topics.",
+          "placeholder": null,
+          "type": "NUMBER",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        }
+      ]
+    },
+    {
+      "slug": "get_answers",
+      "name": "Get answers",
+      "description": "Reads back previously saved answers for the caller's open interview, optionally filtered by topic and/or question order. Includes the confirmed answer and rawUserMessages when stored. Read-only; use this to remind the interviewee what they answered, and as the primary source when building the final handover. Each question carries its answer version in `sequence`, which is what revise_answer's expectedSequence expects.",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": [
+        {
+          "slug": "questionOrder",
+          "label": "Question order",
+          "description": "Optional. Limit results to this question, by its order number within its topic. Question order repeats across topics, so pair it with topicOrder when the topic is known.",
+          "placeholder": null,
+          "type": "NUMBER",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        },
+        {
+          "slug": "topicOrder",
+          "label": "Topic order",
+          "description": "Optional. Limit results to this topic, by its order number from the current state. Required alongside questionOrder if the question order alone matches more than one topic.",
+          "placeholder": null,
+          "type": "NUMBER",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        }
+      ]
+    },
+    {
+      "slug": "admin_query_records",
+      "name": "Admin: query records",
+      "description": "Runs an ad hoc query against any CKR Dataverse table with structured column filters, sorting, and projection. Field names, types, and valid operators are resolved live from Dataverse metadata, not hard-coded; call admin_describe_schema first (with the same table) to learn them rather than guessing. Unlike every other action here, this is NOT scoped to the caller's own interview: it is an admin/monitoring tool over the whole dataset, gated only by who has access to this connection. Returns matching rows as JSON by default, or as a downloadable CSV when exportAsCsv is set. An unknown table, field, or operator returns an error naming the problem and pointing back to admin_describe_schema.",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": [
+        {
+          "slug": "table",
+          "label": "Table",
+          "description": "The CKR entity to query, by its Dataverse logical name or entity set name (e.g. ckr_interview / ckr_interviews). These names are effectively static, but call admin_describe_schema if unsure of the exact one for this environment.",
+          "placeholder": "ckr_interview",
+          "type": "TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        },
+        {
+          "slug": "select",
+          "label": "Columns to return",
+          "description": "Optional. Field identifiers (from admin_describe_schema) to include in each row. Defaults to every attribute on the entity when omitted.",
+          "placeholder": null,
+          "type": "OBJECT",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": "{\"type\":\"array\",\"items\":{\"type\":\"string\"}}"
+        },
+        {
+          "slug": "exportAsCsv",
+          "label": "Export as CSV",
+          "description": "Return the matching rows as a downloadable CSV file instead of an inline JSON list.",
+          "placeholder": null,
+          "type": "BOOLEAN",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        },
+        {
+          "slug": "filters",
+          "label": "Filters",
+          "description": "Optional. Column filters to apply, ANDed together. Each entry needs a field (a field identifier returned by admin_describe_schema for this table, e.g. a lookup column reads as _ckr_interview_value), an operator, and a value. String fields support eq/ne/contains/startswith; numbers and dates support eq/ne/gt/ge/lt/le; booleans and GUIDs support eq/ne only.",
+          "placeholder": null,
+          "type": "OBJECT",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": "{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"field\":{\"type\":\"string\",\"description\":\"Field identifier for the chosen table, from admin_describe_schema\"},\"operator\":{\"type\":\"string\",\"enum\":[\"eq\",\"ne\",\"gt\",\"ge\",\"lt\",\"le\",\"contains\",\"startswith\"]},\"value\":{\"type\":[\"string\",\"number\",\"boolean\"]}},\"required\":[\"field\",\"operator\",\"value\"]}}"
+        },
+        {
+          "slug": "top",
+          "label": "Max rows",
+          "description": "Optional. Maximum number of rows to return, capped at 5000. Defaults to 200.",
+          "placeholder": null,
+          "type": "NUMBER",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        },
+        {
+          "slug": "orderBy",
+          "label": "Sort by",
+          "description": "Optional. A field identifier (from admin_describe_schema) to sort by. Defaults to createdon.",
+          "placeholder": null,
+          "type": "TEXT",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        },
+        {
+          "slug": "orderDirection",
+          "label": "Sort direction",
+          "description": "Optional. Defaults to descending.",
+          "placeholder": null,
+          "type": "SELECT",
+          "required": false,
+          "options": [
+            {
+              "label": "Ascending",
+              "value": "asc"
+            },
+            {
+              "label": "Descending",
+              "value": "desc"
+            }
+          ],
+          "allowMultiSelect": false,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        }
+      ]
+    },
+    {
+      "slug": "admin_describe_schema",
+      "name": "Admin: describe schema",
+      "description": "Discovers the CKR Dataverse tables and columns that admin_query_records can filter, select, or sort by, resolved live from Dataverse's own EntityDefinitions/Attributes metadata rather than a hard-coded list, so it can't drift from what actually exists in this environment. Also resolves the human-readable labels for Choice/Picklist columns (e.g. ckr_topicstatus) where the environment supports it. Call with a table to get its columns, or omit table to list every ckr_ entity. Call this before admin_query_records if you don't already know the field names for a table.",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": [
+        {
+          "slug": "table",
+          "label": "Table",
+          "description": "Optional. The CKR entity to describe, by its Dataverse logical name or entity set name (e.g. ckr_interview / ckr_interviews). Omit to list every entity whose logical name starts with ckr_.",
+          "placeholder": "ckr_interview",
+          "type": "TEXT",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        }
+      ]
+    },
+    {
+      "slug": "get_discovery",
+      "name": "Get discovery profile",
+      "description": "Reads back the caller's saved pre-interview discovery profile (role, business unit, responsibilities, tools, focus topics, KPIs/constraints). Read-only; use this when building the final summary document, since finalize_interview's cover metadata only carries role and business unit.",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": []
+    },
+    {
+      "slug": "abandon_interview",
+      "name": "Abandon interview",
+      "description": "Cancels the caller's current in-progress interview. Use only when the interviewee explicitly wants to discard it; requires confirmation and cannot be undone. After success, do not start a new interview until they ask.",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": true,
+      "inputFields": []
+    }
+  ],
+  "triggers": []
+}
