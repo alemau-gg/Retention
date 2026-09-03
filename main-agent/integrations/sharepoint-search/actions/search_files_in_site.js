@@ -1,5 +1,5 @@
 // Self-contained Langdock custom-integration action.
-// Searches files in a predefined SharePoint site using Microsoft Graph Search.
+// Searches files in a predefined SharePoint site or subfolder using Microsoft Graph Search.
 const MAX_RETRIES = 3;
 const FALLBACK_DELAY_S = 2;
 const MAX_DELAY_MS = 30000;
@@ -111,16 +111,37 @@ function normalizeUrl(url) {
   }
 }
 
-function hitIsInSite(hit, siteId, sitePathPrefix) {
+function hitIsInScope(hit, siteId, targetPathPrefix) {
   const resource = hit.resource;
   if (!resource) return false;
 
-  if (siteId && resource.parentReference?.siteId === siteId) {
-    return true;
+  // Strict site check if siteId is present
+  if (
+    siteId &&
+    resource.parentReference?.siteId &&
+    resource.parentReference.siteId !== siteId
+  ) {
+    return false;
   }
 
-  const webUrl = (resource.webUrl || "").toLowerCase();
-  return webUrl.startsWith(sitePathPrefix.toLowerCase());
+  // URL prefix check against the site + subfolder path
+  if (targetPathPrefix) {
+    const webUrl = (resource.webUrl || "").toLowerCase();
+    let decodedWebUrl = webUrl;
+    try {
+      decodedWebUrl = decodeURI(webUrl).toLowerCase();
+    } catch (_e) {}
+    const decodedPrefix = decodeURI(targetPathPrefix).toLowerCase();
+
+    if (
+      !webUrl.startsWith(targetPathPrefix.toLowerCase()) &&
+      !decodedWebUrl.startsWith(decodedPrefix)
+    ) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 function mapHit(hit) {
@@ -163,15 +184,47 @@ function mapHit(hit) {
   };
 }
 
-// 1. Resolve target site URL and optional site ID from connection auth fields
-const configuredSiteUrl = (data.auth.siteUrl || "").trim();
+// 1. Resolve target site URL and optional site ID / subfolder from auth and inputs
+const configuredSiteUrl = (data.auth.siteUrl || "").trim().replace(/\/+$/, "");
 const configuredSiteId = (data.auth.siteId || "").trim();
+const configuredSubfolder = (data.auth.subfolderPath || "")
+  .trim()
+  .replace(/^\/+|\/+$/g, "");
+const inputSubfolder = (data.input.subfolder || "")
+  .trim()
+  .replace(/^\/+|\/+$/g, "");
 
 if (!configuredSiteUrl && !configuredSiteId) {
   throw new Error(
     "SharePoint site URL or site ID must be configured in connection auth fields",
   );
 }
+
+// Build target path prefix combining site and subfolder
+let effectivePath = configuredSiteUrl;
+if (configuredSubfolder) {
+  effectivePath += `/${configuredSubfolder}`;
+}
+if (inputSubfolder) {
+  // If inputSubfolder already starts with configuredSubfolder, do not duplicate
+  if (
+    configuredSubfolder &&
+    inputSubfolder.toLowerCase().startsWith(configuredSubfolder.toLowerCase())
+  ) {
+    effectivePath = `${configuredSiteUrl}/${inputSubfolder}`;
+  } else {
+    effectivePath += `/${inputSubfolder}`;
+  }
+}
+
+const targetPathPrefix = effectivePath
+  ? effectivePath.replace(/\/+$/, "") + "/"
+  : "";
+
+// Parse limit (default 25, max 100)
+const rawLimit = Number(data.input.limit);
+const limit =
+  Number.isInteger(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 100) : 25;
 
 const entityTypes = ["driveItem"];
 const queryString = data.input.query?.trim();
@@ -208,10 +261,7 @@ try {
     const webUrl = item.webUrl;
     if (!webUrl) return [];
 
-    // Confirm resolved URL belongs to the configured site
-    const siteRootCheck = configuredSiteUrl
-      ? configuredSiteUrl.replace(/\/$/, "").toLowerCase() + "/"
-      : "";
+    // Confirm resolved URL belongs to the configured scope
     if (
       configuredSiteId &&
       item.parentReference?.siteId &&
@@ -219,8 +269,19 @@ try {
     ) {
       return [];
     }
-    if (siteRootCheck && !webUrl.toLowerCase().startsWith(siteRootCheck)) {
-      return [];
+    if (targetPathPrefix) {
+      let decodedWeb = webUrl.toLowerCase();
+      try {
+        decodedWeb = decodeURI(webUrl).toLowerCase();
+      } catch (_e) {}
+      const decodedTarget = decodeURI(targetPathPrefix).toLowerCase();
+
+      if (
+        !webUrl.toLowerCase().startsWith(targetPathPrefix.toLowerCase()) &&
+        !decodedWeb.startsWith(decodedTarget)
+      ) {
+        return [];
+      }
     }
 
     const mimeType = getMimeType(item);
@@ -257,14 +318,10 @@ try {
     ];
   }
 
-  // 2. Build scoped KQL query string restricted to the configured site
+  // 2. Build scoped KQL query string restricted to the configured site/subfolder
   let scopedQueryString = queryString;
-  let sitePathPrefix = "";
-
-  if (configuredSiteUrl) {
-    const siteRoot = configuredSiteUrl.replace(/\/$/, "") + "/";
-    sitePathPrefix = siteRoot;
-    scopedQueryString = `${queryString} path:"${siteRoot}"`;
+  if (targetPathPrefix) {
+    scopedQueryString = `${queryString} path:"${targetPathPrefix}"`;
   }
 
   const searchRequest = {
@@ -272,6 +329,8 @@ try {
       {
         entityTypes,
         query: { queryString: scopedQueryString },
+        size: limit,
+        from: 0,
         trimDuplicates: true,
         queryAlterationOptions: {
           enableModification: true,
@@ -295,7 +354,8 @@ try {
 
   return (hits || [])
     .filter((hit) => hit.resource?.name)
-    .filter((hit) => hitIsInSite(hit, configuredSiteId, sitePathPrefix))
+    .filter((hit) => hitIsInScope(hit, configuredSiteId, targetPathPrefix))
+    .slice(0, limit)
     .map(mapHit);
 } catch {
   return [];
