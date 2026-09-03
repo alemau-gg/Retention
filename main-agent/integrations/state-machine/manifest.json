@@ -327,7 +327,7 @@
     {
       "slug": "save_topic_summary",
       "name": "Save topic summary",
-      "description": "Saves the approved summary for the current topic and advances it to completed. Rejects the write with a conflict if the expected topic order no longer matches the backend.",
+      "description": "Saves the user-approved summary TEXT for the current topic in Dataverse and advances the topic to completed. This stores content only; it creates no file. Call generate_topic_document afterwards, with the same topic order, to produce and file the topic's Word document. Rejects the write with a conflict if the expected topic order no longer matches the backend.",
       "nativeActionType": "NONE",
       "actionType": "API",
       "requiresConfirmation": false,
@@ -361,9 +361,32 @@
       ]
     },
     {
+      "slug": "generate_topic_document",
+      "name": "Generate topic document",
+      "description": "Creates the standardized Word document for one already-approved topic and files it in the caller's interview folder. The summary text is read from Dataverse, never from the caller, so save_topic_summary must have stored it first; pass only the topic order. Also ensures the Source transcripts/ and Supporting documents/ subfolders, files a Markdown source transcript under Source transcripts/, and lists the actual contents of Supporting documents/ in a closing section. Returns the .docx as a file attachment. Reruns replace the generated .docx and transcript for that topic and never touch user-supplied supporting files. Use this instead of building or uploading a topic .docx yourself.",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": [
+        {
+          "slug": "topicOrder",
+          "label": "Topic order",
+          "description": "The order number of the topic whose document should be generated, taken verbatim from the last state (e.g. 2). Everything else — the summary text, file name, folder path, and interview — is resolved server-side. A topic without an approved stored summary is refused with a conflict and nothing is written.",
+          "placeholder": null,
+          "type": "NUMBER",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        }
+      ]
+    },
+    {
       "slug": "upload_document",
       "name": "Upload document",
-      "description": "Uploads a topic summary, final handover, or user-confirmed supporting file into the caller's interview folder on the central CKR site. The destination folder is resolved server-side from the caller's identity. Uploading with docType \"final\" also advances a finalized interview to Document Generated, which is what tells a later session the handover file was filed.",
+      "description": "Uploads the final handover or a user-confirmed supporting file into the caller's interview folder on the central CKR site. The destination folder is resolved server-side from the caller's identity. Uploading with docType \"final\" also advances a finalized interview to Document Generated, which is what tells a later session the handover file was filed. Do NOT use this for per-topic documents: generate_topic_document produces those from the stored summary. docType \"topic\" is kept only for legacy recovery of a topic file that generate_topic_document cannot produce.",
       "nativeActionType": "NONE",
       "actionType": "API",
       "requiresConfirmation": false,
@@ -371,13 +394,13 @@
         {
           "slug": "docType",
           "label": "Document type",
-          "description": "Whether this is a per-topic summary, final interview summary, or optional supporting file.",
+          "description": "Whether this is the final interview summary, an optional supporting file, or a legacy per-topic document. Use \"final\" for the handover and \"supporting\" for a user-confirmed attachment. Do not use \"topic\" in the normal flow — call generate_topic_document instead; \"topic\" remains only for recovering a topic file the generator cannot produce.",
           "placeholder": null,
           "type": "SELECT",
           "required": true,
           "options": [
             {
-              "label": "Topic summary",
+              "label": "Topic summary (legacy recovery)",
               "value": "topic"
             },
             {
@@ -397,7 +420,7 @@
         {
           "slug": "file",
           "label": "File",
-          "description": "The single user-confirmed file to upload. Topic and final documents are generated .docx files; supporting files may use their original format.",
+          "description": "The single user-confirmed file to upload. The final document is a generated .docx; supporting files may use their original format.",
           "placeholder": null,
           "type": "FILE",
           "required": true,

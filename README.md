@@ -8,6 +8,7 @@ BASF Knowledge Retention agent sources, split by agent.
   - `system-prompt.md` — interview system prompt
   - `skills/` — `knowledge-retention-interviewing`, `knowledge-retention-reporting`
   - `integrations/state-machine/` — Knowledge Retention Backend actions + manifest
+  - `integrations/sharepoint-search/` — SharePoint Scoped Search integration (site-restricted search)
 
 - **`handover-agent/`** — administrator-facing handover agent
   - `system-prompt.md` — handover system prompt
