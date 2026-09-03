@@ -157,10 +157,13 @@ const KnowledgeRetentionUtils = {
   // guidance but also hands over the two things an administrator needs to act:
   // which action failed, and what the API actually returned.
   failureMessage(status, detail) {
-    // Pass the API body through unchanged. Do not rephrase, wrap, or invent a message —
-    // the administrator needs exactly what Dataverse / Graph / Azure AD returned.
     const code = status === null || status === undefined || status === '' ? 'not reported' : String(status);
     const message = detail === null || detail === undefined ? '' : String(detail);
+    if (status === 429 || Number(status) === 429) {
+      return `The save or request was not completed due to temporary rate limiting. Please retry shortly. When you contact your administrator, please pass on these details: the action that returned the error is "${KnowledgeRetentionUtils.ACTION_SLUG}", the error code is ${code}, and the error returned by the API is: ${message}`;
+    }
+    // Pass the API body through unchanged. Do not rephrase, wrap, or invent a message —
+    // the administrator needs exactly what Dataverse / Graph / Azure AD returned.
     return `${KnowledgeRetentionUtils.MESSAGES.credentialError} When you contact them, please pass on these details: the action that returned the error is "${KnowledgeRetentionUtils.ACTION_SLUG}", the error code is ${code}, and the error returned by the API is: ${message}`;
   },
 
@@ -317,30 +320,138 @@ const KnowledgeRetentionUtils = {
     return result && result.value && result.value.length > 0 ? result.value[0] : null;
   },
 
+  // One FetchXML join (SE-3215) instead of three child GETs. FetchXML omits
+  // attributes whose value is null; OData returns null — coerce missing aliases
+  // to null so computeState / topicQnA see the same shape as the 3-GET loader.
+  // Gate: admin_spike_joined_read → parity.readyToReplaceLoadChildren.
   async loadChildren(data, token, interviewId) {
     const S = KnowledgeRetentionUtils.SCHEMA;
-    const topicFilter = `${S.topic.interviewLookupValue} eq ${interviewId}`;
-    const questionFilter = `${S.question.interviewLookupValue} eq ${interviewId}`;
-    const answerJoinFilter = `${S.answer.interviewLookupValue} eq ${interviewId}`;
-
-    const topicsResult = await KnowledgeRetentionUtils.dv(data, token, {
-      method: 'GET',
-      path: `/${S.entitySets.topics}?$filter=${encodeURIComponent(topicFilter)}&$orderby=${S.topic.order} asc`,
-    });
-    const questionsResult = await KnowledgeRetentionUtils.dv(data, token, {
-      method: 'GET',
-      path: `/${S.entitySets.questions}?$filter=${encodeURIComponent(questionFilter)}&$orderby=${S.question.order} asc`,
-    });
-    const answersResult = await KnowledgeRetentionUtils.dv(data, token, {
-      method: 'GET',
-      path: `/${S.entitySets.answers}?$filter=${encodeURIComponent(answerJoinFilter)}`,
-    });
-
-    return {
-      topics: (topicsResult && topicsResult.value) || [],
-      questions: (questionsResult && questionsResult.value) || [],
-      answers: (answersResult && answersResult.value) || [],
+    const alias = (row, prefix, field) => {
+      if (!row) return undefined;
+      const key = `${prefix}.${field}`;
+      if (Object.prototype.hasOwnProperty.call(row, key)) return row[key];
+      // Root entity id may arrive unprefixed on some FetchXML responses.
+      if (prefix === 'topic' && field === S.topic.id && row[S.topic.id]) return row[S.topic.id];
+      return undefined;
     };
+    const aliasOrNull = (row, prefix, field) => {
+      const value = alias(row, prefix, field);
+      return value === undefined ? null : value;
+    };
+    const uniqueBy = (rows, idField) => {
+      const map = new Map();
+      for (const row of rows) {
+        const id = row[idField];
+        if (id && !map.has(id)) map.set(id, row);
+      }
+      return Array.from(map.values());
+    };
+
+    const fetchXml = `
+<fetch>
+  <entity name="ckr_interview">
+    <attribute name="${S.interview.id}" />
+    <filter type="and">
+      <condition attribute="${S.interview.id}" operator="eq" value="${interviewId}" />
+    </filter>
+    <link-entity name="ckr_interviewtopic" from="ckr_interview" to="${S.interview.id}" link-type="outer" alias="topic">
+      <attribute name="${S.topic.id}" />
+      <attribute name="${S.topic.name}" />
+      <attribute name="${S.topic.order}" />
+      <attribute name="${S.topic.status}" />
+      <attribute name="${S.topic.summary}" />
+      <attribute name="${S.topic.summaryStatus}" />
+      <link-entity name="ckr_question" from="ckr_topic" to="${S.topic.id}" link-type="outer" alias="question">
+        <attribute name="${S.question.id}" />
+        <attribute name="${S.question.text}" />
+        <attribute name="${S.question.order}" />
+        <attribute name="${S.question.status}" />
+        <attribute name="${S.question.isAnswered}" />
+        <link-entity name="ckr_answer" from="ckr_question" to="${S.question.id}" link-type="outer" alias="answer">
+          <attribute name="${S.answer.id}" />
+          <attribute name="${S.answer.confirmedAnswer}" />
+          <attribute name="${S.answer.rawUserMessages}" />
+          <attribute name="${S.answer.sequence}" />
+          <attribute name="${S.answer.isLatest}" />
+        </link-entity>
+      </link-entity>
+    </link-entity>
+  </entity>
+</fetch>`.trim();
+
+    const result = await KnowledgeRetentionUtils.dv(data, token, {
+      method: 'GET',
+      path: `/${S.entitySets.interviews}?fetchXml=${encodeURIComponent(fetchXml)}`,
+    });
+    const rows = (result && result.value) || [];
+
+    const topics = uniqueBy(
+      rows
+        .map((r) => {
+          const id = alias(r, 'topic', S.topic.id);
+          if (!id) return null;
+          return {
+            [S.topic.id]: id,
+            [S.topic.name]: aliasOrNull(r, 'topic', S.topic.name),
+            [S.topic.order]: aliasOrNull(r, 'topic', S.topic.order),
+            [S.topic.status]: aliasOrNull(r, 'topic', S.topic.status),
+            [S.topic.summary]: aliasOrNull(r, 'topic', S.topic.summary),
+            [S.topic.summaryStatus]: aliasOrNull(r, 'topic', S.topic.summaryStatus),
+            [S.topic.interviewLookupValue]: interviewId,
+          };
+        })
+        .filter(Boolean),
+      S.topic.id,
+    ).sort((a, b) => Number(a[S.topic.order]) - Number(b[S.topic.order]));
+
+    const questions = uniqueBy(
+      rows
+        .map((r) => {
+          const questionId = alias(r, 'question', S.question.id);
+          const topicId = alias(r, 'topic', S.topic.id);
+          if (!questionId) return null;
+          return {
+            [S.question.id]: questionId,
+            [S.question.text]: aliasOrNull(r, 'question', S.question.text),
+            [S.question.order]: aliasOrNull(r, 'question', S.question.order),
+            [S.question.status]: aliasOrNull(r, 'question', S.question.status),
+            [S.question.isAnswered]: aliasOrNull(r, 'question', S.question.isAnswered),
+            [S.question.interviewLookupValue]: interviewId,
+            [S.question.topicLookupValue]: topicId || null,
+          };
+        })
+        .filter(Boolean),
+      S.question.id,
+    ).sort((a, b) => Number(a[S.question.order]) - Number(b[S.question.order]));
+
+    const answers = uniqueBy(
+      rows
+        .map((r) => {
+          const id = alias(r, 'answer', S.answer.id);
+          const questionId = alias(r, 'question', S.question.id);
+          if (!id) return null;
+          return {
+            [S.answer.id]: id,
+            [S.answer.confirmedAnswer]: aliasOrNull(r, 'answer', S.answer.confirmedAnswer),
+            [S.answer.rawUserMessages]: aliasOrNull(r, 'answer', S.answer.rawUserMessages),
+            [S.answer.sequence]: aliasOrNull(r, 'answer', S.answer.sequence),
+            [S.answer.isLatest]: aliasOrNull(r, 'answer', S.answer.isLatest),
+            [S.answer.interviewLookupValue]: interviewId,
+            [S.answer.questionLookupValue]: questionId || null,
+          };
+        })
+        .filter(Boolean),
+      S.answer.id,
+    );
+
+    return { topics, questions, answers };
+  },
+
+  needsChildren(interview) {
+    const S = KnowledgeRetentionUtils.SCHEMA;
+    const ST = KnowledgeRetentionUtils.STATUS;
+    if (!interview) return false;
+    return Number(interview[S.interview.status]) === ST.interview.generated;
   },
 
   // ===========================================================================
