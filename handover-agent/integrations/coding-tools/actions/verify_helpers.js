@@ -47,8 +47,11 @@ if (response.status !== 200) {
   throw new Error(`Failed to get integration (${response.status}): ${verifyHelpersFormatError(response)}`);
 }
 
-const integration = response.json.integration;
-const actions = integration && integration.actions;
+const integration = response.json && response.json.integration;
+if (!integration || integration.id !== integrationId) {
+  throw new Error('Integration response did not match the trusted Dev integration');
+}
+const actions = integration.actions;
 const blockers = [];
 const report = [];
 

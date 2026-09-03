@@ -3,6 +3,9 @@ const stagingIntegrationId = data.input.stagingIntegrationId;
 const trustedDevIntegrationId = data.auth.devIntegrationId;
 const trustedStagingIntegrationId = data.auth.stagingIntegrationId;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const ACTION_SLUG_RE = /^[a-zA-Z0-9_-]{1,100}$/;
+const MAX_ACTIONS = 250;
+const MAX_CODE_LENGTH = 150000;
 
 if (
   typeof devIntegrationId !== 'string' ||
@@ -49,7 +52,37 @@ async function promoteGetIntegration(integrationId) {
   if (response.status !== 200) {
     throw new Error(`Failed to read integration "${integrationId}" (${response.status}): ${promoteFormatError(response)}`);
   }
-  return response.json.integration;
+  const integration = response.json && response.json.integration;
+  if (!integration || integration.id !== integrationId || !Array.isArray(integration.actions)) {
+    throw new Error(`Integration response did not include the requested integration "${integrationId}"`);
+  }
+  return integration;
+}
+
+function validateIntegrationActions(integration, label) {
+  if (integration.actions.length > MAX_ACTIONS) {
+    throw new Error(`${label} contains more than the safe ${MAX_ACTIONS}-action limit`);
+  }
+  const slugs = new Set();
+  for (const action of integration.actions) {
+    if (
+      !action ||
+      typeof action.id !== 'string' ||
+      !UUID_RE.test(action.id) ||
+      typeof action.slug !== 'string' ||
+      !ACTION_SLUG_RE.test(action.slug)
+    ) {
+      throw new Error(`${label} contains an action without a valid UUID ID or safe slug`);
+    }
+    if (slugs.has(action.slug)) {
+      throw new Error(`${label} contains duplicate action slug "${action.slug}"`);
+    }
+    slugs.add(action.slug);
+    if (typeof action.code === 'string' && action.code.length > MAX_CODE_LENGTH) {
+      throw new Error(`${label} action "${action.slug}" exceeds Langdock's ${MAX_CODE_LENGTH}-character code limit`);
+    }
+  }
+  return integration.actions;
 }
 
 function promoteActionPayload(action) {
@@ -76,7 +109,11 @@ async function promoteCreateAction(integrationId, action) {
   if (response.status !== 200 && response.status !== 201) {
     throw new Error(`Failed to create action "${action.slug}" (${response.status}): ${promoteFormatError(response)}`);
   }
-  return response.json.action;
+  const created = response.json && response.json.action;
+  if (!created || typeof created.id !== 'string' || !UUID_RE.test(created.id) || created.slug !== action.slug) {
+    throw new Error(`Created action "${action.slug}" did not return a valid matching action`);
+  }
+  return created;
 }
 
 async function promoteUpdateAction(integrationId, action) {
@@ -105,8 +142,8 @@ async function promoteDeleteAction(integrationId, action) {
 
 const dev = await promoteGetIntegration(devIntegrationId);
 const staging = await promoteGetIntegration(stagingIntegrationId);
-const devActions = Array.isArray(dev.actions) ? dev.actions : [];
-const stagingActions = Array.isArray(staging.actions) ? staging.actions : [];
+const devActions = validateIntegrationActions(dev, 'Dev integration');
+const stagingActions = validateIntegrationActions(staging, 'Staging integration');
 const stagingBySlug = new Map(stagingActions.map((action) => [action.slug, action]));
 const changes = [];
 
@@ -141,13 +178,17 @@ for (const destinationAction of stagingActions) {
 }
 
 const after = await promoteGetIntegration(stagingIntegrationId);
-const afterActions = Array.isArray(after.actions) ? after.actions : [];
+const afterActions = validateIntegrationActions(after, 'Post-promotion Staging integration');
 const afterBySlug = new Map(afterActions.map((action) => [action.slug, action]));
 const missing = devActions.filter((action) => !afterBySlug.has(action.slug)).map((action) => action.slug);
 const unexpected = afterActions.filter((action) => !devSlugs.has(action.slug)).map((action) => action.slug);
-if (missing.length > 0 || unexpected.length > 0) {
+const changed = devActions
+  .filter((action) => afterBySlug.has(action.slug))
+  .filter((action) => promoteComparableAction(action) !== promoteComparableAction(afterBySlug.get(action.slug)))
+  .map((action) => action.slug);
+if (missing.length > 0 || unexpected.length > 0 || changed.length > 0) {
   throw new Error(
-    `Promotion verification failed. Missing actions: ${missing.join(', ') || 'none'}. Unexpected actions: ${unexpected.join(', ') || 'none'}.`,
+    `Promotion verification failed. Missing actions: ${missing.join(', ') || 'none'}. Unexpected actions: ${unexpected.join(', ') || 'none'}. Changed actions: ${changed.join(', ') || 'none'}.`,
   );
 }
 

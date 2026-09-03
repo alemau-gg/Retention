@@ -8,6 +8,14 @@ const MAX_LIMIT = 250;
 const MAX_QUERY_LENGTH = 100;
 const SLUG_RE = /^[a-z0-9-]{1,100}$/;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const MAX_ERROR_LENGTH = 2000;
+
+function safeError(value) {
+  return String(value).replace(
+    /((?:api[_-]?key|authorization|client[_-]?secret|access[_-]?token|refresh[_-]?token|password|secret)\s*[:=]\s*)(["']?)[^,\s"']+/gi,
+    '$1$2[redacted]',
+  ).slice(0, MAX_ERROR_LENGTH);
+}
 
 if (
   trustedSkillIds.length === 0 ||
@@ -19,14 +27,14 @@ if (
 
 function formatError(response) {
   const json = response.json;
-  if (!json) return response.text || response.error || 'Unknown error';
+  if (!json) return safeError(response.text || response.error || 'Langdock returned an error');
   if (Array.isArray(json.errors)) {
-    const details = json.errors.map((error) => error?.message).filter(Boolean).join(', ');
+    const details = json.errors.map((error) => safeError(error?.message)).filter(Boolean).join(', ');
     if (details) return details;
   }
   const detail = json.message || json.error;
-  if (typeof detail === 'string') return detail;
-  return JSON.stringify(detail || json);
+  if (typeof detail === 'string') return safeError(detail);
+  return 'Langdock returned an error without a message';
 }
 
 const requestedLimit = data.input.limit == null ? DEFAULT_LIMIT : data.input.limit;
@@ -72,19 +80,23 @@ if (!Array.isArray(skills)) {
   throw new Error('Skill catalog response did not include a skills array');
 }
 const allowed = new Set(trustedSkillIds);
-const filteredSkills = skills.filter((skill) => allowed.has(skill.id));
+const filteredSkills = skills.filter((skill) => skill && typeof skill === 'object' && allowed.has(skill.id));
+const nextCursor = response.json.nextCursor ?? null;
+if (nextCursor !== null && (typeof nextCursor !== 'string' || !UUID_RE.test(nextCursor))) {
+  throw new Error('Skill catalog response contained an invalid pagination cursor');
+}
 
 return {
-  skills: filteredSkills.slice(0, MAX_LIMIT).map((skill) => ({
+  skills: filteredSkills.slice(0, requestedLimit).map((skill) => ({
     id: skill.id,
-    name: skill.name,
-    slug: skill.slug,
-    description: skill.description,
-    integrationIds: Array.isArray(skill.integrationIds) ? skill.integrationIds : [],
+    name: typeof skill.name === 'string' ? skill.name.slice(0, 64) : null,
+    slug: typeof skill.slug === 'string' ? skill.slug.slice(0, 100) : null,
+    description: typeof skill.description === 'string' ? skill.description.slice(0, 1024) : null,
+    integrationIds: Array.isArray(skill.integrationIds) ? skill.integrationIds.slice(0, 250) : [],
     createdAt: skill.createdAt,
     updatedAt: skill.updatedAt,
   })),
-  nextCursor: response.json.nextCursor ?? null,
+  nextCursor,
   limit: requestedLimit,
   allowlistedOnly: true,
   note: 'Only configured Knowledge Retention skill IDs are returned. Instructions and file contents are available through the corresponding detail actions.',

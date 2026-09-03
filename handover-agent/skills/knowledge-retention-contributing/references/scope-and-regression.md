@@ -28,8 +28,9 @@ The read-only coding-tools actions are:
 Read actions use fixed, documented GET endpoints and never accept a caller
 controlled HTTP method, path, or upstream URL. Integration detail and action
 lookups are restricted to the trusted Dev/Staging IDs configured in the
-connection. There is no documented workspace-wide `list_agents` endpoint;
-`get_agent` by ID is the complete supported agent lookup.
+connection; action lookup accepts exactly one ID or safe slug. There is no
+documented workspace-wide `list_agents` endpoint; `get_agent` by ID is the
+complete supported agent lookup.
 
 Never touch another integration to fix, align, copy a pattern, peek, or experiment. If a request needs another integration changed, refuse and propose a KR Backend, KR skill, or KR prompt alternative, or escalate to a human.
 
