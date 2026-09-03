@@ -1,0 +1,29 @@
+handover-agent/skills/knowledge-retention-contributing/scripts/sync-helpers.js
+  s_211c34fd024161::t_8f38266984ad75 29,42
+main-agent/integrations/state-machine/manifest.json
+  s_211c34fd024161::t_70e0799d0bb732 426-447
+  s_211c34fd024161::t_60bfcb6dc854ce 425
+handover-agent/skills/knowledge-retention-contributing/scripts/verify-helpers.js
+  s_211c34fd024161::t_0a1c5e6ffcd1c9 27,40
+main-agent/integrations/state-machine/actions/read_supporting_document.js
+  s_211c34fd024161::t_076c73a5177c1b 865,867,869
+  s_211c34fd024161::t_6e975a3208455c 939,945
+  s_211c34fd024161::t_744e588268ecd0 872,904-905,942,947-950,955-956,959-974,987-992
+  s_211c34fd024161::t_409209b79cba78 1-864,866,868,870-871,873-903,906-938,940-941,943-944,946,951-954,957-958,975-986,993-1008
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "2e03acd0f2f29c4eea95ec3b372c520fc5146402",
+  "prompts": {},
+  "sessions": {
+    "s_211c34fd024161": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "790bff2e-57e4-4883-bb0b-4207a4653277",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
