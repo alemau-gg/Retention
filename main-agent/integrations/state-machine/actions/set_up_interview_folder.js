@@ -23,9 +23,9 @@ const KnowledgeRetentionUtils = {
       name: 'ckr_name',
       displayName: 'ckr_employeedisplayname',
       // Schema assumption: no live Dataverse metadata is available locally.
-      // ckr_employeeuserid is the proposed logical name for the Langdock
+      // cr32c_aisuiteid is the proposed logical name for the Langdock
       // stable-user-ID column and must remain a text field until confirmed.
-      userId: 'ckr_employeeuserid',
+      userId: 'cr32c_aisuiteid',
       email: 'ckr_employeeemail',
       language: 'ckr_language',
       status: 'ckr_interviewstatus',

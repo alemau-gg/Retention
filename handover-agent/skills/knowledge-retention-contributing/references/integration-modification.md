@@ -27,7 +27,7 @@ You are editing a live **state machine** over Dataverse + SharePoint (app-only `
 6. **Prefer partial success where KR already does.** SharePoint invite failures on `set_up_interview_folder` are non-fatal: folder is ready, `accessGranted` / detail fields tell the truth, and `instruction` carries the sharing reminder. Still **throw** on hard API/auth failures via `failureMessage`.
 7. **Judge from the seats that matter.** Employee-path `instruction` text is for the interview agent (directive, stage-correct). It must not leak record GUIDs, action slugs as user copy, or invent stage from chat. Administrator-facing error text must keep verbatim API bodies so support can act.
 
-For the stable-identity/SharePoint stream, `ckr_employeeuserid` is the
+For the stable-identity/SharePoint stream, `cr32c_aisuiteid` is the
 confirmed/proposed logical name of the text field for `data.user.id`; verify
 that live schema assumption and do not substitute another field.
 `ckr_employeeemail` remains the case-preserved legacy fallback only when that
@@ -182,7 +182,7 @@ A half-synced helper set is a production incident. If a write fails mid-sync, st
 
 - Session identity via `resolveIdentity`: `data.user.id` is the authoritative
   Langdock interview-ownership key. The proposed Dataverse text column
-  `ckr_employeeuserid` is a local schema assumption because no live Dataverse
+  `cr32c_aisuiteid` is a local schema assumption because no live Dataverse
   metadata is available; confirm its logical name and type before deployment.
   UPN/email from `data.user.userPrincipalName` or `data.user.email` remains a
   case-preserved display/Graph snapshot and is the temporary fallback only for
