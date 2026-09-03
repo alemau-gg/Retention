@@ -1,0 +1,71 @@
+main-agent/integrations/state-machine/actions/save_answer.js
+  s_1312476d619bd7::t_3f7684b7cfffcb 689
+main-agent/integrations/state-machine/actions/finalize_interview.js
+  s_1312476d619bd7::t_3f7684b7cfffcb 689
+  s_1312476d619bd7::t_2e78408550e875 923
+main-agent/integrations/state-machine/actions/save_consent.js
+  s_1312476d619bd7::t_3f7684b7cfffcb 689
+main-agent/integrations/state-machine/actions/get_discovery.js
+  s_1312476d619bd7::t_3f7684b7cfffcb 688
+main-agent/integrations/state-machine/actions/generate_topic_document.js
+  s_1312476d619bd7::t_5489a233a8756c 1-1935
+handover-agent/skills/knowledge-retention-contributing/scripts/verify-helpers.js
+  s_1312476d619bd7::t_2c80345a110b85 27,32
+main-agent/integrations/state-machine/actions/save_feedback.js
+  s_1312476d619bd7::t_3f7684b7cfffcb 689
+main-agent/integrations/state-machine/manifest.json
+  s_1312476d619bd7::t_5322b1b688d87d 423
+  s_1312476d619bd7::t_e8340c603500ae 330
+  s_1312476d619bd7::t_a3c9fe838b1e45 364-385,389
+  s_1312476d619bd7::t_1e7ec8d456e4b2 397,403
+  s_1312476d619bd7::t_054ddcf993bb9a 363
+main-agent/integrations/state-machine/actions/abandon_interview.js
+  s_1312476d619bd7::t_3f7684b7cfffcb 688
+main-agent/integrations/state-machine/actions/get_runtime_state.js
+  s_1312476d619bd7::t_d76a71af783ed7 689
+main-agent/integrations/state-machine/actions/save_discovery.js
+  s_1312476d619bd7::t_3f7684b7cfffcb 689
+main-agent/integrations/state-machine/actions/save_topics_and_questions.js
+  s_1312476d619bd7::t_3f7684b7cfffcb 689
+main-agent/system-prompt.md
+  s_1312476d619bd7::t_acc8f962efca2f 51
+  s_1312476d619bd7::t_6e3ba9859cf519 56-58
+main-agent/integrations/state-machine/actions/create_interview.js
+  s_1312476d619bd7::t_3f7684b7cfffcb 689
+main-agent/integrations/state-machine/actions/get_answers.js
+  s_1312476d619bd7::t_3f7684b7cfffcb 688
+main-agent/integrations/state-machine/actions/save_topic_summary.js
+  s_1312476d619bd7::t_3f7684b7cfffcb 689
+  s_1312476d619bd7::t_75f9942f01f8d3 894
+  s_1312476d619bd7::t_3482db185af5bb 884-886,888
+main-agent/integrations/state-machine/actions/set_up_interview_folder.js
+  s_1312476d619bd7::t_3f7684b7cfffcb 689
+main-agent/integrations/state-machine/actions/upload_document.js
+  s_1312476d619bd7::t_3f7684b7cfffcb 689
+main-agent/skills/knowledge-retention-reporting/SKILL.md
+  s_1312476d619bd7::t_375be0657802ce 52
+  s_1312476d619bd7::t_b01c78effdc858 83-87
+  s_1312476d619bd7::t_42034f4cf38747 36-38
+  s_1312476d619bd7::t_babc32cc5d6315 8-9
+  s_1312476d619bd7::t_025d5809e6e830 23
+handover-agent/skills/knowledge-retention-contributing/scripts/sync-helpers.js
+  s_1312476d619bd7::t_2c80345a110b85 29,34
+main-agent/integrations/state-machine/actions/revise_answer.js
+  s_1312476d619bd7::t_3f7684b7cfffcb 689
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "592312044c85aca1b6c377a758af777cfa4564f6",
+  "prompts": {},
+  "sessions": {
+    "s_1312476d619bd7": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "dea9eb34-b7f4-4cb3-9f06-dde9148beb1a",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
