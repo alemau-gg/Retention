@@ -686,7 +686,7 @@ const KnowledgeRetentionUtils = {
           expectedTopicOrder: topicOrder,
           topicQnA: KnowledgeRetentionUtils.topicQnA(children_.questions, children_.answers, topic[S.topic.id]),
           progressLabel: `Topic ${topicOrder} of ${children_.topics.length} · summary`,
-          instruction: `Tell the user in ${language} that ${summaryLead} Load the knowledge-retention-reporting skill and use its default topic-summary workflow. Open references/summary-format.md only; do not open final-document.md, the final-document supporting references, or assets/template.docx. Build a faithful summary from topicQnA (prefer rawUserMessages when present, else the confirmed answer) and from any confirmed supporting files: read those attachments and include every relevant concrete fact, naming the source file. The summary must be exhaustive: one mini-header per answered question. Prefer a short paragraph, then bullets when there are several facts, then a translated For-example from the interviewee (never invented), with line breaks between blocks; leave that shape if a quote, table, or one tight paragraph fits better. Then a short how-this-fits-together paragraph. First draft already this dense and scannable; do not wait for the user to ask for more examples. At least as long as the combined rawUserMessages (or confirmed answers if raw is empty) plus supporting-file facts, no upper word cap. If shorter or missing examples, expand before presenting. Translate every section heading into ${language}. Invent nothing, and use only the sections allowed by summary-format.md. After the user approves, call save_topic_summary with expectedTopicOrder ${topicOrder}, create a new blank document named exactly "${topicFileName}" containing only the approved summary, run the skill's pre-upload checks, upload it via upload_document with fileName exactly "${topicFileName}", and confirm with the folder link.${supportingFileInstruction}`,
+          instruction: `Tell the user in ${language} that ${summaryLead} Load the knowledge-retention-reporting skill and use its default topic-summary workflow. Open references/summary-format.md only; do not open final-document.md, the final-document supporting references, or assets/template.docx. Build a faithful summary from topicQnA (prefer rawUserMessages when present, else the confirmed answer) and from any confirmed supporting files: read those attachments and include every relevant concrete fact, naming the source file. The summary must be exhaustive: one mini-header per answered question. Prefer a short paragraph, then bullets when there are several facts, then a translated For-example from the interviewee (never invented), with line breaks between blocks; leave that shape if a quote, table, or one tight paragraph fits better. Then a short how-this-fits-together paragraph. First draft already this dense and scannable; do not wait for the user to ask for more examples. At least as long as the combined rawUserMessages (or confirmed answers if raw is empty) plus supporting-file facts, no upper word cap. If shorter or missing examples, expand before presenting. Translate every section heading into ${language}. Invent nothing, and use only the sections allowed by summary-format.md. After the user approves, call save_topic_summary with expectedTopicOrder ${topicOrder} and then follow the instruction it returns. Do not write, format, or upload the topic document yourself: generate_topic_document builds "${topicFileName}" from the saved summary server-side, files it in the interview folder, and returns it. Never hand it summary text, a file name, or a folder path.${supportingFileInstruction}`,
         });
       }
 
@@ -881,16 +881,17 @@ const interviewForState = Object.assign({}, interview, interviewCursor);
 const state = KnowledgeRetentionUtils.computeState(data, interviewForState, children);
 
 // The topic is now summarized, so computeState has already moved on to the next
-// topic and no longer mentions the upload. Nothing records whether the file was
-// filed, so the instruction to upload has to be carried here or it is lost.
+// topic and no longer mentions the document. Nothing records whether the file was
+// filed, so the hand-off has to be carried here or it is lost. Saving the summary
+// and producing the file are two separate steps: this action only stored the text.
 const topicFileName = KnowledgeRetentionUtils.topicDocumentFileName(expectedOrder, topic[S.topic.name]);
-const uploadStep = `The summary is saved. Before continuing, create "${topicFileName}" containing only the approved summary and upload it with upload_document (docType "topic", fileName exactly "${topicFileName}").`;
+const documentStep = `The summary text is saved, but its document does not exist yet. Before continuing, call generate_topic_document with topicOrder ${expectedOrder}. It builds "${topicFileName}" from the summary just stored, files it in the interview folder, and returns the file. Do not write, format, or upload that document yourself, do not call upload_document for it, and pass nothing but the topic order.`;
 
 return {
   conflict: false,
   savedTopicOrder: expectedOrder,
   nextAction: state.nextAction,
-  instruction: `${uploadStep} ${state.instruction}`,
+  instruction: `${documentStep} ${state.instruction}`,
   language: state.language,
   progressLabel: state.progressLabel,
   nextQuestionText: state.nextQuestionText,

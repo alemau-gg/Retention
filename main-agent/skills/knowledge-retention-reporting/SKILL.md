@@ -5,8 +5,8 @@ description: >-
   ALWAYS use for knowledge-retention topic summaries
   (GenerateOrReviewTopicSummary), missing topic-file recovery
   (UploadMissingTopicDocuments), and the final branded handover
-  (BuildFinalDocument / FinalizeAndCollectFeedback). Default path is topic
-  summary + blank .docx named exactly the backend fileName. Open
+  (BuildFinalDocument / FinalizeAndCollectFeedback). Default path is writing
+  the topic summary text; the backend turns it into the .docx. Open
   references/final-document.md only for the final handover. Not for discovery,
   topic generation, or live Q&A — those belong to
   knowledge-retention-interviewing / backend nextQuestionText.
@@ -20,7 +20,7 @@ Methodology only. Stage, approval gates, and uploads follow the backend `instruc
 | Load | `nextAction` | Path |
 |---|---|---|
 | Yes | `GenerateOrReviewTopicSummary` | **Topic summary** (this file + `references/summary-format.md` only) |
-| Yes | `UploadMissingTopicDocuments` | **Topic files only** — blank `.docx` named exactly `missingTopicFiles.fileName`; then retry `finalize_interview`. Not the final handover. |
+| Yes | `UploadMissingTopicDocuments` | **Topic files only** — call `generate_topic_document` for each missing entry's order, then retry `finalize_interview`. Not the final handover. |
 | Yes | `BuildFinalDocument` or same-session `FinalizeAndCollectFeedback` (final-doc step) | **Final handover** — open `references/final-document.md` and follow it end-to-end |
 | No | `RunPreInterviewDiscovery`, `GenerateTopicsAndQuestions`, `AskActiveQuestion` | Interviewing skill / verbatim `nextQuestionText` |
 | No | Folder setup, consent, feedback-only, closing message | Backend instruction alone |
@@ -33,9 +33,9 @@ Default job when this skill is loaded: **topic summary**. Switch to the final pa
 |---|---|---|
 | Trigger | `GenerateOrReviewTopicSummary` | `BuildFinalDocument` / `FinalizeAndCollectFeedback` final-doc step |
 | Methodology | `references/summary-format.md` only | `references/final-document.md` → `document-structure.md` + `fixed-sections-template.md` |
-| Docx | **New blank** file named exactly the backend `fileName` | Populate branded `assets/template.docx` via the **BASF document template** skill (call it; never edit that skill) |
-| Upload | `upload_document` `docType: topic` | `upload_document` `docType: final` |
-| Forbidden | Branded template, final-document refs, cover/TOC/1.1–1.4 | Reusing a topic summary `.docx`; inventing facts; skipping Phase 1–4; writing chapters only from stored summaries |
+| Docx | **You never build one.** `generate_topic_document` renders it from the saved summary | Populate branded `assets/template.docx` via the **BASF document template** skill (call it; never edit that skill) |
+| Upload | Handled by `generate_topic_document` | `upload_document` `docType: final` |
+| Forbidden | Building or uploading the topic `.docx` yourself; branded template; final-document refs; cover/TOC/1.1–1.4 | Reusing a topic summary `.docx`; inventing facts; skipping Phase 1–4; writing chapters only from stored summaries |
 
 For a topic summary, do **not** open: `references/final-document.md`, `references/document-structure.md`, `references/fixed-sections-template.md`, or `assets/template.docx`.
 
@@ -49,7 +49,7 @@ Confirmed supporting files **are** source material for this skill. When writing 
 
 ## Topic summary
 
-**Done when:** user explicitly approves → `save_topic_summary` (`expectedTopicOrder`) → blank `.docx` uploaded (`docType: topic`) named exactly the backend `fileName`, with none of the final-doc machinery.
+**Done when:** user explicitly approves → `save_topic_summary` (`expectedTopicOrder`) → `generate_topic_document` (`topicOrder`) returns the filed `.docx`. Two distinct steps: `save_topic_summary` stores the text, `generate_topic_document` creates the file. Your job ends at the approved text.
 
 ### Forbidden (hard stop)
 
@@ -80,10 +80,11 @@ If any of that appears in a draft, discard it and restart from `references/summa
 
 After explicit approval:
 
-1. `save_topic_summary` with `expectedTopicOrder`.
-2. Build a **new blank document** named exactly `fileName` from the backend instruction (ASCII hyphens, no spaces, no accents). Body = approved summary sections only. Never start from `assets/template.docx`. Never call the BASF document template skill for topic files. Do not invent a prettier filename.
-3. Before upload: search for `{` / `}` / `[…]` placeholders and for title/TOC/exec-summary/1.1–1.4 wording. If any appear, fix or rebuild — do not upload. Do not put markdown `**` into the `.docx`; apply real bold and real lists.
-4. `upload_document` (`docType: topic`, `fileName` exactly as given); confirm with the folder link.
+1. `save_topic_summary` with `expectedTopicOrder`. This saves the text only — no file exists yet.
+2. `generate_topic_document` with the same order and nothing else. The backend reads the saved summary, renders the standardized `.docx`, files it, and returns it as an attachment. Do not build, format, name, or upload that file, do not use the code interpreter for it, and do not call `upload_document` for it.
+3. Show the returned attachment and the folder link. If it comes back with `conflict: true`, follow its instruction instead of improvising a file.
+
+Write the summary in markdown: headings, bullets, numbered lists, `**bold**`, `*italic*`, and pipe tables all survive into Word. Mermaid fences are kept out of the `.docx` and preserved in the Markdown transcript the backend files under `Source transcripts/`. Never write `{}` / `[bracket]` placeholders, a cover page, TOC, exec summary, or 1.1–1.4 sections.
 
 ---
 
