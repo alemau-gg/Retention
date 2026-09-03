@@ -944,6 +944,9 @@ const answerBody = {};
 answerBody[S.answer.name] = String(question[S.question.text]).slice(0, 100);
 answerBody[S.answer.confirmedAnswer] = data.input.finalAnswer;
 answerBody[S.answer.answerText] = data.input.finalAnswer;
+if (data.input.rawUserMessages) {
+  answerBody[S.answer.rawUserMessages] = data.input.rawUserMessages;
+}
 answerBody[S.answer.answeredOn] = now;
 answerBody[S.answer.sequence] = priorSequence + 1;
 answerBody[S.answer.isLatest] = true;
