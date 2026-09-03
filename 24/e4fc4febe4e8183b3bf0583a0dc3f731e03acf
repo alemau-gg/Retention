@@ -1,0 +1,25 @@
+main-agent/integrations/state-machine/manifest.json
+  s_550488af68d39d::t_7f5163a5bb30c5 486
+  s_550488af68d39d::t_0b181aac0a3bdc 505-516
+  s_550488af68d39d::t_904d08a5311008 504
+main-agent/integrations/state-machine/actions/revise_answer.js
+  s_550488af68d39d::t_47f58b82b50e95 783-785
+main-agent/system-prompt.md
+  s_550488af68d39d::t_470102a5f19496 12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "24e4fc4febe4e8183b3bf0583a0dc3f731e03acf",
+  "prompts": {},
+  "sessions": {
+    "s_550488af68d39d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b37faa1a-23ad-401a-949f-95d1fc10319a",
+        "model": "grok-4.5"
+      },
+      "human_author": null
+    }
+  }
+}
