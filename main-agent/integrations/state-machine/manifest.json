@@ -483,7 +483,7 @@
     {
       "slug": "revise_answer",
       "name": "Revise answer",
-      "description": "Records a new version of the interviewee's answer to an EARLIER, already-answered question (not the question currently being asked). The previous version is kept as history. If that question's topic summary was already approved, the summary is flagged for regeneration. Only works before the interview is finalized; identify the question by its topic and question order from the current state, never by an ID.",
+      "description": "Records a new version of the interviewee's answer to an EARLIER, already-answered question (not the question currently being asked). Requires finalAnswer plus rawUserMessages (verbatim revision transcript). The previous version is kept as history. If that question's topic summary was already approved, the summary is flagged for regeneration. Only works before the interview is finalized; identify the question by its topic and question order from the current state, never by an ID.",
       "nativeActionType": "NONE",
       "actionType": "API",
       "requiresConfirmation": false,
@@ -492,6 +492,19 @@
           "slug": "finalAnswer",
           "label": "Final answer",
           "description": "The interviewee's confirmed corrected answer. Save only after explicit confirmation.",
+          "placeholder": null,
+          "type": "MULTI_LINE_TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 16000,
+          "jsonSchema": null
+        },
+        {
+          "slug": "rawUserMessages",
+          "label": "Raw user messages",
+          "description": "Required. The interviewee's own messages for this revision, in chronological order: the correction plus every follow-up, copied verbatim. Do not EVER paraphrase, condense, omit, or substitute the cleaned finalAnswer. This is of utmost importance.",
           "placeholder": null,
           "type": "MULTI_LINE_TEXT",
           "required": true,
