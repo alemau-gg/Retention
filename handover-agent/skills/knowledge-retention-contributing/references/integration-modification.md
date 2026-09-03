@@ -27,6 +27,17 @@ You are editing a live **state machine** over Dataverse + SharePoint (app-only `
 6. **Prefer partial success where KR already does.** SharePoint invite failures on `set_up_interview_folder` are non-fatal: folder is ready, `accessGranted` / detail fields tell the truth, and `instruction` carries the sharing reminder. Still **throw** on hard API/auth failures via `failureMessage`.
 7. **Judge from the seats that matter.** Employee-path `instruction` text is for the interview agent (directive, stage-correct). It must not leak record GUIDs, action slugs as user copy, or invent stage from chat. Administrator-facing error text must keep verbatim API bodies so support can act.
 
+For the stable-identity/SharePoint stream, `ckr_employeeuserid` is the
+confirmed/proposed logical name of the text field for `data.user.id`; verify
+that live schema assumption and do not substitute another field.
+`ckr_employeeemail` remains the case-preserved legacy fallback only when that
+field is null, and is the email/UPN snapshot for Graph operations. Folder setup
+persists the URL before permission work, invites employee and manager
+independently using email recipients (never the Langdock ID), and uses
+`retainInheritedPermissions: false` with `Prefer: apiversion=2.1`. A `207`
+result confirms only a recipient response entry without an error; it does not
+prove effective access beyond that response.
+
 Before writing: fetch and carefully read the live action(s) and `get_runtime_state` via Langdock. If Graph/Dataverse behaviour is unclear, read vendor docs (methods, auth, params, pagination, rate limits, error shapes) and confirm non-trivial maps with the administrator.
 
 For Langdock platform behavior, use the **Langdock Docs integration** first,

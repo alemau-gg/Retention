@@ -826,9 +826,6 @@ const email = identity.email;
 const dvToken = await KnowledgeRetentionUtils.dataverseToken(data);
 const S = KnowledgeRetentionUtils.SCHEMA;
 const ST = KnowledgeRetentionUtils.STATUS;
-if (!email) {
-  throw new Error('Unable to determine an email or UPN for SharePoint sharing. Please contact your administrator.');
-}
 
 // Falls back to a finalized interview so a finalize that happened without a folder
 // is still recoverable: upload_document needs the folder, and an open-only lookup
@@ -891,37 +888,8 @@ const folder = await ensureFolder('Interviews', String(interviewNumber));
 const folderItemId = folder.id;
 const webUrl = folder.webUrl;
 
-// Grant edit to the employee, and to their manager when one exists.
-const recipients = [{ email }];
-const managerResponse = await KnowledgeRetentionUtils.graph(data, graphToken, {
-  method: 'GET',
-  path: `/users/${encodeURIComponent(email)}/manager?$select=mail,userPrincipalName`,
-});
-let managerEmail = null;
-if (managerResponse.status === 200 && managerResponse.json) {
-  managerEmail = managerResponse.json.mail || managerResponse.json.userPrincipalName || null;
-  if (managerEmail) {
-    recipients.push({ email: managerEmail });
-  }
-}
-
-// graph() only throws on 401/403, so an invite that fails for any other reason
-// used to pass silently and the folder was reported ready with nobody able to
-// open it. Uploads keep working either way (they are app-only), so a failure here
-// is reported rather than fatal — the user shares the folder manually instead.
-const inviteResponse = await KnowledgeRetentionUtils.graph(data, graphToken, {
-  method: 'POST',
-  path: `/sites/${siteId}/drive/items/${folderItemId}/invite`,
-  body: { recipients, roles: ['write'], requireSignIn: true, sendInvitation: false },
-});
-const accessGranted = inviteResponse.status === 200 || inviteResponse.status === 201;
-const accessFailureDetail = accessGranted
-  ? null
-  : (inviteResponse.json && inviteResponse.json.error && inviteResponse.json.error.message) ||
-    inviteResponse.text ||
-    `HTTP ${inviteResponse.status}`;
-
-// Persist the folder URL on the interview.
+// Persist as soon as the folder exists. Permission work is deliberately after
+// this checkpoint so a manager lookup/invite failure never loses the URL.
 const body = {};
 body[S.interview.folderUrl] = webUrl;
 await KnowledgeRetentionUtils.dv(data, dvToken, {
@@ -929,6 +897,112 @@ await KnowledgeRetentionUtils.dv(data, dvToken, {
   path: `/${S.entitySets.interviews}(${interview[S.interview.id]})`,
   body,
 });
+
+// Resolve the manager independently. The Langdock ID is never sent to Graph:
+// Graph invite recipients require an email address, while /users/{id} here is
+// the caller's asserted email/UPN lookup.
+let managerEmail = null;
+let managerLookupFailure = null;
+if (!email) {
+  managerLookupFailure = 'No email or userPrincipalName was available for the Graph direct grant.';
+} else {
+  try {
+    const managerResponse = await KnowledgeRetentionUtils.graph(data, graphToken, {
+      method: 'GET',
+      path: `/users/${encodeURIComponent(email)}/manager?$select=mail,userPrincipalName`,
+    });
+    if (managerResponse.status === 200 && managerResponse.json) {
+      managerEmail = managerResponse.json.mail || managerResponse.json.userPrincipalName || null;
+    }
+  } catch (error) {
+    managerLookupFailure = error.message || String(error);
+  }
+}
+
+function inviteResult(response, recipientEmail) {
+  const values = response && response.json && Array.isArray(response.json.value)
+    ? response.json.value
+    : [];
+  if (response.status === 200 || response.status === 201) {
+    return { granted: true, detail: null };
+  }
+  if (response.status === 207) {
+    const matching = values.filter((permission) => {
+      const invitationEmail = permission.invitation && permission.invitation.email;
+      const grantedEmail =
+        permission.grantedTo && permission.grantedTo.user &&
+        (permission.grantedTo.user.email || permission.grantedTo.user.mail);
+      return [invitationEmail, grantedEmail].some(
+        (value) => value && String(value).toLowerCase() === String(recipientEmail).toLowerCase(),
+      );
+    });
+    const successful = matching.find((permission) => !permission.error) ||
+      (values.length === 1 && !values[0].error ? values[0] : null);
+    if (successful) return { granted: true, detail: null };
+  }
+  const nestedError = response.json && response.json.error;
+  const itemError = values.find((permission) => permission.error);
+  return {
+    granted: false,
+    detail:
+      (itemError && itemError.error && itemError.error.message) ||
+      (nestedError && nestedError.message) ||
+      response.text ||
+      `HTTP ${response.status}`,
+  };
+}
+
+// Invite each direct recipient separately: a manager failure must not turn an
+// employee grant into an all-or-nothing multi-recipient result. A 207 is only
+// treated as successful when its response contains a successful entry for the
+// requested recipient.
+let employeeInvite = {
+  granted: false,
+  detail: email ? null : 'No email or userPrincipalName was available for the Graph direct grant.',
+};
+if (email) {
+  const employeeInviteResponse = await KnowledgeRetentionUtils.graph(data, graphToken, {
+    method: 'POST',
+    path: `/sites/${siteId}/drive/items/${folderItemId}/invite`,
+    headers: { Prefer: 'apiversion=2.1' },
+    body: {
+      recipients: [{ email }],
+      roles: ['write'],
+      requireSignIn: true,
+      sendInvitation: false,
+      retainInheritedPermissions: false,
+    },
+  });
+  employeeInvite = inviteResult(employeeInviteResponse, email);
+}
+
+let managerInvite = { granted: false, detail: managerLookupFailure };
+if (managerEmail) {
+  try {
+    const managerInviteResponse = await KnowledgeRetentionUtils.graph(data, graphToken, {
+      method: 'POST',
+      path: `/sites/${siteId}/drive/items/${folderItemId}/invite`,
+      headers: { Prefer: 'apiversion=2.1' },
+      body: {
+        recipients: [{ email: managerEmail }],
+        roles: ['write'],
+        requireSignIn: true,
+        sendInvitation: false,
+        retainInheritedPermissions: false,
+      },
+    });
+    managerInvite = inviteResult(managerInviteResponse, managerEmail);
+  } catch (error) {
+    managerInvite = { granted: false, detail: error.message || String(error) };
+  }
+}
+
+const accessGranted = employeeInvite.granted;
+const managerGranted = managerInvite.granted;
+const accessFailureDetail = employeeInvite.granted ? null : employeeInvite.detail;
+const partialOutcome =
+  (Boolean(managerEmail) && employeeInvite.granted !== managerGranted) ||
+  (Boolean(managerLookupFailure) && employeeInvite.granted);
 
 const interviewForState = Object.assign({}, interview, { [S.interview.folderUrl]: webUrl });
 const children = KnowledgeRetentionUtils.needsChildren(interviewForState)
@@ -939,7 +1013,7 @@ const state = KnowledgeRetentionUtils.computeState(data, interviewForState, chil
 // The employee and their manager are invited automatically, but that can fail and
 // other colleagues are never covered — so always tell the user they own sharing.
 const sharingReminder = accessGranted
-  ? `Tell the user the folder is ready at ${webUrl}, that ${managerEmail ? `their manager (${managerEmail}) also has edit access` : 'no manager could be found automatically, so only they have access so far'}, and that they can share the folder from SharePoint with their manager or anyone else they consider relevant.`
+  ? `Tell the user the folder is ready at ${webUrl}, that ${managerGranted ? `Graph confirmed a direct edit grant for their manager (${managerEmail})` : managerEmail ? `their manager could not be granted a confirmed direct permission${managerInvite.detail ? ` (${managerInvite.detail})` : ''}` : 'no manager could be found automatically, so only their direct grant is confirmed so far'}, and that they can share the folder from SharePoint with their manager or anyone else they consider relevant.`
   // The action is idempotent, so this also fires on a re-run where access was
   // already granted the first time. Say "could not be confirmed", not "was not
   // granted" — the invite result does not prove the current sharing state.
@@ -949,8 +1023,12 @@ return {
   folderCreated: true,
   accessGranted,
   accessFailureDetail,
+  employeeAccessGranted: employeeInvite.granted,
   managerEmail,
-  managerGranted: accessGranted && managerEmail !== null,
+  managerGranted,
+  managerAccessFailureDetail: managerInvite.granted ? null : managerInvite.detail,
+  managerLookupFailure,
+  partialOutcome,
   sharePointFolderWebUrl: webUrl,
   nextAction: state.nextAction,
   instruction: `${sharingReminder} ${state.instruction}`,
