@@ -24,7 +24,7 @@ const REQUIRED_ACTION_SLUGS = [
   'create_interview',
   'save_discovery',
   'save_topics_and_questions',
-  'setup_interview_folder',
+  'set_up_interview_folder',
   'save_consent',
   'save_answer',
   'revise_answer',
@@ -37,6 +37,7 @@ const REQUIRED_ACTION_SLUGS = [
   'abandon_interview',
   'admin_describe_schema',
   'admin_query_records',
+  'read_supporting_document',
 ];
 
 function helperBlock(source) {
