@@ -1,6 +1,6 @@
 ---
 name: knowledge-retention-contributing
-version: "1.5.2"
+version: "1.6.0"
 description: >-
   ALWAYS use before proposing or applying any change to the BASF Knowledge
   Retention use case. Defines hard scope, live-read, confirmation, Dev/Staging/
@@ -59,9 +59,11 @@ Read these before acting, then follow the routing table:
   Dev testing is satisfactory.
 - **HOW is read-only here:** `how-the-agent-works.md` is setup documentation.
   Report a separate follow-up instead of editing it.
-- **Scope is narrow:** only the KR Backend, KR skills/prompt, and the five
-  custom Langdock development actions are in scope. Refuse other integrations
-  and non-KR skills.
+- **Scope is narrow:** only the KR Backend, KR skills/prompt, and the
+  coding-tools integration are in scope. Its read-only catalog/detail actions
+  may inspect integrations, actions, the configured agent by ID, and skills;
+  its mutators remain limited to the configured Dev/Staging KR IDs. Refuse
+  other integrations and non-KR skills.
 
 ## Completion standard
 

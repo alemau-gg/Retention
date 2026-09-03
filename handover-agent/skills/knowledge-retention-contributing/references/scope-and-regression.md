@@ -6,13 +6,30 @@ Use this reference when deciding whether a request is allowed, which layer owns 
 
 ### Integrations
 
-Only the Knowledge Retention Backend business integration and these five custom Langdock control-plane actions are in scope:
+Only the Knowledge Retention Backend business integration and the in-scope
+coding-tools control-plane actions are in scope. The five mutators are:
 
 - `update_action`
 - `sync_helpers`
 - `verify_helpers`
 - `promote_to_staging`
 - `revert_to_staging`
+
+The read-only coding-tools actions are:
+
+- `list_integrations`
+- `get_integration`
+- `get_action`
+- `get_agent`
+- `list_skills`
+- `get_skill`
+- `get_skill_file`
+
+Read actions use fixed, documented GET endpoints and never accept a caller
+controlled HTTP method, path, or upstream URL. Integration detail and action
+lookups are restricted to the trusted Dev/Staging IDs configured in the
+connection. There is no documented workspace-wide `list_agents` endpoint;
+`get_agent` by ID is the complete supported agent lookup.
 
 Never touch another integration to fix, align, copy a pattern, peek, or experiment. If a request needs another integration changed, refuse and propose a KR Backend, KR skill, or KR prompt alternative, or escalate to a human.
 

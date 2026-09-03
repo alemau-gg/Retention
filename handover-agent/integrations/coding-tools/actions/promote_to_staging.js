@@ -1,6 +1,23 @@
 const devIntegrationId = data.input.devIntegrationId;
 const stagingIntegrationId = data.input.stagingIntegrationId;
+const trustedDevIntegrationId = data.auth.devIntegrationId;
+const trustedStagingIntegrationId = data.auth.stagingIntegrationId;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+if (
+  typeof devIntegrationId !== 'string' ||
+  !UUID_RE.test(devIntegrationId) ||
+  typeof stagingIntegrationId !== 'string' ||
+  !UUID_RE.test(stagingIntegrationId)
+) {
+  throw new Error('Dev and Staging integration IDs must be UUIDs');
+}
+if (!UUID_RE.test(trustedDevIntegrationId || '') || !UUID_RE.test(trustedStagingIntegrationId || '')) {
+  throw new Error('Trusted Dev and Staging integration IDs are not configured; refusing an unallowlisted promotion');
+}
+if (devIntegrationId !== trustedDevIntegrationId || stagingIntegrationId !== trustedStagingIntegrationId) {
+  throw new Error('Promotion IDs must exactly match the configured trusted Dev and Staging integrations');
+}
 if (devIntegrationId === stagingIntegrationId) {
   throw new Error('Dev and Staging integration IDs must be different.');
 }

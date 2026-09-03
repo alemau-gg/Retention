@@ -1,9 +1,21 @@
 const integrationId = data.input.integrationId;
+const trustedDevIntegrationId = data.auth.devIntegrationId;
 const syncHelpersBaseUrl = (data.auth.baseUrl || 'https://api.langdock.com').replace(/\/+$/, '');
 const helperStart = 'const KnowledgeRetentionUtils = {';
 const helperEnd = '\n};\n';
 const actionSlugPattern = /ACTION_SLUG: '([a-z_]+)',/;
 const adminSlugs = new Set(['admin_describe_schema', 'admin_query_records']);
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+if (typeof integrationId !== 'string' || !UUID_RE.test(integrationId)) {
+  throw new Error('Integration ID must be a UUID');
+}
+if (!UUID_RE.test(trustedDevIntegrationId || '')) {
+  throw new Error('No trusted Dev integration ID is configured; refusing an unallowlisted helper sync');
+}
+if (integrationId !== trustedDevIntegrationId) {
+  throw new Error('sync_helpers only permits the configured Dev integration ID');
+}
 
 function syncHelpersFormatError(response) {
   const json = response.json;

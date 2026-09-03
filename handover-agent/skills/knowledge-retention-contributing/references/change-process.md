@@ -67,7 +67,8 @@ Do not bump the version before confirmation. A version bump never replaces confi
 Clarify the need and fail closed if the request is outside:
 
 - the Knowledge Retention Backend
-- the five dedicated Langdock control-plane actions
+- the dedicated coding-tools control-plane actions: confirmed Dev/Staging
+  mutators and the fixed-GET read-only catalog/detail actions
 - KR skills, including new KR-only skills
 - the KR interview prompt
 - explicitly in-scope KR documentation
@@ -130,6 +131,15 @@ Before reporting completion, provide:
 - rollback or reversal instructions
 
 If setup documentation appears stale, report a separate follow-up. Do not edit HOW or Prod.
+
+The coding-tools read actions are non-mutating and require no confirmation,
+but they still use only documented Langdock endpoint paths, never return the
+API key, and never accept an HTTP method, path, or upstream URL from the
+caller. Integration detail/action reads are limited to the trusted Dev and
+Staging IDs configured in the connection. Agent lookup is by ID because the
+documented Agent API has no workspace-wide list endpoint. Skill file reads
+must reject absolute paths, drive prefixes, control characters, backslashes,
+dot segments, unsupported extensions, and files over 512 KB.
 
 ## Helper synchronization
 
