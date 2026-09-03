@@ -1,0 +1,55 @@
+main-agent/integrations/state-machine/actions/create_interview.js
+  s_ea3621b09a6b7d::t_cac5611a8a64a1 163-167,324-327,330-349,351-383,385,387-446,448-455,779-781
+main-agent/integrations/state-machine/actions/save_answer.js
+  s_ea3621b09a6b7d::t_cac5611a8a64a1 163-167,324-327,330-349,351-383,385,387-446,448-455,870-871,881-897,899
+main-agent/integrations/state-machine/actions/save_topic_summary.js
+  s_ea3621b09a6b7d::t_cac5611a8a64a1 163-167,324-327,330-349,351-383,385,387-446,448-455,826-828
+main-agent/integrations/state-machine/actions/abandon_interview.js
+  s_ea3621b09a6b7d::t_cac5611a8a64a1 162-166,323-326,329-348,350-382,384,386,388-454
+main-agent/integrations/state-machine/actions/get_answers.js
+  s_ea3621b09a6b7d::t_cac5611a8a64a1 162-166,323-326,329-348,350-382,384,386,388-454
+main-agent/integrations/state-machine/actions/admin_describe_schema.js
+  s_ea3621b09a6b7d::t_cac5611a8a64a1 64-67
+main-agent/system-prompt.md
+  s_ea3621b09a6b7d::t_cac5611a8a64a1 47-49,95-96
+main-agent/integrations/state-machine/actions/finalize_interview.js
+  s_ea3621b09a6b7d::t_cac5611a8a64a1 163-167,324-327,330-349,351-383,385,387,389-455
+main-agent/integrations/state-machine/actions/upload_document.js
+  s_ea3621b09a6b7d::t_cac5611a8a64a1 163-167,324-327,330-349,351-383,385,387-446,448-455,865-867
+main-agent/integrations/state-machine/actions/save_feedback.js
+  s_ea3621b09a6b7d::t_cac5611a8a64a1 163-167,324-327,330-349,351-383,385,387,389-455
+main-agent/integrations/state-machine/manifest.json
+  s_ea3621b09a6b7d::t_cac5611a8a64a1 734
+main-agent/integrations/state-machine/actions/revise_answer.js
+  s_ea3621b09a6b7d::t_cac5611a8a64a1 163-167,324-327,330-349,351-383,385,387-446,448-455,942-963
+main-agent/integrations/state-machine/actions/save_topics_and_questions.js
+  s_ea3621b09a6b7d::t_cac5611a8a64a1 163-167,324-327,330-349,351-383,385,387-446,448-455,772-794,876-879,881,885,887,903-914,927-937,942-1016,1032,1034
+main-agent/integrations/state-machine/actions/get_discovery.js
+  s_ea3621b09a6b7d::t_cac5611a8a64a1 162-166,323-326,329-348,350-382,384,386,388-454
+main-agent/integrations/state-machine/actions/save_discovery.js
+  s_ea3621b09a6b7d::t_cac5611a8a64a1 163-167,324-327,330-349,351-383,385,387-446,448-455,819-820
+main-agent/integrations/state-machine/actions/set_up_interview_folder.js
+  s_ea3621b09a6b7d::t_cac5611a8a64a1 163-167,324-327,330-349,351-383,385,387-446,448-455,775,877-881
+main-agent/integrations/state-machine/actions/admin_query_records.js
+  s_ea3621b09a6b7d::t_cac5611a8a64a1 69-72
+main-agent/integrations/state-machine/actions/get_runtime_state.js
+  s_ea3621b09a6b7d::t_cac5611a8a64a1 163-167,324-327,330-349,351-383,385,387-446,448-455,806-808
+main-agent/integrations/state-machine/actions/save_consent.js
+  s_ea3621b09a6b7d::t_cac5611a8a64a1 163-167,324-327,330-349,351-383,385,387-446,448-455,789-791
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "f18e0c1453866281b010445a20c6a735fe076007",
+  "prompts": {},
+  "sessions": {
+    "s_ea3621b09a6b7d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "bdfaa3df-15de-46f8-975a-80035e72119e",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
