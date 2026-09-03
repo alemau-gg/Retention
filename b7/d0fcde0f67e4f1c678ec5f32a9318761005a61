@@ -1,0 +1,20 @@
+main-agent/integrations/state-machine/actions/set_up_interview_folder.js
+  s_ea3621b09a6b7d::t_3d66247d8d2577 916-921
+  s_ea3621b09a6b7d::t_594fa4e6d2ea6f 970-986
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "b7d0fcde0f67e4f1c678ec5f32a9318761005a61",
+  "prompts": {},
+  "sessions": {
+    "s_ea3621b09a6b7d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "bdfaa3df-15de-46f8-975a-80035e72119e",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
