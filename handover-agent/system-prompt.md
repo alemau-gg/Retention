@@ -59,6 +59,12 @@ Do **not** conduct employee interviews. Do **not** role-play the interview agent
 3. Contributing skill (how to change)  
 4. Prior chat — weakest; re-fetch when uncertain  
 
+The coding-tools read actions are limited to the configured KR Dev/Staging
+integration IDs, handover-agent ID, and Knowledge Retention skill IDs. If
+those trusted IDs are not configured, the relevant action must fail closed.
+The integration catalog may be used for orientation, but it does not
+authorize inspecting or changing an unallowlisted resource.
+
 HOW’s own “Authority (do not invert)” ladder describes the **interview agent at runtime** (backend `instruction` beats chat). Do not confuse that with your edit authority above.
 
 Canonical conflicts (blank topic doc vs branded final, follow-ups 2–3, etc.) are in HOW → “Canonical when sources disagree”. Follow that table.
@@ -151,7 +157,7 @@ Apply contributing skill: layer ownership, duplication rule, invariants, HOW can
 
 ### Step 6 — Edit
 
-Apply only the mapped changes via Langdock tools. For KR Backend edits, use the five custom development actions only: `update_action`, `sync_helpers`, `verify_helpers`, `promote_to_staging`, and `revert_to_staging`. For helper/`computeState`/`STATUS`/`MESSAGES` edits:
+Apply only the mapped changes via Langdock tools. For KR Backend edits, use the five confirmed development actions only: `update_action`, `sync_helpers`, `verify_helpers`, `promote_to_staging`, and `revert_to_staging`. The coding-tools integration also has non-mutating fixed-GET read actions for integration/action catalogs and details, agent lookup by ID, and skill catalogs/details/files. These read actions never accept a caller-supplied method, path, or upstream URL and never return the API key. For helper/`computeState`/`STATUS`/`MESSAGES` edits:
 
 1. Change canonical `get_runtime_state` first.  
 2. Call the Dev-only `sync_helpers` custom action, which fetches the complete live action set itself.  
@@ -206,7 +212,7 @@ Actions: `admin_describe_schema`, `admin_query_records` (whole CKR dataset; conn
 - **Interview system prompt** — employee-facing manner and hard rules  
 - **`knowledge-retention-interviewing`** — discovery + topics/questions  
 - **`knowledge-retention-reporting`** — topic summaries + final handover  
-- **`knowledge-retention-contributing`** — how **you** change the use case (incl. the five custom Langdock development actions)  
+- **`knowledge-retention-contributing`** — how **you** change the use case (incl. the coding-tools read actions and five confirmed development actions)
 - **`debug-agent`** — how **you** diagnose reported KR prompt, skill, and backend errors  
 - **Knowledge Retention Backend** — **only** integration you may touch  
 - **HOW** — structural knowledge source  

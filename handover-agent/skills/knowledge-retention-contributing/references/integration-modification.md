@@ -4,7 +4,12 @@ Langdock conventions for **changing** the live **Knowledge Retention Backend** �
 
 **Hard scope:** Knowledge Retention Backend only. Never open, diff, or patch another integration “for reference” while coding.
 
-**Operations:** read and update live Dev actions/manifest through Langdock API tools. After helper edits, call the Dev-only `sync_helpers` and `verify_helpers` custom actions on fresh live sources, then write confirmed updates back.
+**Operations:** read and update live Dev actions/manifest through Langdock API
+tools. The coding-tools integration also provides fixed-GET read actions for
+catalog/detail inspection of integrations, actions, the configured agent, and
+skills. After helper edits, call the Dev-only `sync_helpers` and
+`verify_helpers` custom actions on fresh live sources, then write confirmed
+updates back.
 
 **Precedence when rules conflict:**
 
@@ -43,6 +48,13 @@ Before writing: fetch and carefully read the live action(s) and `get_runtime_sta
 For Langdock platform behavior, use the **Langdock Docs integration** first,
 especially its Integration API reference. Do not rely on memory for endpoint
 paths, request shapes, sandbox globals, status codes, or action behavior.
+
+The read-only coding-tools actions use only the documented paths
+`/integrations/v1/get`, `/integrations/v1/{integrationId}`,
+`/agent/v1/get`, `/skills/v1`, `/skills/v1/{skillId}`, and
+`/skills/v1/{skillId}/files`. There is no documented workspace-wide
+`list_agents` endpoint. Action details are obtained by reading the containing
+integration and selecting the action, which is the documented API shape.
 
 Write **complete, runnable** action code — not stubs. After each write, re-read the live artifact and confirm what Langdock stored matches intent. For Graph or Dataverse behavior, use the relevant vendor documentation.
 

@@ -8,7 +8,7 @@ This reference defines where the BASF Knowledge Retention use case may be read, 
 |---|---|---|
 | **Prod** | Human-managed live workspace | No access by process. Never request, accept, infer, read, write, promote to, or revert from a Prod ID. |
 | **Staging** | Stable-testing baseline and rollback source | Read only for comparison and revert. It may change only through confirmed `promote_to_staging`. Never use `update_action`, `sync_helpers`, or `verify_helpers` against it. |
-| **Dev** | Active development and exploratory testing | The only environment that may receive ordinary edits, helper synchronization, and verification. |
+| **Dev** | Active development and exploratory testing | The only environment that may receive ordinary edits, helper synchronization, and verification. Its ID must be configured as the trusted Dev integration ID. |
 
 The same API key may technically reach multiple integration IDs. Environment safety is therefore a hard process rule, not an assumed API permission boundary.
 
@@ -75,9 +75,12 @@ If Dev must be reset, explain that the operation will make Dev match Staging, in
 
 The action returns a pre-revert Dev snapshot. It is not a generic undo for an unpromoted experiment: it restores Staging, so use it only when Staging is the intended source of truth.
 
-## Custom development actions
+## Coding-tools actions
 
-The Langdock control-plane integration intentionally contains only these five self-contained actions. Do not add `_shared.js`, `require`, `import`, npm packages, or generic catalog actions.
+The Langdock control-plane integration contains five confirmed mutators plus
+read-only catalog/detail actions. Do not add `_shared.js`, `require`, `import`,
+npm packages, or actions with caller-controlled HTTP methods, paths, or
+upstream URLs.
 
 | Action | Inputs | Behavior | Writes and restrictions |
 |---|---|---|---|
@@ -86,5 +89,19 @@ The Langdock control-plane integration intentionally contains only these five se
 | `verify_helpers` | `integrationId` | Freshly fetches the integration and checks helper completeness, action coverage, `ACTION_SLUG` values, forbidden module syntax, and drift from `get_runtime_state`. | Read-only. Use against Dev only. `ok: true` is required before completion. |
 | `promote_to_staging` | `devIntegrationId`, `stagingIntegrationId` | Compares actions by slug, creates missing actions, updates changed actions, deletes actions absent from Dev, and fetches Staging again to verify the mirror. | Writes Staging. Requires confirmation and the user-acceptance gate. Never pass a Prod ID. Returns `prePromotionStaging`. |
 | `revert_to_staging` | `devIntegrationId`, `stagingIntegrationId` | Compares Staging and Dev by slug, creates missing actions, updates changed actions, deletes actions absent from Staging, and fetches Dev again to verify the mirror. | Writes Dev. Requires confirmation. Staging is the source of truth. Returns `preRevertDev`. |
+| `list_integrations` | None | Lists shared private API, MCP, and A2A integrations with bounded metadata; it never returns credentials or action code. | Read-only. No confirmation. |
+| `get_integration` | `integrationId` | Reads bounded metadata plus nested action definitions and complete stored action code for the configured Dev or Staging integration. | Read-only. Requires a configured integration allowlist; no confirmation. |
+| `get_action` | `integrationId`, `actionId` or `actionSlug` | Reads one action by UUID or safe slug from a configured Dev or Staging integration, including its complete stored code within Langdock's documented action-code limit. | Read-only. Requires the integration allowlist and exactly one selector; no confirmation. |
+| `get_agent` | `agentId` | Reads the configured handover agent by UUID using the documented Agent API endpoint. | Read-only. No workspace-wide `list_agents` endpoint is assumed or invented; no confirmation. Fails closed without `trustedAgentId`. |
+| `list_skills` | Optional `limit`, `cursor`, `query`, `slug` | Lists configured Knowledge Retention skills with bounded metadata and documented pagination cursor. | Read-only. No confirmation. Fails closed without `trustedSkillIds`. |
+| `get_skill` | `skillId` | Reads one configured Knowledge Retention skill's bounded instructions and stored-file metadata, without file contents. | Read-only. UUID and skill allowlist required; no confirmation. |
+| `get_skill_file` | `skillId`, `path` | Reads one UTF-8 file only when the skill is allowlisted and the path is relative, traversal-free, extension-allowlisted, and within 512 KB. | Read-only. UUID, skill allowlist, and strict path validation; no confirmation. |
 
-These actions call the Langdock Integrations API internally with `ld.request`. Generic `list_integrations`, `get_integration`, `create_action`, and `delete_action` actions are intentionally absent, so IDs must come from trusted configuration or the user.
+All actions call approved Langdock API paths internally with `ld.request`.
+Read actions have fixed GET methods and paths; callers cannot supply an HTTP
+method, path, or upstream URL. The manifest's optional
+`devIntegrationId`/`stagingIntegrationId` fields are trusted connection
+configuration, not caller input. Any environment-sensitive action fails
+closed until those IDs are configured and exact input IDs match them. Never
+guess or infer those IDs from names. The catalog is informational; use only
+allowlisted IDs for detail or mutation actions.

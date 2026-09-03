@@ -18,11 +18,47 @@
     {
       "slug": "baseUrl",
       "label": "Base URL",
-      "description": "API base URL. Defaults to https://api.langdock.com. For dedicated deployments, use https://<deployment-url>/api/public.",
+      "description": "Optional Langdock API base URL. Leave blank for https://api.langdock.com or use https://<deployment-url>/api/public for a dedicated deployment.",
       "placeholder": "https://api.langdock.com",
       "type": "TEXT",
       "required": false,
       "maxLength": null
+    },
+    {
+      "slug": "devIntegrationId",
+      "label": "Trusted Dev integration ID",
+      "description": "Optional UUID allowlisted as the only Dev integration target. Configure this before using coding-tool actions; environment-sensitive actions fail closed when it is absent.",
+      "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "type": "TEXT",
+      "required": false,
+      "maxLength": 36
+    },
+    {
+      "slug": "stagingIntegrationId",
+      "label": "Trusted Staging integration ID",
+      "description": "Optional UUID allowlisted as the only Staging integration target. Configure this before promotion, revert, or a trusted integration-detail lookup; environment-sensitive actions fail closed when it is absent.",
+      "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "type": "TEXT",
+      "required": false,
+      "maxLength": 36
+    },
+    {
+      "slug": "trustedAgentId",
+      "label": "Trusted handover agent ID",
+      "description": "Optional UUID allowlisted for the handover agent detail lookup. Configure this before using get_agent; the action fails closed when it is absent or a different agent ID is supplied.",
+      "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "type": "TEXT",
+      "required": false,
+      "maxLength": 36
+    },
+    {
+      "slug": "trustedSkillIds",
+      "label": "Trusted Knowledge Retention skill IDs",
+      "description": "Optional comma-separated UUID allowlist for Knowledge Retention skills, for example id1,id2. Configure this before using skill catalog/detail actions; they fail closed when it is absent or a different skill ID is supplied.",
+      "placeholder": "uuid1,uuid2",
+      "type": "MULTI_LINE_TEXT",
+      "required": false,
+      "maxLength": 2000
     }
   ],
   "actions": [
@@ -73,7 +109,7 @@
           "options": null,
           "allowMultiSelect": null,
           "allowMultiFile": false,
-          "maxLength": null,
+          "maxLength": 100,
           "jsonSchema": null
         },
         {
@@ -86,20 +122,20 @@
           "options": null,
           "allowMultiSelect": null,
           "allowMultiFile": false,
-          "maxLength": null,
+          "maxLength": 1000,
           "jsonSchema": null
         },
         {
           "slug": "code",
           "label": "Code",
-          "description": "New JavaScript code. Maximum 40000 characters. Available globals: data.input (user inputs), data.auth (credentials), env (workspace env vars), ld.request (HTTP).",
+          "description": "New JavaScript code, up to 150000 characters. Available globals: data.input (user inputs), data.auth (credentials), env (workspace env vars), ld.request (HTTP).",
           "placeholder": null,
           "type": "MULTI_LINE_TEXT",
           "required": false,
           "options": null,
           "allowMultiSelect": null,
           "allowMultiFile": false,
-          "maxLength": null,
+          "maxLength": 150000,
           "jsonSchema": null
         },
         {
@@ -113,7 +149,7 @@
           "allowMultiSelect": null,
           "allowMultiFile": false,
           "maxLength": null,
-          "jsonSchema": "{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"label\":{\"type\":\"string\",\"maxLength\":100},\"type\":{\"type\":\"string\",\"enum\":[\"TEXT\",\"MULTI_LINE_TEXT\",\"NUMBER\",\"BOOLEAN\",\"SELECT\",\"PASSWORD\",\"VECTOR\",\"OBJECT\",\"FILE\",\"ID\"]},\"description\":{\"type\":\"string\",\"maxLength\":500},\"placeholder\":{\"type\":\"string\",\"maxLength\":200},\"required\":{\"type\":\"boolean\"},\"options\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"label\":{\"type\":\"string\"},\"value\":{\"type\":\"string\"}},\"required\":[\"label\",\"value\"]}},\"allowMultiSelect\":{\"type\":\"boolean\"},\"contextActionId\":{\"type\":\"string\"}},\"required\":[\"label\"]}}"
+          "jsonSchema": "{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"slug\":{\"type\":\"string\"},\"label\":{\"type\":\"string\",\"maxLength\":100},\"type\":{\"type\":\"string\",\"enum\":[\"TEXT\",\"MULTI_LINE_TEXT\",\"NUMBER\",\"BOOLEAN\",\"SELECT\",\"PASSWORD\",\"VECTOR\",\"OBJECT\",\"FILE\",\"ID\"]},\"description\":{\"type\":\"string\",\"maxLength\":500},\"placeholder\":{\"type\":\"string\",\"maxLength\":200},\"required\":{\"type\":\"boolean\"},\"order\":{\"type\":\"integer\",\"minimum\":0},\"options\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"label\":{\"type\":\"string\"},\"value\":{\"type\":\"string\"}},\"required\":[\"label\",\"value\"]}},\"allowMultiSelect\":{\"type\":\"boolean\"},\"contextActionId\":{\"type\":\"string\"},\"jsonSchema\":{\"type\":[\"string\",\"null\"]}},\"required\":[\"label\"]}}"
         },
         {
           "slug": "requiresConfirmation",
@@ -144,7 +180,7 @@
         {
           "slug": "integrationId",
           "label": "Integration ID",
-          "description": "UUID of the integration whose actions should be checked",
+          "description": "UUID of the configured Dev integration whose actions should be checked. Do not use a Staging or Prod ID.",
           "placeholder": null,
           "type": "TEXT",
           "required": true,
@@ -170,7 +206,7 @@
         {
           "slug": "integrationId",
           "label": "Integration ID",
-          "description": "UUID of the integration to verify",
+          "description": "UUID of the configured Dev integration to verify. Do not use a Staging or Prod ID.",
           "placeholder": null,
           "type": "TEXT",
           "required": true,
@@ -185,7 +221,7 @@
     {
       "slug": "promote_to_staging",
       "name": "Promote to Staging",
-      "description": "Mirrors the Dev Knowledge Retention integration into Staging after the user confirms that Dev testing is satisfactory.",
+      "description": "Mirrors the configured Dev Knowledge Retention integration into configured Staging after the user confirms that Dev testing is satisfactory.",
       "activeLabel": "Promoting to Staging",
       "doneLabel": "Promoted to Staging",
       "failedLabel": "Failed to promote to Staging",
@@ -196,7 +232,7 @@
         {
           "slug": "devIntegrationId",
           "label": "Dev integration ID",
-          "description": "UUID of the Knowledge Retention integration running in Dev.",
+          "description": "UUID of the configured Dev Knowledge Retention integration. Must match the trusted Dev connection setting; never use a Prod ID.",
           "placeholder": null,
           "type": "TEXT",
           "required": true,
@@ -209,7 +245,7 @@
         {
           "slug": "stagingIntegrationId",
           "label": "Staging integration ID",
-          "description": "UUID of the Knowledge Retention integration running in Staging.",
+          "description": "UUID of the configured Staging Knowledge Retention integration. Must match the trusted Staging connection setting; never use a Prod ID.",
           "placeholder": null,
           "type": "TEXT",
           "required": true,
@@ -224,7 +260,7 @@
     {
       "slug": "revert_to_staging",
       "name": "Revert to Staging",
-      "description": "Mirrors the stable Staging Knowledge Retention integration back into Dev after the user confirms that Dev should be reset.",
+      "description": "Mirrors the configured stable Staging Knowledge Retention integration back into configured Dev after the user confirms that Dev should be reset.",
       "activeLabel": "Reverting Dev to Staging",
       "doneLabel": "Reverted Dev to Staging",
       "failedLabel": "Failed to revert Dev to Staging",
@@ -235,7 +271,7 @@
         {
           "slug": "devIntegrationId",
           "label": "Dev integration ID",
-          "description": "UUID of the Knowledge Retention integration running in Dev.",
+          "description": "UUID of the configured Dev Knowledge Retention integration. Must match the trusted Dev connection setting; never use a Prod ID.",
           "placeholder": null,
           "type": "TEXT",
           "required": true,
@@ -248,7 +284,7 @@
         {
           "slug": "stagingIntegrationId",
           "label": "Staging integration ID",
-          "description": "UUID of the Knowledge Retention integration running in Staging.",
+          "description": "UUID of the configured Staging Knowledge Retention integration. Must match the trusted Staging connection setting; never use a Prod ID.",
           "placeholder": null,
           "type": "TEXT",
           "required": true,
@@ -256,6 +292,252 @@
           "allowMultiSelect": null,
           "allowMultiFile": false,
           "maxLength": null,
+          "jsonSchema": null
+        }
+      ]
+    },
+    {
+      "slug": "list_integrations",
+      "name": "List integrations",
+      "description": "Lists private API, MCP, and A2A integrations shared with the configured API key without exposing credentials or action code.",
+      "activeLabel": "Listing integrations",
+      "doneLabel": "Listed integrations",
+      "failedLabel": "Failed to list integrations",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": []
+    },
+    {
+      "slug": "get_integration",
+      "name": "Get integration details",
+      "description": "Reads allowlisted Dev or Staging integration metadata, nested action definitions, and complete stored action code without credentials.",
+      "activeLabel": "Reading integration details",
+      "doneLabel": "Read integration details",
+      "failedLabel": "Failed to read integration details",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": [
+        {
+          "slug": "integrationId",
+          "label": "Integration ID",
+          "description": "UUID of the configured Dev or Staging integration to inspect. Use an ID from the integration catalog and skip this action if it is not allowlisted in the connection.",
+          "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+          "type": "TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 36,
+          "jsonSchema": null
+        }
+      ]
+    },
+    {
+      "slug": "get_action",
+      "name": "Get action details",
+      "description": "Reads one action by ID or safe slug from an allowlisted Dev or Staging integration, including its complete stored JavaScript code and input definitions.",
+      "activeLabel": "Reading action details",
+      "doneLabel": "Read action details",
+      "failedLabel": "Failed to read action details",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": [
+        {
+          "slug": "integrationId",
+          "label": "Integration ID",
+          "description": "UUID of the configured Dev or Staging integration containing the action. Use an ID from the integration catalog.",
+          "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+          "type": "TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 36,
+          "jsonSchema": null
+        },
+        {
+          "slug": "actionId",
+          "label": "Action ID",
+          "description": "Optional UUID of the action to inspect. Provide this or action slug, but not both.",
+          "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+          "type": "TEXT",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 36,
+          "jsonSchema": null
+        },
+        {
+          "slug": "actionSlug",
+          "label": "Action slug",
+          "description": "Optional lowercase action slug using letters, numbers, and underscores. Provide this or action ID, but not both.",
+          "placeholder": "get_runtime_state",
+          "type": "TEXT",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 100,
+          "jsonSchema": null
+        }
+      ]
+    },
+    {
+      "slug": "get_agent",
+      "name": "Get agent details",
+      "description": "Reads the current published agent configuration, or its draft when it has never been published, by agent UUID. The documented Agent API has no workspace-wide list_agents endpoint.",
+      "activeLabel": "Reading agent details",
+      "doneLabel": "Read agent details",
+      "failedLabel": "Failed to read agent details",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": [
+        {
+          "slug": "agentId",
+          "label": "Agent ID",
+          "description": "UUID of the agent to inspect. Use a trusted ID supplied by the administrator; this read action does not enumerate agents.",
+          "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+          "type": "TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 36,
+          "jsonSchema": null
+        }
+      ]
+    },
+    {
+      "slug": "list_skills",
+      "name": "List skills",
+      "description": "Lists configured Knowledge Retention skills with bounded metadata. Use query or slug to narrow the catalog; instructions and file contents are returned by detail actions. Requires trustedSkillIds connection configuration.",
+      "activeLabel": "Listing skills",
+      "doneLabel": "Listed skills",
+      "failedLabel": "Failed to list skills",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": [
+        {
+          "slug": "limit",
+          "label": "Result limit",
+          "description": "Optional number of skills to return, from 1 to 250. Defaults to 50 when omitted.",
+          "placeholder": "50",
+          "type": "NUMBER",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        },
+        {
+          "slug": "query",
+          "label": "Search query",
+          "description": "Optional text used by Langdock to search skill names and descriptions. Omit it to list the first page.",
+          "placeholder": "retention",
+          "type": "TEXT",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 100,
+          "jsonSchema": null
+        },
+        {
+          "slug": "slug",
+          "label": "Skill slug",
+          "description": "Optional exact lowercase skill slug filter, containing only letters, numbers, and dashes.",
+          "placeholder": "knowledge-retention-contributing",
+          "type": "TEXT",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 100,
+          "jsonSchema": null
+        },
+        {
+          "slug": "cursor",
+          "label": "Page cursor",
+          "description": "Optional UUID cursor returned by the previous skill catalog response. Omit it for the first page.",
+          "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+          "type": "TEXT",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 36,
+          "jsonSchema": null
+        }
+      ]
+    },
+    {
+      "slug": "get_skill",
+      "name": "Get skill details",
+      "description": "Reads one configured Knowledge Retention skill's bounded instructions and stored-file metadata without file contents. Requires trustedSkillIds connection configuration.",
+      "activeLabel": "Reading skill details",
+      "doneLabel": "Read skill details",
+      "failedLabel": "Failed to read skill details",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": [
+        {
+          "slug": "skillId",
+          "label": "Skill ID",
+          "description": "UUID of the skill to inspect. Use an ID returned by the skill catalog or supplied by the administrator.",
+          "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+          "type": "TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 36,
+          "jsonSchema": null
+        }
+      ]
+    },
+    {
+      "slug": "get_skill_file",
+      "name": "Get skill file",
+      "description": "Reads one configured Knowledge Retention skill's UTF-8 file by a validated relative path. Contents are limited to Langdock's documented 512 KB file bound and require trustedSkillIds connection configuration.",
+      "activeLabel": "Reading skill file",
+      "doneLabel": "Read skill file",
+      "failedLabel": "Failed to read skill file",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": [
+        {
+          "slug": "skillId",
+          "label": "Skill ID",
+          "description": "UUID of the skill containing the file. Use an ID returned by the skill catalog or skill detail.",
+          "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+          "type": "TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 36,
+          "jsonSchema": null
+        },
+        {
+          "slug": "path",
+          "label": "Relative file path",
+          "description": "Relative UTF-8 file path from the skill root, for example references/template.md. Do not use absolute paths, backslashes, dot segments, control characters, or unsupported extensions.",
+          "placeholder": "references/template.md",
+          "type": "TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 255,
           "jsonSchema": null
         }
       ]

@@ -1,6 +1,22 @@
 const integrationId = data.input.integrationId;
 const actionId = data.input.actionId;
+const trustedDevIntegrationId = data.auth.devIntegrationId;
 const updateActionBaseUrl = (data.auth.baseUrl || 'https://api.langdock.com').replace(/\/+$/, '');
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const MAX_CODE_LENGTH = 150000;
+
+if (typeof integrationId !== 'string' || !UUID_RE.test(integrationId)) {
+  throw new Error('Integration ID must be a UUID');
+}
+if (typeof actionId !== 'string' || !UUID_RE.test(actionId)) {
+  throw new Error('Action ID must be a UUID');
+}
+if (!UUID_RE.test(trustedDevIntegrationId || '')) {
+  throw new Error('No trusted Dev integration ID is configured; refusing an unallowlisted update');
+}
+if (integrationId !== trustedDevIntegrationId) {
+  throw new Error('update_action only permits the configured Dev integration ID');
+}
 
 function updateActionFormatError(response) {
   const json = response.json;
@@ -33,10 +49,18 @@ if (integrationResponse.status !== 200) {
   );
 }
 
-const integration = integrationResponse.json.integration;
-const previousAction = (integration.actions || []).find((action) => action.id === actionId);
+const integration = integrationResponse.json && integrationResponse.json.integration;
+if (!integration || integration.id !== integrationId || !Array.isArray(integration.actions)) {
+  throw new Error('Integration response did not include the requested integration and its actions');
+}
+const previousAction = integration.actions.find((action) => action.id === actionId);
 if (!previousAction) {
   throw new Error(`Action "${actionId}" was not found in integration "${integrationId}"`);
+}
+if (data.input.code != null && (
+  typeof data.input.code !== 'string' || data.input.code.length > MAX_CODE_LENGTH
+)) {
+  throw new Error(`Action code must be at most ${MAX_CODE_LENGTH} characters`);
 }
 
 // Start from the live action so omitted fields cannot be lost when the API
@@ -97,8 +121,10 @@ if (updatedIntegrationResponse.status !== 200) {
   );
 }
 
-const updatedIntegration = updatedIntegrationResponse.json.integration;
-const updatedAction = (updatedIntegration.actions || []).find((action) => action.id === actionId);
+const updatedIntegration = updatedIntegrationResponse.json && updatedIntegrationResponse.json.integration;
+const updatedAction = updatedIntegration && Array.isArray(updatedIntegration.actions)
+  ? updatedIntegration.actions.find((action) => action.id === actionId)
+  : null;
 if (!updatedAction) {
   throw new Error('Action was updated but was not present in the verification response');
 }
