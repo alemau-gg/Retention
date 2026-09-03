@@ -1,0 +1,31 @@
+main-agent/integrations/sharepoint-search/manifest.json
+  s_857a80b4d486e1::t_01f19fcf53b567 1-63
+README.md
+  s_857a80b4d486e1::t_adeacddb7578ab 11
+main-agent/integrations/sharepoint-search/authTest.js
+  s_857a80b4d486e1::t_52f9db12de517c 1-13
+main-agent/integrations/sharepoint-search/oauth/refreshToken.js
+  s_857a80b4d486e1::t_e5b637f74fcad0 1-20
+main-agent/integrations/sharepoint-search/oauth/authorization.js
+  s_857a80b4d486e1::t_a1556035632c1d 1-4
+main-agent/integrations/sharepoint-search/oauth/accessToken.js
+  s_857a80b4d486e1::t_4772e9f5f1c735 1-21
+main-agent/integrations/sharepoint-search/actions/search_files_in_site.js
+  s_857a80b4d486e1::t_e165cd4834be31 1-302
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "ae4a96b2d91380c4990ee4dee16e3e47eef98839",
+  "prompts": {},
+  "sessions": {
+    "s_857a80b4d486e1": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "be0d8d9a-fb93-4593-a67e-7da6b6bee9bd",
+        "model": "grok-4.6"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
