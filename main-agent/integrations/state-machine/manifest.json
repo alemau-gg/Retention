@@ -386,7 +386,7 @@
     {
       "slug": "upload_document",
       "name": "Upload document",
-      "description": "Uploads the final handover or a user-confirmed supporting file into the caller's interview folder on the central CKR site. The destination folder is resolved server-side from the caller's identity. Uploading with docType \"final\" also advances a finalized interview to Document Generated, which is what tells a later session the handover file was filed. Do NOT use this for per-topic documents: generate_topic_document produces those from the stored summary. docType \"topic\" is kept only for legacy recovery of a topic file that generate_topic_document cannot produce.",
+      "description": "Uploads the final handover or a user-confirmed supporting file into the caller's interview folder on the central CKR site. Supporting files are idempotently placed in the fixed Supporting documents/ subfolder; the caller/model cannot choose a folder path. The destination interview is resolved server-side from the caller's identity. Uploading with docType \"final\" also advances a finalized interview to Document Generated, which is what tells a later session the handover file was filed. Do NOT use this for per-topic documents: generate_topic_document produces those from the stored summary. docType \"topic\" is kept only for legacy recovery of a topic file that generate_topic_document cannot produce.",
       "nativeActionType": "NONE",
       "actionType": "API",
       "requiresConfirmation": false,
@@ -394,7 +394,7 @@
         {
           "slug": "docType",
           "label": "Document type",
-          "description": "Whether this is the final interview summary, an optional supporting file, or a legacy per-topic document. Use \"final\" for the handover and \"supporting\" for a user-confirmed attachment. Do not use \"topic\" in the normal flow — call generate_topic_document instead; \"topic\" remains only for recovering a topic file the generator cannot produce.",
+          "description": "Whether this is the final interview summary, an optional supporting file, or a legacy per-topic document. Use \"final\" for the handover (stored at the interview-folder root) and \"supporting\" for a user-confirmed attachment (always stored in the fixed Supporting documents/ subfolder; never provide or infer a folder path). Do not use \"topic\" in the normal flow — call generate_topic_document instead; \"topic\" remains only for recovering a topic file the generator cannot produce.",
           "placeholder": null,
           "type": "SELECT",
           "required": true,
@@ -433,7 +433,7 @@
         {
           "slug": "fileName",
           "label": "File name",
-          "description": "The unique file name to store, including its extension (e.g. Topic-1 Stakeholder map.docx, InterviewFinalSummary_42.docx, or Process-Checklist.pdf).",
+          "description": "The unique file name only, including its extension; do not send a folder path (e.g. Topic-1 Stakeholder map.docx, InterviewFinalSummary_42.docx, or Process-Checklist.pdf). Supporting files are stored in the fixed Supporting documents/ subfolder.",
           "placeholder": null,
           "type": "TEXT",
           "required": true,

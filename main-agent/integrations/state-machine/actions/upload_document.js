@@ -819,14 +819,16 @@ const KnowledgeRetentionUtils = {
 };
 
 // Uploads a summary or user-confirmed supporting file into the caller's interview
-// folder. The destination folder is resolved server-side from identity, never from
-// an input, so a caller cannot write into another interviewee's folder.
+// folder. Supporting files use the fixed Supporting documents/ subfolder. The
+// destination is resolved server-side from identity, never from an input, so a
+// caller cannot write into another interviewee's folder.
 const identity = KnowledgeRetentionUtils.resolveIdentity(data);
 const email = identity.email;
 const dvToken = await KnowledgeRetentionUtils.dataverseToken(data);
 const S = KnowledgeRetentionUtils.SCHEMA;
 const ST = KnowledgeRetentionUtils.STATUS;
 const docType = data.input.docType;
+const SUPPORTING_FOLDER = 'Supporting documents';
 if (!['topic', 'final', 'supporting'].includes(docType)) {
   throw new Error('Unsupported document type. Use topic, final, or supporting.');
 }
@@ -847,13 +849,56 @@ if (!data.input.file || !data.input.file.binary || !data.input.file.binary.data)
 const fileBuffer = Buffer.from(data.input.file.binary.data);
 
 const siteId = data.auth.sharepointSiteId;
-const folderPath = KnowledgeRetentionUtils.interviewFolderPath(interview);
+const graphToken = await KnowledgeRetentionUtils.graphToken(data);
+const interviewFolderPath = KnowledgeRetentionUtils.interviewFolderPath(interview);
+const encodedInterviewFolder = interviewFolderPath
+  .split('/')
+  .map((segment) => encodeURIComponent(segment))
+  .join('/');
+let folderPath = interviewFolderPath;
+if (docType === 'supporting') {
+  // Supporting files are always filed in this fixed subfolder. The folder name
+  // is backend-owned; no caller/model input can change the destination.
+  const lookupPath = `/sites/${siteId}/drive/root:/${encodedInterviewFolder}/${encodeURIComponent(SUPPORTING_FOLDER)}`;
+  const existing = await KnowledgeRetentionUtils.graph(data, graphToken, {
+    method: 'GET',
+    path: lookupPath,
+  });
+  if (existing.status === 200) {
+    // The subfolder already exists, which is the normal resumed/repeated-upload path.
+  } else if (existing.status === 404) {
+    const created = await KnowledgeRetentionUtils.graph(data, graphToken, {
+      method: 'POST',
+      path: `/sites/${siteId}/drive/root:/${encodedInterviewFolder}:/children`,
+      body: { name: SUPPORTING_FOLDER, folder: {}, '@microsoft.graph.conflictBehavior': 'fail' },
+    });
+    if (created.status === 409) {
+      const retry = await KnowledgeRetentionUtils.graph(data, graphToken, {
+        method: 'GET',
+        path: lookupPath,
+      });
+      if (retry.status !== 200) {
+        const detail =
+          (retry.json && retry.json.error && retry.json.error.message) || retry.text || '';
+        throw new Error(KnowledgeRetentionUtils.failureMessage(retry.status, detail));
+      }
+    } else if (created.status !== 200 && created.status !== 201) {
+      const detail =
+        (created.json && created.json.error && created.json.error.message) || created.text || '';
+      throw new Error(KnowledgeRetentionUtils.failureMessage(created.status, detail));
+    }
+  } else {
+    const detail =
+      (existing.json && existing.json.error && existing.json.error.message) || existing.text || '';
+    throw new Error(KnowledgeRetentionUtils.failureMessage(existing.status, detail));
+  }
+  folderPath = `${interviewFolderPath}/${SUPPORTING_FOLDER}`;
+}
 const encodedPath = folderPath
   .split('/')
   .map((segment) => encodeURIComponent(segment))
   .join('/');
 const fileName = data.input.fileName;
-const graphToken = await KnowledgeRetentionUtils.graphToken(data);
 const destinationPath = `/sites/${siteId}/drive/root:/${encodedPath}/${encodeURIComponent(fileName)}:/content`;
 
 // Supporting files are intentionally never overwritten. There is no folder-list
@@ -864,7 +909,9 @@ if (docType === 'supporting') {
     path: destinationPath.replace(/:\/content$/, ''),
   });
   if (existingResponse.status === 200) {
-    throw new Error(`A supporting file named "${fileName}" already exists in the interview folder. Choose a unique file name.`);
+    throw new Error(
+      `A supporting file named "${fileName}" already exists in the ${SUPPORTING_FOLDER}/ subfolder. Choose a unique file name.`,
+    );
   }
   if (existingResponse.status !== 404) {
     const detail =
@@ -922,7 +969,9 @@ const state = KnowledgeRetentionUtils.computeState(data, interviewForState, chil
 
 // State the outcome before the computed instruction so the agent never re-checks
 // or rebuilds the file it just filed.
-const uploadedNote = `${fileName} was uploaded successfully; it is filed in the interview folder, so do not re-check or rebuild that file.${
+const uploadedLocation =
+  docType === 'supporting' ? `the ${SUPPORTING_FOLDER}/ subfolder of the interview folder` : 'the interview folder';
+const uploadedNote = `${fileName} was uploaded successfully; it is filed in ${uploadedLocation}, so do not re-check or rebuild that file.${
   documentGenerated ? ' The interview is now marked as Document Generated.' : ''
 }`;
 

@@ -41,7 +41,7 @@ For a topic summary, do **not** open: `references/final-document.md`, `reference
 
 ## Supporting files
 
-Do not create a supporting file automatically. If the user attaches a file and explicitly confirms that it is useful for the interview, file that original attachment with `upload_document` using `docType: supporting` and a unique filename. Supporting uploads do not use the topic-summary format or the branded final template.
+Do not create a supporting file automatically. If the user attaches a file and explicitly confirms that it is useful for the interview, file that original attachment with `upload_document` using `docType: supporting` and a unique filename. The backend always files it in the fixed `Supporting documents/` subfolder; never provide or infer a folder path. Supporting uploads do not use the topic-summary format or the branded final template.
 
 Confirmed supporting files **are** source material for this skill. When writing a topic summary or the final handover, read each such file (chat attachment) and include every relevant concrete fact. Name the source filename. Do not invent contents you could not read.
 
