@@ -913,6 +913,12 @@ if (!email) {
     });
     if (managerResponse.status === 200 && managerResponse.json) {
       managerEmail = managerResponse.json.mail || managerResponse.json.userPrincipalName || null;
+    } else if (managerResponse.status !== 404) {
+      const detail =
+        (managerResponse.json && managerResponse.json.error && managerResponse.json.error.message) ||
+        managerResponse.text ||
+        `HTTP ${managerResponse.status}`;
+      managerLookupFailure = `Manager lookup failed (${managerResponse.status}): ${detail}`;
     }
   } catch (error) {
     managerLookupFailure = error.message || String(error);
@@ -961,19 +967,23 @@ let employeeInvite = {
   detail: email ? null : 'No email or userPrincipalName was available for the Graph direct grant.',
 };
 if (email) {
-  const employeeInviteResponse = await KnowledgeRetentionUtils.graph(data, graphToken, {
-    method: 'POST',
-    path: `/sites/${siteId}/drive/items/${folderItemId}/invite`,
-    headers: { Prefer: 'apiversion=2.1' },
-    body: {
-      recipients: [{ email }],
-      roles: ['write'],
-      requireSignIn: true,
-      sendInvitation: false,
-      retainInheritedPermissions: false,
-    },
-  });
-  employeeInvite = inviteResult(employeeInviteResponse, email);
+  try {
+    const employeeInviteResponse = await KnowledgeRetentionUtils.graph(data, graphToken, {
+      method: 'POST',
+      path: `/sites/${siteId}/drive/items/${folderItemId}/invite`,
+      headers: { Prefer: 'apiversion=2.1' },
+      body: {
+        recipients: [{ email }],
+        roles: ['write'],
+        requireSignIn: true,
+        sendInvitation: false,
+        retainInheritedPermissions: false,
+      },
+    });
+    employeeInvite = inviteResult(employeeInviteResponse, email);
+  } catch (error) {
+    employeeInvite = { granted: false, detail: error.message || String(error) };
+  }
 }
 
 let managerInvite = { granted: false, detail: managerLookupFailure };
