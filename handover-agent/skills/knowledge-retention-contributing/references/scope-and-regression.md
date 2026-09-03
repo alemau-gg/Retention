@@ -84,7 +84,12 @@ Preserve the manifest contract. `sharepointSiteId` uses lowercase `p`; `authTest
 ## Invariants
 
 - Target records from status and expected-order tokens, never LLM-provided record IDs.
-- Preserve session identity casing; do not lowercase it.
+- Use `data.user.id` as the authoritative interview ownership key. Keep
+  `data.user.userPrincipalName`/`data.user.email` case-preserved for the email
+  snapshot and Graph operations, and use them as a fallback only for legacy
+  rows whose stable-ID field is null. A non-null different stable ID must never
+  match that fallback. New interview creation fails closed when `data.user.id`
+  is absent.
 - Flip status last when possible.
 - Never invent a stage from chat or expose internal mechanics to interviewees.
 - Do not add a folder-listing action unless a separate HOW redesign addresses the topic-upload gap.

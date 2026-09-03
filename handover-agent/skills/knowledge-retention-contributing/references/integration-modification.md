@@ -169,7 +169,19 @@ A half-synced helper set is a production incident. If a write fails mid-sync, st
 
 ### Identity and targeting
 
-- Session identity via `resolveIdentity`: UPN/email from `data.user`, **not** lowercased, never `alternativeEmail`, fail closed if missing.
+- Session identity via `resolveIdentity`: `data.user.id` is the authoritative
+  Langdock interview-ownership key. The proposed Dataverse text column
+  `ckr_employeeuserid` is a local schema assumption because no live Dataverse
+  metadata is available; confirm its logical name and type before deployment.
+  UPN/email from `data.user.userPrincipalName` or `data.user.email` remains a
+  case-preserved display/Graph snapshot and is the temporary fallback only for
+  legacy interview rows whose stable-ID column is null. A row with a different
+  non-null stable ID must never match that fallback. The resolver may resume a
+  legacy row when the stable ID is absent but email/UPN exists; `create_interview`
+  must require the stable ID and must never accept a model-supplied ID.
+- Keep Graph manager lookup and invite recipients on email/UPN. A Langdock
+  `data.user.id` must not be sent to Graph unless it is independently confirmed
+  to be an Entra object ID.
 - Mutating employee actions resolve write targets from status columns + expected-order tokens (`expectedQuestionOrder`, `expectedTopicOrder`, `expectedSequence`, …). **Never** accept Dataverse record IDs from the model.
 - Question order repeats per topic — `save_answer` needs both order tokens; ambiguous revise targets return `conflict: true` with candidate topics.
 
@@ -208,6 +220,7 @@ Preserve employee-path keys: `nextAction`, `instruction`, orders, `topicQnA`, la
 | Unbatched fan-out over many IDs | Batches of 5–25 if you add concurrency |
 | Pass `clientSecret` / tokens into helpers as args | Read `data.auth.*` at the call site |
 | Typo `sharePointSiteId` | `sharepointSiteId` only |
+| Use email as the primary ownership key | Query stable ID first; only legacy null-ID rows may use the case-preserved email fallback |
 | Lowercase email for OData `eq` | Keep asserted session case |
 | Accept record GUIDs from the model | Orders + server resolution |
 | Throw on soft `conflict` | Return `conflict: true` + fresh state |
