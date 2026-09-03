@@ -22,6 +22,10 @@ const KnowledgeRetentionUtils = {
       number: 'ckr_interviewnumber',
       name: 'ckr_name',
       displayName: 'ckr_employeedisplayname',
+      // Schema assumption: no live Dataverse metadata is available locally.
+      // cr32c_aisuiteid is the proposed logical name for the Langdock
+      // stable-user-ID column and must remain a text field until confirmed.
+      userId: 'cr32c_aisuiteid',
       email: 'ckr_employeeemail',
       language: 'ckr_language',
       status: 'ckr_interviewstatus',
@@ -169,21 +173,30 @@ const KnowledgeRetentionUtils = {
   },
 
   // ===========================================================================
-  // Identity — derived exclusively from the Langdock session. Fail closed.
+  // Identity — derived exclusively from the Langdock session. The stable
+  // Langdock user ID is authoritative for interview ownership. Email/UPN is
+  // retained only as a display/Graph snapshot and for legacy rows.
   // alternativeEmail is deliberately never consulted.
   // ===========================================================================
-  resolveIdentity(data) {
-    const upn =
-      (data.user && typeof data.user.userPrincipalName === 'string' && data.user.userPrincipalName.trim()) ||
-      (data.user && typeof data.user.email === 'string' && data.user.email.trim()) ||
+  resolveIdentity(data, { requireStableId = false } = {}) {
+    const user = data.user || {};
+    const userId =
+      (typeof user.id === 'string' && user.id.trim()) ||
       null;
-    if (!upn) {
+    const email =
+      (typeof user.userPrincipalName === 'string' && user.userPrincipalName.trim()) ||
+      (typeof user.email === 'string' && user.email.trim()) ||
+      null;
+    if (!userId && !email) {
       throw new Error('Unable to determine your identity from the session. Please contact your administrator.');
+    }
+    if (requireStableId && !userId) {
+      throw new Error('Unable to determine the stable user ID from the session. Please contact your administrator.');
     }
     // Do NOT lowercase: the original flows filter ckr_employeeemail on the raw
     // asserted value, and OData `eq` on a string column is case-sensitive in
     // practice. Lowercasing would miss mixed-case stored emails on resume.
-    return upn;
+    return { userId, email };
   },
 
   // Escape single quotes for safe interpolation into an OData $filter literal.
@@ -303,22 +316,61 @@ const KnowledgeRetentionUtils = {
   // ===========================================================================
   // State loading — the user's open interview, or the most recent completed one.
   // ===========================================================================
-  async loadInterviewRow(data, token, email, { completed } = {}) {
+  async loadInterviewRow(data, token, identity, { completed } = {}) {
     const S = KnowledgeRetentionUtils.SCHEMA;
     const ST = KnowledgeRetentionUtils.STATUS;
-    const safeEmail = KnowledgeRetentionUtils.escapeODataLiteral(email);
     // "completed" spans finalized (60) and documentGenerated (70): once the final
     // document is filed the interview is still the row post-finalize actions need.
     // An `eq 60` filter would make a document-generated interview invisible.
     const statusFilter = completed
       ? `${S.interview.status} ge ${ST.interview.finalized} and ${S.interview.status} lt ${ST.interview.cancelled}`
       : `${S.interview.status} lt ${ST.interview.finalized}`;
-    const filter = `${S.interview.email} eq '${safeEmail}' and ${statusFilter}`;
-    const result = await KnowledgeRetentionUtils.dv(data, token, {
-      method: 'GET',
-      path: `/${S.entitySets.interviews}?$filter=${encodeURIComponent(filter)}&$orderby=createdon desc&$top=1`,
-    });
-    return result && result.value && result.value.length > 0 ? result.value[0] : null;
+    const find = async (filter) => {
+      const result = await KnowledgeRetentionUtils.dv(data, token, {
+        method: 'GET',
+        path: `/${S.entitySets.interviews}?$filter=${encodeURIComponent(filter)}&$orderby=createdon desc&$top=1`,
+      });
+      return result && result.value && result.value.length > 0 ? result.value[0] : null;
+    };
+
+    // Stable ID is authoritative. Email fallback is restricted to legacy rows
+    // whose new ID field is null, so a row owned by another stable ID can never
+    // be returned by the fallback.
+    if (identity.userId) {
+      const safeUserId = KnowledgeRetentionUtils.escapeODataLiteral(identity.userId);
+      const current = await find(`${S.interview.userId} eq '${safeUserId}' and ${statusFilter}`);
+      if (current) return current;
+    }
+    if (identity.email) {
+      const safeEmail = KnowledgeRetentionUtils.escapeODataLiteral(identity.email);
+      return find(
+        `${S.interview.email} eq '${safeEmail}' and ${S.interview.userId} eq null and ${statusFilter}`,
+      );
+    }
+    return null;
+  },
+
+  // Same stable-ID-first/legacy-null-ID candidate logic as loadInterviewRow,
+  // used by get_runtime_state's latest-cancelled guard.
+  async loadLatestInterviewRow(data, token, identity) {
+    const S = KnowledgeRetentionUtils.SCHEMA;
+    const find = async (filter) => {
+      const result = await KnowledgeRetentionUtils.dv(data, token, {
+        method: 'GET',
+        path: `/${S.entitySets.interviews}?$filter=${encodeURIComponent(filter)}&$orderby=createdon desc&$top=1`,
+      });
+      return result && result.value && result.value.length > 0 ? result.value[0] : null;
+    };
+    if (identity.userId) {
+      const safeUserId = KnowledgeRetentionUtils.escapeODataLiteral(identity.userId);
+      const current = await find(`${S.interview.userId} eq '${safeUserId}'`);
+      if (current) return current;
+    }
+    if (identity.email) {
+      const safeEmail = KnowledgeRetentionUtils.escapeODataLiteral(identity.email);
+      return find(`${S.interview.email} eq '${safeEmail}' and ${S.interview.userId} eq null`);
+    }
+    return null;
   },
 
   // One FetchXML join (SE-3215) instead of three child GETs. FetchXML omits
@@ -769,7 +821,8 @@ const KnowledgeRetentionUtils = {
 // Creates the SharePoint folder Interviews/{interviewNumber} on the central CKR
 // site and grants edit to the employee and their manager. App-only Graph; the
 // folder is derived from identity, never an input. Idempotent.
-const email = KnowledgeRetentionUtils.resolveIdentity(data);
+const identity = KnowledgeRetentionUtils.resolveIdentity(data);
+const email = identity.email;
 const dvToken = await KnowledgeRetentionUtils.dataverseToken(data);
 const S = KnowledgeRetentionUtils.SCHEMA;
 const ST = KnowledgeRetentionUtils.STATUS;
@@ -778,8 +831,8 @@ const ST = KnowledgeRetentionUtils.STATUS;
 // is still recoverable: upload_document needs the folder, and an open-only lookup
 // here would leave that interview with no way to file its documents.
 const interview =
-  (await KnowledgeRetentionUtils.loadInterviewRow(data, dvToken, email)) ||
-  (await KnowledgeRetentionUtils.loadInterviewRow(data, dvToken, email, { completed: true }));
+  (await KnowledgeRetentionUtils.loadInterviewRow(data, dvToken, identity)) ||
+  (await KnowledgeRetentionUtils.loadInterviewRow(data, dvToken, identity, { completed: true }));
 if (!interview) {
   throw new Error('No interview found. Start an interview first.');
 }
@@ -835,37 +888,8 @@ const folder = await ensureFolder('Interviews', String(interviewNumber));
 const folderItemId = folder.id;
 const webUrl = folder.webUrl;
 
-// Grant edit to the employee, and to their manager when one exists.
-const recipients = [{ email }];
-const managerResponse = await KnowledgeRetentionUtils.graph(data, graphToken, {
-  method: 'GET',
-  path: `/users/${encodeURIComponent(email)}/manager?$select=mail,userPrincipalName`,
-});
-let managerEmail = null;
-if (managerResponse.status === 200 && managerResponse.json) {
-  managerEmail = managerResponse.json.mail || managerResponse.json.userPrincipalName || null;
-  if (managerEmail) {
-    recipients.push({ email: managerEmail });
-  }
-}
-
-// graph() only throws on 401/403, so an invite that fails for any other reason
-// used to pass silently and the folder was reported ready with nobody able to
-// open it. Uploads keep working either way (they are app-only), so a failure here
-// is reported rather than fatal — the user shares the folder manually instead.
-const inviteResponse = await KnowledgeRetentionUtils.graph(data, graphToken, {
-  method: 'POST',
-  path: `/sites/${siteId}/drive/items/${folderItemId}/invite`,
-  body: { recipients, roles: ['write'], requireSignIn: true, sendInvitation: false },
-});
-const accessGranted = inviteResponse.status === 200 || inviteResponse.status === 201;
-const accessFailureDetail = accessGranted
-  ? null
-  : (inviteResponse.json && inviteResponse.json.error && inviteResponse.json.error.message) ||
-    inviteResponse.text ||
-    `HTTP ${inviteResponse.status}`;
-
-// Persist the folder URL on the interview.
+// Persist as soon as the folder exists. Permission work is deliberately after
+// this checkpoint so a manager lookup/invite failure never loses the URL.
 const body = {};
 body[S.interview.folderUrl] = webUrl;
 await KnowledgeRetentionUtils.dv(data, dvToken, {
@@ -873,6 +897,122 @@ await KnowledgeRetentionUtils.dv(data, dvToken, {
   path: `/${S.entitySets.interviews}(${interview[S.interview.id]})`,
   body,
 });
+
+// Resolve the manager independently. The Langdock ID is never sent to Graph:
+// Graph invite recipients require an email address, while /users/{id} here is
+// the caller's asserted email/UPN lookup.
+let managerEmail = null;
+let managerLookupFailure = null;
+if (!email) {
+  managerLookupFailure = 'No email or userPrincipalName was available for the Graph direct grant.';
+} else {
+  try {
+    const managerResponse = await KnowledgeRetentionUtils.graph(data, graphToken, {
+      method: 'GET',
+      path: `/users/${encodeURIComponent(email)}/manager?$select=mail,userPrincipalName`,
+    });
+    if (managerResponse.status === 200 && managerResponse.json) {
+      managerEmail = managerResponse.json.mail || managerResponse.json.userPrincipalName || null;
+    } else if (managerResponse.status !== 404) {
+      const detail =
+        (managerResponse.json && managerResponse.json.error && managerResponse.json.error.message) ||
+        managerResponse.text ||
+        `HTTP ${managerResponse.status}`;
+      managerLookupFailure = `Manager lookup failed (${managerResponse.status}): ${detail}`;
+    }
+  } catch (error) {
+    managerLookupFailure = error.message || String(error);
+  }
+}
+
+function inviteResult(response, recipientEmail) {
+  const values = response && response.json && Array.isArray(response.json.value)
+    ? response.json.value
+    : [];
+  if (response.status === 200 || response.status === 201) {
+    return { granted: true, detail: null };
+  }
+  if (response.status === 207) {
+    const matching = values.filter((permission) => {
+      const invitationEmail = permission.invitation && permission.invitation.email;
+      const grantedEmail =
+        permission.grantedTo && permission.grantedTo.user &&
+        (permission.grantedTo.user.email || permission.grantedTo.user.mail);
+      return [invitationEmail, grantedEmail].some(
+        (value) => value && String(value).toLowerCase() === String(recipientEmail).toLowerCase(),
+      );
+    });
+    const successful = matching.find((permission) => !permission.error) ||
+      (values.length === 1 && !values[0].error ? values[0] : null);
+    if (successful) return { granted: true, detail: null };
+  }
+  const nestedError = response.json && response.json.error;
+  const itemError = values.find((permission) => permission.error);
+  return {
+    granted: false,
+    detail:
+      (itemError && itemError.error && itemError.error.message) ||
+      (nestedError && nestedError.message) ||
+      response.text ||
+      `HTTP ${response.status}`,
+  };
+}
+
+// Invite each direct recipient separately: a manager failure must not turn an
+// employee grant into an all-or-nothing multi-recipient result. A 207 is only
+// treated as successful when its response contains a successful entry for the
+// requested recipient.
+let employeeInvite = {
+  granted: false,
+  detail: email ? null : 'No email or userPrincipalName was available for the Graph direct grant.',
+};
+if (email) {
+  try {
+    const employeeInviteResponse = await KnowledgeRetentionUtils.graph(data, graphToken, {
+      method: 'POST',
+      path: `/sites/${siteId}/drive/items/${folderItemId}/invite`,
+      headers: { Prefer: 'apiversion=2.1' },
+      body: {
+        recipients: [{ email }],
+        roles: ['write'],
+        requireSignIn: true,
+        sendInvitation: false,
+        retainInheritedPermissions: false,
+      },
+    });
+    employeeInvite = inviteResult(employeeInviteResponse, email);
+  } catch (error) {
+    employeeInvite = { granted: false, detail: error.message || String(error) };
+  }
+}
+
+let managerInvite = { granted: false, detail: managerLookupFailure };
+if (managerEmail) {
+  try {
+    const managerInviteResponse = await KnowledgeRetentionUtils.graph(data, graphToken, {
+      method: 'POST',
+      path: `/sites/${siteId}/drive/items/${folderItemId}/invite`,
+      headers: { Prefer: 'apiversion=2.1' },
+      body: {
+        recipients: [{ email: managerEmail }],
+        roles: ['write'],
+        requireSignIn: true,
+        sendInvitation: false,
+        retainInheritedPermissions: false,
+      },
+    });
+    managerInvite = inviteResult(managerInviteResponse, managerEmail);
+  } catch (error) {
+    managerInvite = { granted: false, detail: error.message || String(error) };
+  }
+}
+
+const accessGranted = employeeInvite.granted;
+const managerGranted = managerInvite.granted;
+const accessFailureDetail = employeeInvite.granted ? null : employeeInvite.detail;
+const partialOutcome =
+  (Boolean(managerEmail) && employeeInvite.granted !== managerGranted) ||
+  (Boolean(managerLookupFailure) && employeeInvite.granted);
 
 const interviewForState = Object.assign({}, interview, { [S.interview.folderUrl]: webUrl });
 const children = KnowledgeRetentionUtils.needsChildren(interviewForState)
@@ -883,7 +1023,7 @@ const state = KnowledgeRetentionUtils.computeState(data, interviewForState, chil
 // The employee and their manager are invited automatically, but that can fail and
 // other colleagues are never covered — so always tell the user they own sharing.
 const sharingReminder = accessGranted
-  ? `Tell the user the folder is ready at ${webUrl}, that ${managerEmail ? `their manager (${managerEmail}) also has edit access` : 'no manager could be found automatically, so only they have access so far'}, and that they can share the folder from SharePoint with their manager or anyone else they consider relevant.`
+  ? `Tell the user the folder is ready at ${webUrl}, that ${managerGranted ? `Graph confirmed a direct edit grant for their manager (${managerEmail})` : managerEmail ? `their manager could not be granted a confirmed direct permission${managerInvite.detail ? ` (${managerInvite.detail})` : ''}` : 'no manager could be found automatically, so only their direct grant is confirmed so far'}, and that they can share the folder from SharePoint with their manager or anyone else they consider relevant.`
   // The action is idempotent, so this also fires on a re-run where access was
   // already granted the first time. Say "could not be confirmed", not "was not
   // granted" — the invite result does not prove the current sharing state.
@@ -893,8 +1033,12 @@ return {
   folderCreated: true,
   accessGranted,
   accessFailureDetail,
+  employeeAccessGranted: employeeInvite.granted,
   managerEmail,
-  managerGranted: accessGranted && managerEmail !== null,
+  managerGranted,
+  managerAccessFailureDetail: managerInvite.granted ? null : managerInvite.detail,
+  managerLookupFailure,
+  partialOutcome,
   sharePointFolderWebUrl: webUrl,
   nextAction: state.nextAction,
   instruction: `${sharingReminder} ${state.instruction}`,

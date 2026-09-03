@@ -22,6 +22,10 @@ const KnowledgeRetentionUtils = {
       number: 'ckr_interviewnumber',
       name: 'ckr_name',
       displayName: 'ckr_employeedisplayname',
+      // Schema assumption: no live Dataverse metadata is available locally.
+      // cr32c_aisuiteid is the proposed logical name for the Langdock
+      // stable-user-ID column and must remain a text field until confirmed.
+      userId: 'cr32c_aisuiteid',
       email: 'ckr_employeeemail',
       language: 'ckr_language',
       status: 'ckr_interviewstatus',
@@ -169,21 +173,30 @@ const KnowledgeRetentionUtils = {
   },
 
   // ===========================================================================
-  // Identity — derived exclusively from the Langdock session. Fail closed.
+  // Identity — derived exclusively from the Langdock session. The stable
+  // Langdock user ID is authoritative for interview ownership. Email/UPN is
+  // retained only as a display/Graph snapshot and for legacy rows.
   // alternativeEmail is deliberately never consulted.
   // ===========================================================================
-  resolveIdentity(data) {
-    const upn =
-      (data.user && typeof data.user.userPrincipalName === 'string' && data.user.userPrincipalName.trim()) ||
-      (data.user && typeof data.user.email === 'string' && data.user.email.trim()) ||
+  resolveIdentity(data, { requireStableId = false } = {}) {
+    const user = data.user || {};
+    const userId =
+      (typeof user.id === 'string' && user.id.trim()) ||
       null;
-    if (!upn) {
+    const email =
+      (typeof user.userPrincipalName === 'string' && user.userPrincipalName.trim()) ||
+      (typeof user.email === 'string' && user.email.trim()) ||
+      null;
+    if (!userId && !email) {
       throw new Error('Unable to determine your identity from the session. Please contact your administrator.');
+    }
+    if (requireStableId && !userId) {
+      throw new Error('Unable to determine the stable user ID from the session. Please contact your administrator.');
     }
     // Do NOT lowercase: the original flows filter ckr_employeeemail on the raw
     // asserted value, and OData `eq` on a string column is case-sensitive in
     // practice. Lowercasing would miss mixed-case stored emails on resume.
-    return upn;
+    return { userId, email };
   },
 
   // Escape single quotes for safe interpolation into an OData $filter literal.
@@ -303,22 +316,61 @@ const KnowledgeRetentionUtils = {
   // ===========================================================================
   // State loading — the user's open interview, or the most recent completed one.
   // ===========================================================================
-  async loadInterviewRow(data, token, email, { completed } = {}) {
+  async loadInterviewRow(data, token, identity, { completed } = {}) {
     const S = KnowledgeRetentionUtils.SCHEMA;
     const ST = KnowledgeRetentionUtils.STATUS;
-    const safeEmail = KnowledgeRetentionUtils.escapeODataLiteral(email);
     // "completed" spans finalized (60) and documentGenerated (70): once the final
     // document is filed the interview is still the row post-finalize actions need.
     // An `eq 60` filter would make a document-generated interview invisible.
     const statusFilter = completed
       ? `${S.interview.status} ge ${ST.interview.finalized} and ${S.interview.status} lt ${ST.interview.cancelled}`
       : `${S.interview.status} lt ${ST.interview.finalized}`;
-    const filter = `${S.interview.email} eq '${safeEmail}' and ${statusFilter}`;
-    const result = await KnowledgeRetentionUtils.dv(data, token, {
-      method: 'GET',
-      path: `/${S.entitySets.interviews}?$filter=${encodeURIComponent(filter)}&$orderby=createdon desc&$top=1`,
-    });
-    return result && result.value && result.value.length > 0 ? result.value[0] : null;
+    const find = async (filter) => {
+      const result = await KnowledgeRetentionUtils.dv(data, token, {
+        method: 'GET',
+        path: `/${S.entitySets.interviews}?$filter=${encodeURIComponent(filter)}&$orderby=createdon desc&$top=1`,
+      });
+      return result && result.value && result.value.length > 0 ? result.value[0] : null;
+    };
+
+    // Stable ID is authoritative. Email fallback is restricted to legacy rows
+    // whose new ID field is null, so a row owned by another stable ID can never
+    // be returned by the fallback.
+    if (identity.userId) {
+      const safeUserId = KnowledgeRetentionUtils.escapeODataLiteral(identity.userId);
+      const current = await find(`${S.interview.userId} eq '${safeUserId}' and ${statusFilter}`);
+      if (current) return current;
+    }
+    if (identity.email) {
+      const safeEmail = KnowledgeRetentionUtils.escapeODataLiteral(identity.email);
+      return find(
+        `${S.interview.email} eq '${safeEmail}' and ${S.interview.userId} eq null and ${statusFilter}`,
+      );
+    }
+    return null;
+  },
+
+  // Same stable-ID-first/legacy-null-ID candidate logic as loadInterviewRow,
+  // used by get_runtime_state's latest-cancelled guard.
+  async loadLatestInterviewRow(data, token, identity) {
+    const S = KnowledgeRetentionUtils.SCHEMA;
+    const find = async (filter) => {
+      const result = await KnowledgeRetentionUtils.dv(data, token, {
+        method: 'GET',
+        path: `/${S.entitySets.interviews}?$filter=${encodeURIComponent(filter)}&$orderby=createdon desc&$top=1`,
+      });
+      return result && result.value && result.value.length > 0 ? result.value[0] : null;
+    };
+    if (identity.userId) {
+      const safeUserId = KnowledgeRetentionUtils.escapeODataLiteral(identity.userId);
+      const current = await find(`${S.interview.userId} eq '${safeUserId}'`);
+      if (current) return current;
+    }
+    if (identity.email) {
+      const safeEmail = KnowledgeRetentionUtils.escapeODataLiteral(identity.email);
+      return find(`${S.interview.email} eq '${safeEmail}' and ${S.interview.userId} eq null`);
+    }
+    return null;
   },
 
   // One FetchXML join (SE-3215) instead of three child GETs. FetchXML omits
@@ -769,12 +821,13 @@ const KnowledgeRetentionUtils = {
 // Saves the approved summary for the current topic with optimistic concurrency.
 // The current topic is resolved server-side; the caller passes only the expected
 // order integer. A mismatch returns a conflict and writes nothing.
-const email = KnowledgeRetentionUtils.resolveIdentity(data);
+const identity = KnowledgeRetentionUtils.resolveIdentity(data);
+const email = identity.email;
 const token = await KnowledgeRetentionUtils.dataverseToken(data);
 const S = KnowledgeRetentionUtils.SCHEMA;
 const ST = KnowledgeRetentionUtils.STATUS;
 
-const interview = await KnowledgeRetentionUtils.loadInterviewRow(data, token, email);
+const interview = await KnowledgeRetentionUtils.loadInterviewRow(data, token, identity);
 if (!interview) {
   throw new Error('No open interview found.');
 }
