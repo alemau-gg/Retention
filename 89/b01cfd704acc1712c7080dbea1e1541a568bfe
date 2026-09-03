@@ -1,0 +1,83 @@
+handover-agent/skills/knowledge-retention-contributing/references/environment-contract.md
+  s_34d5d83719fd24::t_b8ce2caab8589b 96
+  s_34d5d83719fd24::t_52375f983440a5 95,97-98
+  s_34d5d83719fd24::t_974aec3c4c9226 11,78,80-83,92-94,99-107
+handover-agent/system-prompt.md
+  s_34d5d83719fd24::t_291446a31df2bd 215
+  s_34d5d83719fd24::t_1b2872de31edf0 160
+  s_34d5d83719fd24::t_7e6f10486ab351 62-67
+handover-agent/integrations/coding-tools/actions/verify_helpers.js
+  s_34d5d83719fd24::t_7a260533dab628 2,9-19
+handover-agent/integrations/coding-tools/actions/promote_to_staging.js
+  s_34d5d83719fd24::t_bfeccd67d006c0 3-5,7-20
+handover-agent/integrations/coding-tools/actions/revert_to_staging.js
+  s_34d5d83719fd24::t_02c153d14ba068 3-5,9-22
+handover-agent/integrations/coding-tools/manifest.json
+  s_34d5d83719fd24::t_555128fc20aaa1 451-463
+  s_34d5d83719fd24::t_54fa372d6a05d7 44-61
+  s_34d5d83719fd24::t_0dbb4b29227d2a 21,26-43,298-404,406-450,464-469,471-495,497-530
+  s_34d5d83719fd24::t_4d0fdb85713cc3 405,470,496
+handover-agent/integrations/coding-tools/actions/get_skill_file.js
+  s_34d5d83719fd24::t_2c5673add8aab7 1-2,7-18,29-42,45-79,86-96
+  s_34d5d83719fd24::t_410049263f8fc2 19-23
+  s_34d5d83719fd24::t_a2685dfb08275e 44
+  s_34d5d83719fd24::t_ec1bba90be1e57 3-6,24-28,43,80-85
+handover-agent/integrations/coding-tools/actions/get_skill.js
+  s_34d5d83719fd24::t_67e00d6906fb52 1,6-12,23-74
+  s_34d5d83719fd24::t_bc64cbb71202c6 14-18
+  s_34d5d83719fd24::t_6c3c6ae8645c68 2-5,13,19-22
+handover-agent/integrations/coding-tools/actions/get_integration.js
+  s_34d5d83719fd24::t_a4052b2d777915 1-6,8-70,76-80
+  s_34d5d83719fd24::t_50eb81c0ae374c 7,71-75
+handover-agent/integrations/coding-tools/actions/list_skills.js
+  s_34d5d83719fd24::t_7d3e1c1d91d830 1,6-9,19-46,52-54,56-73,76-77,79-88,91
+  s_34d5d83719fd24::t_45d7898833511c 2-5,10-18,74-75,78,89-90
+  s_34d5d83719fd24::t_b06f5f800c8c21 47-51,55
+handover-agent/integrations/coding-tools/actions/get_action.js
+  s_34d5d83719fd24::t_fb467df3687c8d 1-77
+handover-agent/integrations/coding-tools/actions/get_agent.js
+  s_34d5d83719fd24::t_251d74ab7e1c53 1,3-10,17-51,57-64,67-73,78-81
+  s_34d5d83719fd24::t_8b6d1b2019bb68 2,11-16,52-56,65-66,74-77
+handover-agent/integrations/coding-tools/actions/sync_helpers.js
+  s_34d5d83719fd24::t_54078c0f646bdc 2,8-18
+handover-agent/skills/knowledge-retention-contributing/SKILL.md
+  s_34d5d83719fd24::t_41d6dcde6738b4 62-66
+  s_34d5d83719fd24::t_12f8cb1c168e80 3
+handover-agent/integrations/coding-tools/actions/update_action.js
+  s_34d5d83719fd24::t_8debbdf773b2c9 3,5-18
+handover-agent/integrations/coding-tools/actions/list_integrations.js
+  s_34d5d83719fd24::t_e516ea19b24284 1-69
+handover-agent/skills/knowledge-retention-contributing/references/scope-and-regression.md
+  s_34d5d83719fd24::t_e31abd88b8744d 9-10,18-32
+  s_34d5d83719fd24::t_93d7fb8965ee41 33
+handover-agent/skills/knowledge-retention-contributing/references/change-process.md
+  s_34d5d83719fd24::t_7556386cd52c9a 70-71,135-142
+  s_430ddf3f2facf5::t_5325e38e418eea 143
+handover-agent/skills/knowledge-retention-contributing/references/integration-modification.md
+  s_34d5d83719fd24::t_0d2ca3340338bf 7-12,41-46
+  s_34d5d83719fd24::t_07b1af2b5400d0 47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "89b01cfd704acc1712c7080dbea1e1541a568bfe",
+  "prompts": {},
+  "sessions": {
+    "s_34d5d83719fd24": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "48a0220d-8cc0-435f-890c-eaef0bf41e85",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    },
+    "s_430ddf3f2facf5": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "063c3ec9-d608-434d-a5f9-27a18dcea5bd",
+        "model": "grok-4.6"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
