@@ -327,7 +327,7 @@
     {
       "slug": "save_topic_summary",
       "name": "Save topic summary",
-      "description": "Saves the user-approved summary TEXT for the current topic in Dataverse and advances the topic to completed. This stores content only; it creates no file. Call generate_topic_document afterwards, with the same topic order, to produce and file the topic's Word document. Rejects the write with a conflict if the expected topic order no longer matches the backend.",
+      "description": "Saves the user-approved Markdown summary FILE for the current topic in Dataverse and advances the topic to completed. The user can review and edit the attached Markdown before saving. This stores content only; it creates no Word file. Call generate_topic_document afterwards with the same topic order. Rejects the write with a conflict if the expected topic order no longer matches the backend.",
       "nativeActionType": "NONE",
       "actionType": "API",
       "requiresConfirmation": false,
@@ -346,16 +346,16 @@
           "jsonSchema": null
         },
         {
-          "slug": "summaryText",
-          "label": "Summary text",
-          "description": "The user-approved summary for the current topic. Save only after explicit approval.",
+          "slug": "summaryFile",
+          "label": "Reviewed Markdown summary",
+          "description": "The exact Markdown file the user reviewed and approved. Attach the edited file after the user confirms it. The backend stores its full UTF-8 contents; do not replace it with a paraphrase or a different file.",
           "placeholder": null,
-          "type": "MULTI_LINE_TEXT",
+          "type": "FILE",
           "required": true,
           "options": null,
-          "allowMultiSelect": null,
+          "allowMultiSelect": false,
           "allowMultiFile": false,
-          "maxLength": 32000,
+          "maxLength": null,
           "jsonSchema": null
         }
       ]
