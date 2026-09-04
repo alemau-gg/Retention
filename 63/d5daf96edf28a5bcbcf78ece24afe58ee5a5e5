@@ -1,0 +1,22 @@
+main-agent/integrations/markdown-to-docx-test/manifest.json
+  s_ea3621b09a6b7d::t_50a0cd01b97dc7 22-23,25-26,29,31
+  s_ea3621b09a6b7d::t_9a7a09f75a27cc 24
+main-agent/integrations/markdown-to-docx-test/actions/markdown_to_docx_test.js
+  s_ea3621b09a6b7d::t_9a7a09f75a27cc 790-799
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "63d5daf96edf28a5bcbcf78ece24afe58ee5a5e5",
+  "prompts": {},
+  "sessions": {
+    "s_ea3621b09a6b7d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "bdfaa3df-15de-46f8-975a-80035e72119e",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
