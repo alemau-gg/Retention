@@ -6,7 +6,8 @@ description: >-
   (GenerateOrReviewTopicSummary), missing topic-file recovery
   (UploadMissingTopicDocuments), and the final branded handover
   (BuildFinalDocument / FinalizeAndCollectFeedback). Default path is writing
-  the topic summary text; the backend turns it into the .docx. Open
+  and reviewing an editable Markdown summary file; the backend turns it into
+  the .docx. Open
   references/final-document.md only for the final handover. Not for discovery,
   topic generation, or live Q&A — those belong to
   knowledge-retention-interviewing / backend nextQuestionText.
@@ -84,7 +85,7 @@ After explicit approval:
 2. `generate_topic_document` with the same order and nothing else. The backend reads the saved summary, renders the standardized `.docx`, files it, and returns it as an attachment. Do not build, format, name, or upload that file, do not use the code interpreter for it, and do not call `upload_document` for it.
 3. Show the returned attachment and the folder link. If it comes back with `conflict: true`, follow its instruction instead of improvising a file.
 
-Write the summary into an editable Markdown file: headings, bullets, numbered lists, `**bold**`, `*italic*`, and pipe tables all survive into Word. Show or attach that file for user review and use the exact approved file in `save_topic_summary`. Mermaid fences are kept out of the `.docx` and preserved in the Markdown transcript the backend files under `Source transcripts/`. Never write `{}` / `[bracket]` placeholders, a cover page, TOC, exec summary, or 1.1–1.4 sections.
+Use the `write` document tool to create or update the editable Markdown file: headings, bullets, numbered lists, `**bold**`, `*italic*`, and pipe tables all survive into Word. Show or attach that file for user review and use the exact approved file in `save_topic_summary`. Mermaid fences are kept out of the `.docx` and preserved in the Markdown transcript the backend files under `Source transcripts/`. Never write `{}` / `[bracket]` placeholders, a cover page, TOC, exec summary, or 1.1–1.4 sections.
 
 ---
 

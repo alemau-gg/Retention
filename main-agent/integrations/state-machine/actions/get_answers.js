@@ -135,7 +135,7 @@ const KnowledgeRetentionUtils = {
     consentQuestion:
       'Would you like to enable this functionality for the current interview? Please explicitly confirm or decline.',
     postGeneration:
-      'Great, I have prepared the topics and questions for your knowledge retention interview. You do not need to finish in one session: each answer you confirm is saved, so you can pause and resume in a later session and pick up where you left off. Just be sure to confirm the answer you are working on before you stop. Let me know when you are ready to start with the first topic.',
+      'Great, I have prepared the topics and questions for your knowledge retention interview. You do not need to finish in one session: each answer you confirm is saved, so you can pause and resume in a later session and pick up where you left off. Just be sure to confirm the answer you are working on before you stop. I will now begin with the first topic.',
     discoveryIntro:
       "you'll first answer a few questions about your work so relevant topics can be prepared",
     interviewOverview:
