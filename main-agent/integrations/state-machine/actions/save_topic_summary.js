@@ -864,19 +864,27 @@ function decodeUtf8SummaryFile(file) {
   const bytes = Buffer.from(file.binary.data);
   let text;
   if (typeof TextDecoder === 'function') {
-    text = new TextDecoder('utf-8').decode(bytes);
+    try {
+      text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+    } catch (_error) {
+      throw new Error('The reviewed Markdown summary file is not valid UTF-8.');
+    }
   } else {
     let binary = '';
     for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-    text = decodeURIComponent(escape(binary));
+    try {
+      text = decodeURIComponent(escape(binary));
+    } catch (_error) {
+      throw new Error('The reviewed Markdown summary file is not valid UTF-8.');
+    }
   }
   if (text.charCodeAt(0) === 0xfeff) text = text.slice(1);
   text = text.replace(/\r\n?/g, '\n');
   if (!text.trim()) {
     throw new Error('The reviewed Markdown summary file is empty.');
   }
-  if (text.length > 32000) {
-    throw new Error('The reviewed Markdown summary is longer than the supported 32000-character limit.');
+  if (text.length > 1048576) {
+    throw new Error('The reviewed Markdown summary is longer than the supported 1048576-character limit.');
   }
   return text;
 }
