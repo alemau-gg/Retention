@@ -1683,6 +1683,7 @@ if (!interview[S.interview.folderUrl]) {
 
 const topicName = topic[S.topic.name] === null || topic[S.topic.name] === undefined ? '' : String(topic[S.topic.name]);
 const docxFileName = KnowledgeRetentionUtils.topicDocumentFileName(requestedOrder, topicName);
+const fallbackDocxFileName = docxFileName.replace(/\.docx$/i, '-FINAL.docx');
 const markdownFileName = docxFileName.replace(/\.docx$/i, '.md');
 const generatedOn = new Date().toISOString();
 
@@ -1700,7 +1701,6 @@ const markdownLines = [
   `- Role: ${interview[S.interview.role] || 'not recorded'}`,
   `- Business unit: ${interview[S.interview.businessUnit] || 'not recorded'}`,
   `- Interview language: ${KnowledgeRetentionUtils.languageName(interview[S.interview.language])}`,
-  `- Generated: ${generatedOn}`,
   '',
   '## Approved topic summary (source Markdown)',
   '',
@@ -1809,28 +1809,6 @@ const bodyParts = [];
 bodyParts.push(DOCX.paragraphXml(documentTitle, { style: 'DocTitle', literal: true }));
 bodyParts.push(DOCX.paragraphXml(subtitleParts.join(' \u00b7 '), { style: 'DocSubtitle', literal: true }));
 
-const metaRows = [
-  ['Employee', employeeName],
-  ['Role', interview[S.interview.role]],
-  ['Business unit', interview[S.interview.businessUnit]],
-  ['Interview', interview[S.interview.number]],
-  ['Topic', `${requestedOrder} of ${children.topics.length}${topicName ? ` \u2014 ${topicName}` : ''}`],
-  ['Interview language', KnowledgeRetentionUtils.languageName(interview[S.interview.language])],
-  ['Generated', `${generatedOn.slice(0, 16).replace('T', ' ')} UTC`],
-]
-  .map((row) => [row[0], row[1] === null || row[1] === undefined ? '' : String(row[1])])
-  .filter((row) => row[1]);
-if (metaRows.length > 0) {
-  bodyParts.push(
-    DOCX.tableXml(metaRows, ['left', 'left'], {
-      literal: true,
-      noHeader: true,
-      boldFirstColumn: true,
-      ratios: [0.28, 0.72],
-    }),
-  );
-}
-
 bodyParts.push(DOCX.renderBlocks(DOCX.parseBlocks(summaryText), renderContext));
 
 bodyParts.push(DOCX.paragraphXml('Supporting documents', { style: 'Heading1', literal: true }));
@@ -1858,6 +1836,30 @@ const docxBytes = DOCX.build(bodyParts.join(''), renderContext.orderedNums, {
 const notices = [];
 let transcriptFileName = null;
 let transcriptWebUrl = null;
+let outputDocxFileName = docxFileName;
+const canonicalDocxPath = `/sites/${siteId}/drive/root:/${encodedFolder}/${encodeURIComponent(docxFileName)}`;
+try {
+  const deleteResponse = await KnowledgeRetentionUtils.graph(data, graphToken, {
+    method: 'DELETE',
+    path: canonicalDocxPath,
+  });
+  if (deleteResponse.status !== 200 && deleteResponse.status !== 204 && deleteResponse.status !== 404) {
+    const detail =
+      (deleteResponse.json && deleteResponse.json.error && deleteResponse.json.error.message) ||
+      deleteResponse.text ||
+      `HTTP ${deleteResponse.status}`;
+    outputDocxFileName = fallbackDocxFileName;
+    notices.push(
+      `The canonical topic document "${docxFileName}" could not be replaced (${detail}); the new document was filed as "${fallbackDocxFileName}".`,
+    );
+  }
+} catch (error) {
+  outputDocxFileName = fallbackDocxFileName;
+  notices.push(
+    `The canonical topic document "${docxFileName}" could not be replaced (${error.message || String(error)}); the new document was filed as "${fallbackDocxFileName}".`,
+  );
+}
+
 try {
   const transcriptResponse = await KnowledgeRetentionUtils.graph(data, graphToken, {
     method: 'PUT',
@@ -1886,7 +1888,7 @@ try {
 
 const uploadResponse = await KnowledgeRetentionUtils.graph(data, graphToken, {
   method: 'PUT',
-  path: `/sites/${siteId}/drive/root:/${encodedFolder}/${encodeURIComponent(docxFileName)}:/content`,
+  path: `/sites/${siteId}/drive/root:/${encodedFolder}/${encodeURIComponent(outputDocxFileName)}:/content`,
   isBinary: true,
   headers: { 'Content-Type': DOCX_MIME },
   body: Buffer.from(docxBytes),
@@ -1898,7 +1900,7 @@ if (uploadResponse.status !== 200 && uploadResponse.status !== 201) {
 }
 
 const state = KnowledgeRetentionUtils.computeState(data, interview, children);
-const generatedNote = `"${docxFileName}" was generated from the stored summary for topic ${requestedOrder} and filed in the interview folder, and the same file is attached to this result. Show the user that attachment and the folder link; do not rebuild, reformat, re-upload, or re-attach it, and do not call upload_document for it.${
+const generatedNote = `"${outputDocxFileName}" was generated from the stored summary for topic ${requestedOrder} and filed in the interview folder, and the same file is attached to this result. Show the user that attachment and the folder link; do not rebuild, reformat, re-upload, or re-attach it, and do not call upload_document for it.${
   transcriptFileName ? ` Its Markdown source transcript was filed under ${SOURCE_FOLDER}/ and is deliberately not returned to chat; do not mention it as a deliverable.` : ''
 }`;
 
@@ -1906,7 +1908,7 @@ const result = {
   generated: true,
   conflict: false,
   topicOrder: requestedOrder,
-  fileName: docxFileName,
+  fileName: outputDocxFileName,
   fileWebUrl: (uploadResponse.json && uploadResponse.json.webUrl) || null,
   sourceTranscriptFileName: transcriptFileName,
   sourceTranscriptWebUrl: transcriptWebUrl,
@@ -1923,7 +1925,7 @@ const result = {
   // Langdock file output: a single object under `files` is what surfaces the
   // .docx as a chat attachment. The Markdown transcript is deliberately absent.
   files: {
-    fileName: docxFileName,
+    fileName: outputDocxFileName,
     mimeType: DOCX_MIME,
     base64: DOCX.base64(docxBytes),
     lastModified: generatedOn,
