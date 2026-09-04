@@ -853,9 +853,37 @@ if (!topic || Number(topic[S.topic.order]) !== expectedOrder) {
   };
 }
 
+function decodeUtf8SummaryFile(file) {
+  if (!file || !file.binary || !file.binary.data) {
+    throw new Error('Attach the reviewed Markdown summary file before saving.');
+  }
+  const fileName = String(file.fileName || '').toLowerCase();
+  if (!fileName.endsWith('.md') && !fileName.endsWith('.markdown')) {
+    throw new Error('The summary file must be a Markdown file ending in .md or .markdown.');
+  }
+  const bytes = Buffer.from(file.binary.data);
+  let text;
+  if (typeof TextDecoder === 'function') {
+    text = new TextDecoder('utf-8').decode(bytes);
+  } else {
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    text = decodeURIComponent(escape(binary));
+  }
+  if (text.charCodeAt(0) === 0xfeff) text = text.slice(1);
+  text = text.replace(/\r\n?/g, '\n');
+  if (!text.trim()) {
+    throw new Error('The reviewed Markdown summary file is empty.');
+  }
+  if (text.length > 32000) {
+    throw new Error('The reviewed Markdown summary is longer than the supported 32000-character limit.');
+  }
+  return text;
+}
+
 const now = new Date().toISOString();
 const body = {};
-body[S.topic.summary] = data.input.summaryText;
+body[S.topic.summary] = decodeUtf8SummaryFile(data.input.summaryFile);
 body[S.topic.status] = ST.topic.summarized;
 body[S.topic.summaryStatus] = ST.summary.confirmed;
 body[S.topic.summaryConfirmedOn] = now;

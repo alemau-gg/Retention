@@ -49,7 +49,7 @@ Confirmed supporting files **are** source material for this skill. When writing 
 
 ## Topic summary
 
-**Done when:** user explicitly approves → `save_topic_summary` (`expectedTopicOrder`) → `generate_topic_document` (`topicOrder`) returns the filed `.docx`. Two distinct steps: `save_topic_summary` stores the text, `generate_topic_document` creates the file. Your job ends at the approved text.
+**Done when:** user explicitly approves the reviewed Markdown file → `save_topic_summary` (`expectedTopicOrder` + the exact `summaryFile`) → `generate_topic_document` (`topicOrder`) returns the filed `.docx`. Two distinct steps: `save_topic_summary` stores the file's text, `generate_topic_document` creates the Word file. Your job ends at the approved file.
 
 ### Forbidden (hard stop)
 
@@ -66,7 +66,7 @@ If any of that appears in a draft, discard it and restart from `references/summa
 
 ### Write
 
-**Inputs:** ordered Q/A for one topic (`topicQnA` from state; always call `get_answers` as well). Prefer `rawUserMessages` when present, else the confirmed answer. Also any confirmed supporting files for this interview: read them and include relevant contents. Never from memory.
+**Inputs:** ordered Q/A for one topic (`topicQnA` from state; do not call `get_answers` when it is usable). Prefer `rawUserMessages` when present, else the confirmed answer. Also any confirmed supporting files for this interview: read them and include relevant contents. Never from memory.
 
 1. Write for the **successor**, not the interviewee.
 2. Follow `references/summary-format.md` only.
@@ -80,11 +80,11 @@ If any of that appears in a draft, discard it and restart from `references/summa
 
 After explicit approval:
 
-1. `save_topic_summary` with `expectedTopicOrder`. This saves the text only — no file exists yet.
+1. Create or update the complete Markdown summary file, attach the exact file the user reviews, and get explicit approval. Then call `save_topic_summary` with `expectedTopicOrder` and that exact `summaryFile`. This saves the file's text only — no Word file exists yet.
 2. `generate_topic_document` with the same order and nothing else. The backend reads the saved summary, renders the standardized `.docx`, files it, and returns it as an attachment. Do not build, format, name, or upload that file, do not use the code interpreter for it, and do not call `upload_document` for it.
 3. Show the returned attachment and the folder link. If it comes back with `conflict: true`, follow its instruction instead of improvising a file.
 
-Write the summary in markdown: headings, bullets, numbered lists, `**bold**`, `*italic*`, and pipe tables all survive into Word. Mermaid fences are kept out of the `.docx` and preserved in the Markdown transcript the backend files under `Source transcripts/`. Never write `{}` / `[bracket]` placeholders, a cover page, TOC, exec summary, or 1.1–1.4 sections.
+Write the summary into an editable Markdown file: headings, bullets, numbered lists, `**bold**`, `*italic*`, and pipe tables all survive into Word. Show or attach that file for user review and use the exact approved file in `save_topic_summary`. Mermaid fences are kept out of the `.docx` and preserved in the Markdown transcript the backend files under `Source transcripts/`. Never write `{}` / `[bracket]` placeholders, a cover page, TOC, exec summary, or 1.1–1.4 sections.
 
 ---
 
