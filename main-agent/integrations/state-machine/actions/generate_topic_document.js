@@ -1830,35 +1830,14 @@ const docxBytes = DOCX.build(bodyParts.join(''), renderContext.orderedNums, {
 // Upload. The transcript is best-effort (the .docx is the deliverable); the
 // .docx upload is a hard failure. Neither touches interview or topic state, so
 // a failed run leaves the topic exactly as it was and can simply be retried.
-// Both use a plain PUT, which replaces the previous generated file in place and
-// never reaches into Supporting documents/.
+// The DOCX uses a plain PUT, which replaces the previous generated file in
+// place. Cleanup of an older fallback file is best-effort and never blocks the
+// newly generated canonical document.
 // ===========================================================================
 const notices = [];
 let transcriptFileName = null;
 let transcriptWebUrl = null;
-let outputDocxFileName = docxFileName;
-const canonicalDocxPath = `/sites/${siteId}/drive/root:/${encodedFolder}/${encodeURIComponent(docxFileName)}`;
-try {
-  const deleteResponse = await KnowledgeRetentionUtils.graph(data, graphToken, {
-    method: 'DELETE',
-    path: canonicalDocxPath,
-  });
-  if (deleteResponse.status !== 200 && deleteResponse.status !== 204 && deleteResponse.status !== 404) {
-    const detail =
-      (deleteResponse.json && deleteResponse.json.error && deleteResponse.json.error.message) ||
-      deleteResponse.text ||
-      `HTTP ${deleteResponse.status}`;
-    outputDocxFileName = fallbackDocxFileName;
-    notices.push(
-      `The canonical topic document "${docxFileName}" could not be replaced (${detail}); the new document was filed as "${fallbackDocxFileName}".`,
-    );
-  }
-} catch (error) {
-  outputDocxFileName = fallbackDocxFileName;
-  notices.push(
-    `The canonical topic document "${docxFileName}" could not be replaced (${error.message || String(error)}); the new document was filed as "${fallbackDocxFileName}".`,
-  );
-}
+const outputDocxFileName = docxFileName;
 
 try {
   const transcriptResponse = await KnowledgeRetentionUtils.graph(data, graphToken, {
@@ -1897,6 +1876,27 @@ if (uploadResponse.status !== 200 && uploadResponse.status !== 201) {
   const detail =
     (uploadResponse.json && uploadResponse.json.error && uploadResponse.json.error.message) || uploadResponse.text || '';
   throw new Error(KnowledgeRetentionUtils.failureMessage(uploadResponse.status, detail));
+}
+
+const fallbackDocxPath = `/sites/${siteId}/drive/root:/${encodedFolder}/${encodeURIComponent(fallbackDocxFileName)}`;
+try {
+  const cleanupResponse = await KnowledgeRetentionUtils.graph(data, graphToken, {
+    method: 'DELETE',
+    path: fallbackDocxPath,
+  });
+  if (cleanupResponse.status !== 200 && cleanupResponse.status !== 204 && cleanupResponse.status !== 404) {
+    const detail =
+      (cleanupResponse.json && cleanupResponse.json.error && cleanupResponse.json.error.message) ||
+      cleanupResponse.text ||
+      `HTTP ${cleanupResponse.status}`;
+    notices.push(
+      `An older fallback document "${fallbackDocxFileName}" could not be removed (${detail}); the new canonical document is current.`,
+    );
+  }
+} catch (error) {
+  notices.push(
+    `An older fallback document "${fallbackDocxFileName}" could not be removed (${error.message || String(error)}); the new canonical document is current.`,
+  );
 }
 
 const state = KnowledgeRetentionUtils.computeState(data, interview, children);
