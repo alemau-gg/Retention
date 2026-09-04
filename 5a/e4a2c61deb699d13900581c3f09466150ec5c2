@@ -1,0 +1,49 @@
+main-agent/integrations/state-machine/actions/upload_document.js
+  s_ea3621b09a6b7d::t_751f766fc4d9fc 689
+main-agent/integrations/state-machine/actions/save_consent.js
+  s_ea3621b09a6b7d::t_751f766fc4d9fc 689
+main-agent/integrations/state-machine/actions/get_discovery.js
+  s_ea3621b09a6b7d::t_751f766fc4d9fc 688
+main-agent/integrations/state-machine/actions/generate_topic_document.js
+  s_ea3621b09a6b7d::t_751f766fc4d9fc 689
+main-agent/integrations/state-machine/actions/get_runtime_state.js
+  s_ea3621b09a6b7d::t_751f766fc4d9fc 689
+main-agent/integrations/state-machine/actions/get_answers.js
+  s_ea3621b09a6b7d::t_751f766fc4d9fc 688
+main-agent/integrations/state-machine/actions/create_interview.js
+  s_ea3621b09a6b7d::t_751f766fc4d9fc 689
+main-agent/integrations/state-machine/actions/revise_answer.js
+  s_ea3621b09a6b7d::t_751f766fc4d9fc 689
+main-agent/integrations/state-machine/actions/finalize_interview.js
+  s_ea3621b09a6b7d::t_751f766fc4d9fc 689
+main-agent/integrations/state-machine/actions/save_feedback.js
+  s_ea3621b09a6b7d::t_751f766fc4d9fc 689
+main-agent/integrations/state-machine/actions/save_topics_and_questions.js
+  s_ea3621b09a6b7d::t_751f766fc4d9fc 689
+main-agent/integrations/state-machine/actions/set_up_interview_folder.js
+  s_ea3621b09a6b7d::t_751f766fc4d9fc 689
+main-agent/integrations/state-machine/actions/save_topic_summary.js
+  s_ea3621b09a6b7d::t_751f766fc4d9fc 689
+main-agent/integrations/state-machine/actions/save_discovery.js
+  s_ea3621b09a6b7d::t_751f766fc4d9fc 689
+main-agent/integrations/state-machine/actions/abandon_interview.js
+  s_ea3621b09a6b7d::t_751f766fc4d9fc 688
+main-agent/integrations/state-machine/actions/save_answer.js
+  s_ea3621b09a6b7d::t_751f766fc4d9fc 689
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "5ae4a2c61deb699d13900581c3f09466150ec5c2",
+  "prompts": {},
+  "sessions": {
+    "s_ea3621b09a6b7d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "bdfaa3df-15de-46f8-975a-80035e72119e",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
