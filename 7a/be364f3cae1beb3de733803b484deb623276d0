@@ -1,0 +1,20 @@
+main-agent/integrations/state-machine/actions/generate_topic_document.js
+  s_ea3621b09a6b7d::t_606d9bc2100e9d 1833-1835,1840,1881-1899
+  s_ea3621b09a6b7d::t_2e1454bd0f9b7f 1900-1901
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "7abe364f3cae1beb3de733803b484deb623276d0",
+  "prompts": {},
+  "sessions": {
+    "s_ea3621b09a6b7d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "bdfaa3df-15de-46f8-975a-80035e72119e",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
