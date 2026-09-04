@@ -38,6 +38,7 @@ const REQUIRED_ACTION_SLUGS = [
   'abandon_interview',
   'admin_describe_schema',
   'admin_query_records',
+  'read_supporting_document',
 ];
 
 function helperBlock(source) {

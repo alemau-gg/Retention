@@ -446,6 +446,29 @@
       ]
     },
     {
+      "slug": "read_supporting_document",
+      "name": "Read supporting document",
+      "description": "Optional, read-only action for inspecting one previously uploaded and confirmed supporting file from this interview. The file name is resolved inside the server-owned Supporting documents folder for the caller's current or resumable completed interview; it cannot read other folders or arbitrary files.",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": [
+        {
+          "slug": "fileName",
+          "label": "Supporting file name",
+          "description": "The exact basename, including extension, of a previously uploaded and confirmed supporting file in this interview (for example, Process-Checklist.pdf). Do not provide a path or URL.",
+          "placeholder": "Process-Checklist.pdf",
+          "type": "TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 400,
+          "jsonSchema": null
+        }
+      ]
+    },
+    {
       "slug": "finalize_interview",
       "name": "Finalize interview",
       "description": "Completes the caller's interview once every topic is summarized and every canonical Topic-n-{slug}.docx is present in the interview SharePoint folder (a previously uploaded Topic-n {topic name}.docx also counts). If a topic file is missing, nothing is finalized; the missing file names and stored summaries are returned so those files can be uploaded first.",
