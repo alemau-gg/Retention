@@ -848,13 +848,69 @@ const fileBuffer = Buffer.from(data.input.file.binary.data);
 
 const siteId = data.auth.sharepointSiteId;
 const folderPath = KnowledgeRetentionUtils.interviewFolderPath(interview);
-const encodedPath = folderPath
+const fileName = data.input.fileName;
+const graphToken = await KnowledgeRetentionUtils.graphToken(data);
+
+// Supporting files are kept in a fixed child folder; generated topic recovery
+// and final documents remain at the interview-folder root.
+let destinationFolderPath = folderPath;
+if (docType === 'supporting') {
+  const supportingFolderName = 'Supporting documents';
+  const encodedInterviewPath = folderPath
+    .split('/')
+    .map((segment) => encodeURIComponent(segment))
+    .join('/');
+  const supportingLookupPath = `/sites/${siteId}/drive/root:/${encodedInterviewPath}/${encodeURIComponent(supportingFolderName)}`;
+  const existingFolder = await KnowledgeRetentionUtils.graph(data, graphToken, {
+    method: 'GET',
+    path: supportingLookupPath,
+  });
+  if (existingFolder.status === 404) {
+    const createdFolder = await KnowledgeRetentionUtils.graph(data, graphToken, {
+      method: 'POST',
+      path: `/sites/${siteId}/drive/root:/${encodedInterviewPath}:/children`,
+      body: {
+        name: supportingFolderName,
+        folder: {},
+        '@microsoft.graph.conflictBehavior': 'fail',
+      },
+    });
+    if (createdFolder.status !== 200 && createdFolder.status !== 201) {
+      if (createdFolder.status === 409) {
+        const racedFolder = await KnowledgeRetentionUtils.graph(data, graphToken, {
+          method: 'GET',
+          path: supportingLookupPath,
+        });
+        if (racedFolder.status !== 200) {
+          const detail =
+            (racedFolder.json && racedFolder.json.error && racedFolder.json.error.message) ||
+            racedFolder.text ||
+            '';
+          throw new Error(KnowledgeRetentionUtils.failureMessage(racedFolder.status, detail));
+        }
+      } else {
+        const detail =
+          (createdFolder.json && createdFolder.json.error && createdFolder.json.error.message) ||
+          createdFolder.text ||
+          '';
+        throw new Error(KnowledgeRetentionUtils.failureMessage(createdFolder.status, detail));
+      }
+    }
+  } else if (existingFolder.status !== 200) {
+    const detail =
+      (existingFolder.json && existingFolder.json.error && existingFolder.json.error.message) ||
+      existingFolder.text ||
+      '';
+    throw new Error(KnowledgeRetentionUtils.failureMessage(existingFolder.status, detail));
+  }
+  destinationFolderPath = `${folderPath}/${supportingFolderName}`;
+}
+
+const encodedDestinationFolderPath = destinationFolderPath
   .split('/')
   .map((segment) => encodeURIComponent(segment))
   .join('/');
-const fileName = data.input.fileName;
-const graphToken = await KnowledgeRetentionUtils.graphToken(data);
-const destinationPath = `/sites/${siteId}/drive/root:/${encodedPath}/${encodeURIComponent(fileName)}:/content`;
+const destinationPath = `/sites/${siteId}/drive/root:/${encodedDestinationFolderPath}/${encodeURIComponent(fileName)}:/content`;
 
 // Supporting files are intentionally never overwritten. There is no folder-list
 // action in this integration, so check the exact destination before uploading.
@@ -864,7 +920,7 @@ if (docType === 'supporting') {
     path: destinationPath.replace(/:\/content$/, ''),
   });
   if (existingResponse.status === 200) {
-    throw new Error(`A supporting file named "${fileName}" already exists in the interview folder. Choose a unique file name.`);
+    throw new Error(`A supporting file named "${fileName}" already exists in the Supporting documents folder. Choose a unique file name.`);
   }
   if (existingResponse.status !== 404) {
     const detail =

@@ -363,7 +363,7 @@
     {
       "slug": "generate_topic_document",
       "name": "Generate topic document",
-      "description": "Creates the standardized Word document for one already-approved topic and files it in the caller's interview folder. The summary text is read from Dataverse, never from the caller, so save_topic_summary must have stored it first; pass only the topic order. Also ensures the Source transcripts/ and Supporting documents/ subfolders, files a Markdown source transcript under Source transcripts/, and lists the actual contents of Supporting documents/ in a closing section. Returns the .docx as a file attachment. Reruns replace the generated .docx and transcript for that topic and never touch user-supplied supporting files. Use this instead of building or uploading a topic .docx yourself.",
+      "description": "Creates the standardized Word document for one already-approved topic and files it in the caller's interview folder. The summary text is read from Dataverse, never from the caller, so save_topic_summary must have stored it first; pass only the topic order. Also ensures the Source transcripts/ and Supporting documents/ subfolders, files a Markdown source transcript under Source transcripts/, and lists the actual contents of Supporting documents/ in a closing section. Returns the .docx as a file attachment. Reruns best-effort replace the canonical generated .docx; if SharePoint cannot delete that existing file, the new document is filed with a deterministic -FINAL suffix. Reruns never touch user-supplied supporting files. Use this instead of building or uploading a topic .docx yourself.",
       "nativeActionType": "NONE",
       "actionType": "API",
       "requiresConfirmation": false,
@@ -386,7 +386,7 @@
     {
       "slug": "upload_document",
       "name": "Upload document",
-      "description": "Uploads the final handover or a user-confirmed supporting file into the caller's interview folder on the central CKR site. The destination folder is resolved server-side from the caller's identity. Uploading with docType \"final\" also advances a finalized interview to Document Generated, which is what tells a later session the handover file was filed. Do NOT use this for per-topic documents: generate_topic_document produces those from the stored summary. docType \"topic\" is kept only for legacy recovery of a topic file that generate_topic_document cannot produce.",
+      "description": "Uploads the final handover or a user-confirmed supporting file on the central CKR site. Final and legacy topic files are stored at the caller's interview-folder root; supporting files are stored in the fixed Supporting documents/ subfolder. The destination is resolved server-side from the caller's identity. Uploading with docType \"final\" also advances a finalized interview to Document Generated, which is what tells a later session the handover file was filed. Do NOT use this for per-topic documents: generate_topic_document produces those from the stored summary. docType \"topic\" is kept only for legacy recovery of a topic file that generate_topic_document cannot produce.",
       "nativeActionType": "NONE",
       "actionType": "API",
       "requiresConfirmation": false,
@@ -433,7 +433,7 @@
         {
           "slug": "fileName",
           "label": "File name",
-          "description": "The unique file name to store, including its extension (e.g. Topic-1 Stakeholder map.docx, InterviewFinalSummary_42.docx, or Process-Checklist.pdf).",
+          "description": "The unique file name to store, including its extension (e.g. Topic-1 Stakeholder map.docx, InterviewFinalSummary_42.docx, or Process-Checklist.pdf). Supporting files are stored under Supporting documents/; final and legacy topic files stay at the interview-folder root.",
           "placeholder": null,
           "type": "TEXT",
           "required": true,
@@ -471,7 +471,7 @@
     {
       "slug": "finalize_interview",
       "name": "Finalize interview",
-      "description": "Completes the caller's interview once every topic is summarized and every canonical Topic-n-{slug}.docx is present in the interview SharePoint folder (a previously uploaded Topic-n {topic name}.docx also counts). If a topic file is missing, nothing is finalized; the missing file names and stored summaries are returned so those files can be uploaded first.",
+      "description": "Completes the caller's interview once every topic is summarized and every canonical Topic-n-{slug}.docx is present in the interview SharePoint folder (a previously uploaded Topic-n {topic name}.docx or deterministic -FINAL fallback also counts). If a topic file is missing, nothing is finalized; the missing file names and stored summaries are returned so those files can be uploaded first.",
       "nativeActionType": "NONE",
       "actionType": "API",
       "requiresConfirmation": true,

@@ -820,9 +820,9 @@ const KnowledgeRetentionUtils = {
 
 // Completes the interview once every topic is summarized AND every canonical
 // Topic-{n}-{slug}.docx is present in the interview folder (legacy spaced names
-// still count). Missing files
-// are a soft refusal: nothing is finalized, and the stored summaries are
-// returned so the agent can upload those files and call this action again.
+// and deterministic -FINAL fallback names also count). Missing files are a soft
+// refusal: nothing is finalized, and the stored summaries are returned so the
+// agent can upload those files and call this action again.
 const identity = KnowledgeRetentionUtils.resolveIdentity(data);
 const email = identity.email;
 const token = await KnowledgeRetentionUtils.dataverseToken(data);
@@ -909,7 +909,8 @@ while (true) {
 
 const missingTopicFiles = expectedTopicFiles.filter((file) => {
   const legacyName = KnowledgeRetentionUtils.topicDocumentFileNameLegacy(file.order, file.name);
-  return !presentNames.has(file.fileName) && !presentNames.has(legacyName);
+  const fallbackName = file.fileName.replace(/\.docx$/i, '-FINAL.docx');
+  return !presentNames.has(file.fileName) && !presentNames.has(legacyName) && !presentNames.has(fallbackName);
 });
 if (missingTopicFiles.length > 0) {
   const missingList = missingTopicFiles.map((file) => `"${file.fileName}"`).join(', ');
