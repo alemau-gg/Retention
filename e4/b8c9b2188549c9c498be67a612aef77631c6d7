@@ -1,0 +1,29 @@
+main-agent/skills/knowledge-retention-interviewing/SKILL.md
+  s_cd519ef7f4e427::t_e698e1dfb6bcfb 64
+main-agent/skills/knowledge-retention-reporting/SKILL.md
+  s_cd519ef7f4e427::t_2eb3f8d3bbe70b 85
+  s_cd519ef7f4e427::t_48ef951d6b2322 47,82,84
+main-agent/system-prompt.md
+  s_cd519ef7f4e427::t_c6c6b1d922a73c 51
+  s_cd519ef7f4e427::t_819300c081991e 33,58,66
+main-agent/skills/knowledge-retention-reporting/references/summary-format.md
+  s_cd519ef7f4e427::t_8cdc916348cb78 9
+main-agent/integrations/state-machine/manifest.json
+  s_cd519ef7f4e427::t_3b6b1736ea3cfe 330,389,397,451
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "e4b8c9b2188549c9c498be67a612aef77631c6d7",
+  "prompts": {},
+  "sessions": {
+    "s_cd519ef7f4e427": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "561ca45f-d621-4bac-bc3c-7f2902ed50f6",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
