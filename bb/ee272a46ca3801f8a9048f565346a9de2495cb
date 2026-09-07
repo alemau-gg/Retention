@@ -1,0 +1,25 @@
+main-agent/system-prompt.md
+  s_ea3621b09a6b7d::t_b301a5423b179f 68
+main-agent/integrations/state-machine/actions/save_answer.js
+  s_ea3621b09a6b7d::t_c0873d2a07060a 868
+main-agent/integrations/state-machine/actions/save_topic_summary.js
+  s_ea3621b09a6b7d::t_7be40f57f8af9b 845
+main-agent/integrations/state-machine/manifest.json
+  s_ea3621b09a6b7d::t_ca457430b944d9 474
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "bbee272a46ca3801f8a9048f565346a9de2495cb",
+  "prompts": {},
+  "sessions": {
+    "s_ea3621b09a6b7d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "bdfaa3df-15de-46f8-975a-80035e72119e",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
