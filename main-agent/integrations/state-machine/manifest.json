@@ -604,7 +604,7 @@
     {
       "slug": "get_answers",
       "name": "Get answers",
-      "description": "Reads back previously saved answers for the caller's open interview, optionally filtered by topic and/or question order. Includes the confirmed answer and rawUserMessages when stored. Read-only; use this to remind the interviewee what they answered, and as the primary source when building the final handover. Each question carries its answer version in `sequence`, which is what revise_answer's expectedSequence expects.",
+      "description": "Reads back previously saved answers for the caller's open interview or latest resumable completed interview, optionally filtered by topic and/or question order. Includes the confirmed answer and rawUserMessages when stored. Read-only; use this as source data when building the final handover or when the revise path needs full history. Ambiguous or empty filters return structured flags without instructions. Each question carries its answer version in `sequence`, which is what revise_answer's expectedSequence expects.",
       "nativeActionType": "NONE",
       "actionType": "API",
       "requiresConfirmation": false,

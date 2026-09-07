@@ -875,7 +875,7 @@ if (questionOrderFilter !== null && topicOrderFilter === null && topics.length >
   return {
     topics,
     matchCount,
-    instruction: `Question order ${questionOrderFilter} matches more than one topic (question order repeats across topics). Ask the user which topic they mean, then call get_answers again with both topicOrder and questionOrder.`,
+    ambiguous: true,
   };
 }
 
@@ -883,7 +883,7 @@ if (matchCount === 0) {
   return {
     topics: [],
     matchCount: 0,
-    instruction: 'No matching question was found for the given filters. Ask the user to clarify the topic or question, then try again.',
+    noMatch: true,
   };
 }
 
