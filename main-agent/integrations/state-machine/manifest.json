@@ -327,7 +327,7 @@
     {
       "slug": "save_topic_summary",
       "name": "Save topic summary",
-      "description": "Saves the user-approved Markdown summary FILE for the current topic in Dataverse and advances the topic to completed. The user can review and edit the attached Markdown before saving. This stores content only; it creates no Word file. Call generate_topic_document afterwards with the same topic order. Rejects the write with a conflict if the expected topic order no longer matches the backend.",
+      "description": "Saves the exact user-approved Markdown summary FILE for the current topic in Dataverse and advances the topic to completed. The agent must create or update it with the write document tool, attach or show that exact file, and get explicit approval before calling this action. This stores content only; it creates no Word file. Call generate_topic_document afterwards with the same topic order. Rejects the write with a conflict if the expected topic order no longer matches the backend.",
       "nativeActionType": "NONE",
       "actionType": "API",
       "requiresConfirmation": false,
@@ -386,7 +386,7 @@
     {
       "slug": "upload_document",
       "name": "Upload document",
-      "description": "Uploads the final handover or a user-confirmed supporting file on the central CKR site. Final and legacy topic files are stored at the caller's interview-folder root; supporting files are stored in the fixed Supporting documents/ subfolder. The destination is resolved server-side from the caller's identity. Uploading with docType \"final\" also advances a finalized interview to Document Generated, which is what tells a later session the handover file was filed. Do NOT use this for per-topic documents: generate_topic_document produces those from the stored summary. docType \"topic\" is kept only for legacy recovery of a topic file that generate_topic_document cannot produce.",
+      "description": "Uploads the final handover or a user-confirmed supporting file on the central CKR site. Final and legacy topic files are stored at the caller's interview-folder root; supporting files are stored in the fixed Supporting documents/ subfolder. The destination is resolved server-side from the caller's identity. Uploading with docType \"final\" also advances a finalized interview to Document Generated, which is what tells a later session the handover file was filed. Do NOT use this for per-topic documents: generate_topic_document produces those from the stored summary. If recovery reports a missing topic document, call generate_topic_document with its returned topic order. The docType \"topic\" contract remains only for backend legacy compatibility.",
       "nativeActionType": "NONE",
       "actionType": "API",
       "requiresConfirmation": false,
@@ -394,7 +394,7 @@
         {
           "slug": "docType",
           "label": "Document type",
-          "description": "Whether this is the final interview summary, an optional supporting file, or a legacy per-topic document. Use \"final\" for the handover and \"supporting\" for a user-confirmed attachment. Do not use \"topic\" in the normal flow — call generate_topic_document instead; \"topic\" remains only for recovering a topic file the generator cannot produce.",
+          "description": "Whether this is the final interview summary, an optional supporting file, or a legacy per-topic document. Use \"final\" for the handover and \"supporting\" for a user-confirmed attachment. For per-topic documents, including recovery, call generate_topic_document with topicOrder instead; do not use \"topic\" in the agent flow. The \"topic\" value remains for backend legacy compatibility.",
           "placeholder": null,
           "type": "SELECT",
           "required": true,
@@ -448,7 +448,7 @@
     {
       "slug": "read_supporting_document",
       "name": "Read supporting document",
-      "description": "Optional, read-only action for inspecting one previously uploaded and confirmed supporting file from this interview. The file name is resolved inside the server-owned Supporting documents folder for the caller's current or resumable completed interview; it cannot read other folders or arbitrary files.",
+      "description": "Optional, read-only action for inspecting one previously uploaded and confirmed supporting file that is missing from chat. Call it only with the exact basename, including extension; the file name is resolved inside the server-owned Supporting documents folder for the caller's current or resumable completed interview. It cannot read other folders or arbitrary files and is not attached to the agent by default.",
       "nativeActionType": "NONE",
       "actionType": "API",
       "requiresConfirmation": false,
