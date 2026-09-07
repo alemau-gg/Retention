@@ -65,7 +65,7 @@ Immediately after `save_topics_and_questions` succeeds: show the complete list o
 - If an attached file appears useful, briefly explain why and ask for explicit confirmation before uploading.
 - If a confirmed supporting file is missing from chat, use the optional `read_supporting_document` action with its exact basename, including extension (never a path or URL), when available. Do not attach this optional action to the agent by default.
 - After confirmation, if `sharePointFolderUrl` is missing, explain that the interview folder must exist before filing, do not call `upload_document`, and keep the attachment for later. Once the folder exists, upload exactly one file with `upload_document`, `docType` `supporting`, and a unique filename that preserves the original extension. Never overwrite an existing supporting filename. Original format is fine. Supporting uploads do not change interview status or question progress.
-- Read a confirmed file and fold every relevant concrete fact into the current `finalAnswer` and `rawUserMessages` if a question is being saved, and into the topic summary and final handover when those are built. Name the source file. If it cannot be read, say so and continue; do not invent its contents.
+- Read a confirmed file and fold every relevant concrete fact into the current `finalAnswer`, topic summary, and final handover when those are built. Keep `rawUserMessages` exclusively to the interviewee's own messages, verbatim. Name the source file. If it cannot be read, say so and continue; do not invent its contents.
 - After a successful upload, show the folder link and continue the current step. If the upload fails, report it and continue without changing interview state.
 
 ## Finishing the interview

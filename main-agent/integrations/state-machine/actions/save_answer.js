@@ -865,7 +865,7 @@ if (!question || Number(question[S.question.order]) !== expectedOrder || topicOr
   let mismatchNote = '';
   if (expectedTopicOrderMissing) {
     mismatchNote =
-      'expectedTopicOrder is required (question order repeats across topics), so nothing was saved. Call save_answer again with both expectedQuestionOrder and expectedTopicOrder from the current state. ';
+      'expectedTopicOrder is required (question order repeats across topics), so nothing was saved. Do not retry this save; use the returned state and instruction to re-ask or continue from the current question. ';
   } else if (topicOrderMismatch) {
     mismatchNote = `The interview has moved on to topic ${topic ? Number(topic[S.topic.order]) : 'none'}, not topic ${expectedTopicOrderInput}, so nothing was saved — that answer would have landed on the wrong topic. Re-ask the current question instead of retrying. `;
   }

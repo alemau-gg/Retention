@@ -842,7 +842,7 @@ if (!topic || Number(topic[S.topic.order]) !== expectedOrder) {
   return {
     conflict: true,
     nextAction: state.nextAction,
-    instruction: state.instruction,
+    instruction: `The topic summary was not saved because the interview moved to a different topic. Do not retry this save; use the returned state and instruction to continue from the current topic. ${state.instruction}`,
     language: state.language,
     progressLabel: state.progressLabel,
     nextQuestionText: state.nextQuestionText,
