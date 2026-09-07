@@ -587,7 +587,7 @@ const KnowledgeRetentionUtils = {
     const M = KnowledgeRetentionUtils.MESSAGES;
     const prefillEnabled = String(data.auth.prefillEnabled).toLowerCase() === 'true';
     const supportingFileInstruction =
-      ' If the user attaches a file that appears useful for this interview, explain why and ask for explicit confirmation. Only after the interview folder exists (sharePointFolderUrl is present), call upload_document with docType "supporting" and a unique filename. If the folder does not exist yet, explain that documents can be filed after folder setup and keep the attachment available for later. Never generate or upload a supporting file automatically. After a confirmed supporting file is available, read it and treat its contents as interview source material: include relevant facts in the current answer (rawUserMessages and finalAnswer) when mid-question, and in every later topic summary and the final handover, naming the source file. Then resume the current step.';
+      ' If the user attaches a file that appears useful for this interview, explain why and ask for explicit confirmation. Only after the interview folder exists (sharePointFolderUrl is present), call upload_document with docType "supporting" and a unique filename. If the folder does not exist yet, explain that documents can be filed after folder setup and keep the attachment available for later. Never generate or upload a supporting file automatically. After a confirmed supporting file is available, read it and treat its contents as interview source material: when mid-question, include relevant facts in finalAnswer only; never put supporting-file facts in rawUserMessages, which must contain only the interviewee messages verbatim. Include relevant facts in every later topic summary and the final handover, naming the source file. Then resume the current step.';
 
     const base = {
       nextAction: null,
@@ -824,6 +824,11 @@ const KnowledgeRetentionUtils = {
 // question's topic summary was already confirmed, it is reopened (NeedsReview) so
 // the next state regenerates it from the updated answers. Pre-finalize only; the
 // target is chosen by order, never by a record id, to keep the security model.
+const rawUserMessages = data.input.rawUserMessages;
+if (typeof rawUserMessages !== 'string' || rawUserMessages.trim() === '') {
+  throw new Error('rawUserMessages is required and must contain only the interviewee\'s verbatim messages.');
+}
+
 const identity = KnowledgeRetentionUtils.resolveIdentity(data);
 const email = identity.email;
 const token = await KnowledgeRetentionUtils.dataverseToken(data);
@@ -944,9 +949,7 @@ const answerBody = {};
 answerBody[S.answer.name] = String(question[S.question.text]).slice(0, 100);
 answerBody[S.answer.confirmedAnswer] = data.input.finalAnswer;
 answerBody[S.answer.answerText] = data.input.finalAnswer;
-if (data.input.rawUserMessages) {
-  answerBody[S.answer.rawUserMessages] = data.input.rawUserMessages;
-}
+answerBody[S.answer.rawUserMessages] = rawUserMessages;
 answerBody[S.answer.answeredOn] = now;
 answerBody[S.answer.sequence] = priorSequence + 1;
 answerBody[S.answer.isLatest] = true;
@@ -1004,6 +1007,7 @@ newAnswer[S.answer.interviewLookupValue] = interviewId;
 newAnswer[S.answer.confirmedAnswer] = data.input.finalAnswer;
 newAnswer[S.answer.text] = data.input.finalAnswer;
 newAnswer[S.answer.answerText] = data.input.finalAnswer;
+newAnswer[S.answer.rawUserMessages] = rawUserMessages;
 newAnswer[S.answer.answeredOn] = now;
 newAnswer[S.answer.sequence] = priorSequence + 1;
 newAnswer[S.answer.isLatest] = true;

@@ -1,7 +1,7 @@
 {
   "slug": "read_supporting_document",
   "name": "Read supporting document",
-  "description": "Optional, read-only action for inspecting one previously uploaded and confirmed supporting file from this interview. The file name is resolved inside the server-owned Supporting documents folder for the caller's current or resumable completed interview; it cannot read other folders or arbitrary files.",
+  "description": "Optional, read-only action for inspecting one previously uploaded and confirmed supporting file that is missing from chat. Call it only with the exact basename, including extension; the file name is resolved inside the server-owned Supporting documents folder for the caller's current or resumable completed interview. It cannot read other folders or arbitrary files and is not attached to the agent by default.",
   "nativeActionType": "NONE",
   "actionType": "API",
   "requiresConfirmation": false,
