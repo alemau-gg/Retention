@@ -1,0 +1,85 @@
+repackaged-integrations/README.md
+  s_ea3621b09a6b7d::t_4a68311dd924d1 1-13
+repackaged-integrations/coding-tools/actions/get_action/action_manifest.json
+  s_ea3621b09a6b7d::t_8c358b8fac9901 1-52
+repackaged-integrations/coding-tools/actions/get_action/code.js
+  s_ea3621b09a6b7d::t_17940aa365a181 1-143
+repackaged-integrations/coding-tools/actions/get_agent/action_manifest.json
+  s_ea3621b09a6b7d::t_8d05d892b7613c 1-26
+repackaged-integrations/coding-tools/actions/get_agent/code.js
+  s_ea3621b09a6b7d::t_2194ecbbaaca88 1-134
+repackaged-integrations/coding-tools/actions/get_integration/action_manifest.json
+  s_ea3621b09a6b7d::t_c8bb8f4d4d45f9 1-26
+repackaged-integrations/coding-tools/actions/get_integration/code.js
+  s_ea3621b09a6b7d::t_afbbb8606b34b5 1-149
+repackaged-integrations/coding-tools/actions/get_skill/action_manifest.json
+  s_ea3621b09a6b7d::t_e8598d2e561531 1-26
+repackaged-integrations/coding-tools/actions/get_skill/code.js
+  s_ea3621b09a6b7d::t_61d27255fa7176 1-99
+repackaged-integrations/coding-tools/actions/get_skill_file/action_manifest.json
+  s_ea3621b09a6b7d::t_d9509e2bb5f153 1-39
+repackaged-integrations/coding-tools/actions/get_skill_file/code.js
+  s_ea3621b09a6b7d::t_2bdbd05d51fa42 1-122
+repackaged-integrations/coding-tools/actions/list_integrations/action_manifest.json
+  s_ea3621b09a6b7d::t_617a1b26614e18 1-12
+repackaged-integrations/coding-tools/actions/list_integrations/code.js
+  s_ea3621b09a6b7d::t_857707b67c71fa 1-90
+repackaged-integrations/coding-tools/actions/list_skills/action_manifest.json
+  s_ea3621b09a6b7d::t_bac47a78b2be17 1-65
+repackaged-integrations/coding-tools/actions/list_skills/code.js
+  s_ea3621b09a6b7d::t_5d9f473dd0d611 1-103
+repackaged-integrations/coding-tools/actions/promote_to_staging/action_manifest.json
+  s_ea3621b09a6b7d::t_d6f121525d497e 1-39
+repackaged-integrations/coding-tools/actions/promote_to_staging/code.js
+  s_ea3621b09a6b7d::t_94c14de88f30f2 1-213
+repackaged-integrations/coding-tools/actions/revert_to_staging/action_manifest.json
+  s_ea3621b09a6b7d::t_f0d081458663c0 1-39
+repackaged-integrations/coding-tools/actions/revert_to_staging/code.js
+  s_ea3621b09a6b7d::t_dff9816a6fbcd7 1-215
+repackaged-integrations/coding-tools/actions/sync_helpers/action_manifest.json
+  s_ea3621b09a6b7d::t_2f56c7f59ffaaf 1-26
+repackaged-integrations/coding-tools/actions/sync_helpers/code.js
+  s_ea3621b09a6b7d::t_97b06312a42778 1-131
+repackaged-integrations/coding-tools/actions/update_action/action_manifest.json
+  s_ea3621b09a6b7d::t_bf3f9f1e69b9d5 1-104
+repackaged-integrations/coding-tools/actions/update_action/code.js
+  s_ea3621b09a6b7d::t_534d338882693a 1-146
+repackaged-integrations/coding-tools/actions/verify_helpers/action_manifest.json
+  s_ea3621b09a6b7d::t_bd8a74e8ee5b40 1-26
+repackaged-integrations/coding-tools/actions/verify_helpers/code.js
+  s_ea3621b09a6b7d::t_53347551c5d405 1-137
+repackaged-integrations/coding-tools/authTest.js
+  s_ea3621b09a6b7d::t_78443c683eb467 1-16
+repackaged-integrations/coding-tools/manifest.json
+  s_ea3621b09a6b7d::t_4a158574e08efc 1-64
+repackaged-integrations/sharepoint-search/actions/search_files_in_site/action_manifest.json
+  s_ea3621b09a6b7d::t_6439aecb500084 1-41
+repackaged-integrations/sharepoint-search/actions/search_files_in_site/code.js
+  s_ea3621b09a6b7d::t_a27b79b0b0a285 1-362
+repackaged-integrations/sharepoint-search/authTest.js
+  s_ea3621b09a6b7d::t_dcef95d9336fee 1-13
+repackaged-integrations/sharepoint-search/manifest.json
+  s_ea3621b09a6b7d::t_8bc65af29832a9 1-45
+repackaged-integrations/sharepoint-search/oauth/accessToken.js
+  s_ea3621b09a6b7d::t_5a7595c23e91d8 1-21
+repackaged-integrations/sharepoint-search/oauth/authorization.js
+  s_ea3621b09a6b7d::t_72d3466d148165 1-4
+repackaged-integrations/sharepoint-search/oauth/refreshToken.js
+  s_ea3621b09a6b7d::t_f6542ef8d6e606 1-20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "50bd19d4c306a16cdd42947cd04b8c0e3608b590",
+  "prompts": {},
+  "sessions": {
+    "s_ea3621b09a6b7d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "bdfaa3df-15de-46f8-975a-80035e72119e",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
