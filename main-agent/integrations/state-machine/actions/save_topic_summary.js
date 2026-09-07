@@ -926,7 +926,7 @@ const documentStep = `The summary text is saved, but its document does not exist
 return {
   conflict: false,
   savedTopicOrder: expectedOrder,
-  nextAction: state.nextAction,
+  nextAction: 'GenerateTopicDocument',
   instruction: documentStep,
   language: state.language,
   progressLabel: state.progressLabel,
