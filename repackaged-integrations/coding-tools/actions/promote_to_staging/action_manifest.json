@@ -1,0 +1,39 @@
+{
+  "slug": "promote_to_staging",
+  "name": "Promote to Staging",
+  "description": "Mirrors the configured Dev Knowledge Retention integration into configured Staging after the user confirms that Dev testing is satisfactory.",
+  "activeLabel": "Promoting to Staging",
+  "doneLabel": "Promoted to Staging",
+  "failedLabel": "Failed to promote to Staging",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": true,
+  "inputFields": [
+    {
+      "slug": "devIntegrationId",
+      "label": "Dev integration ID",
+      "description": "UUID of the configured Dev Knowledge Retention integration. Must match the trusted Dev connection setting; never use a Prod ID.",
+      "placeholder": null,
+      "type": "TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": null,
+      "jsonSchema": null
+    },
+    {
+      "slug": "stagingIntegrationId",
+      "label": "Staging integration ID",
+      "description": "UUID of the configured Staging Knowledge Retention integration. Must match the trusted Staging connection setting; never use a Prod ID.",
+      "placeholder": null,
+      "type": "TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": null,
+      "jsonSchema": null
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "slug": "revert_to_staging",
+  "name": "Revert to Staging",
+  "description": "Mirrors the configured stable Staging Knowledge Retention integration back into configured Dev after the user confirms that Dev should be reset.",
+  "activeLabel": "Reverting Dev to Staging",
+  "doneLabel": "Reverted Dev to Staging",
+  "failedLabel": "Failed to revert Dev to Staging",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": true,
+  "inputFields": [
+    {
+      "slug": "devIntegrationId",
+      "label": "Dev integration ID",
+      "description": "UUID of the configured Dev Knowledge Retention integration. Must match the trusted Dev connection setting; never use a Prod ID.",
+      "placeholder": null,
+      "type": "TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": null,
+      "jsonSchema": null
+    },
+    {
+      "slug": "stagingIntegrationId",
+      "label": "Staging integration ID",
+      "description": "UUID of the configured Staging Knowledge Retention integration. Must match the trusted Staging connection setting; never use a Prod ID.",
+      "placeholder": null,
+      "type": "TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": null,
+      "jsonSchema": null
+    }
+  ]
+}
