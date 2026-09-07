@@ -1,0 +1,36 @@
+{
+  "slug": "get_answers",
+  "name": "Get answers",
+  "description": "Reads back previously saved answers for the caller's open interview, optionally filtered by topic and/or question order. Includes the confirmed answer and rawUserMessages when stored. Read-only; use this to remind the interviewee what they answered, and as the primary source when building the final handover. Each question carries its answer version in `sequence`, which is what revise_answer's expectedSequence expects.",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": false,
+  "inputFields": [
+    {
+      "slug": "questionOrder",
+      "label": "Question order",
+      "description": "Optional. Limit results to this question, by its order number within its topic. Question order repeats across topics, so pair it with topicOrder when the topic is known.",
+      "placeholder": null,
+      "type": "NUMBER",
+      "required": false,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": null,
+      "jsonSchema": null
+    },
+    {
+      "slug": "topicOrder",
+      "label": "Topic order",
+      "description": "Optional. Limit results to this topic, by its order number from the current state. Required alongside questionOrder if the question order alone matches more than one topic.",
+      "placeholder": null,
+      "type": "NUMBER",
+      "required": false,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": null,
+      "jsonSchema": null
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "slug": "upload_document",
+  "name": "Upload document",
+  "description": "Uploads the final handover or a user-confirmed supporting file on the central CKR site. Final and legacy topic files are stored at the caller's interview-folder root; supporting files are stored in the fixed Supporting documents/ subfolder. The destination is resolved server-side from the caller's identity. Uploading with docType \"final\" also advances a finalized interview to Document Generated, which is what tells a later session the handover file was filed. Do NOT use this for per-topic documents: generate_topic_document produces those from the stored summary. docType \"topic\" is kept only for legacy recovery of a topic file that generate_topic_document cannot produce.",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": false,
+  "inputFields": [
+    {
+      "slug": "docType",
+      "label": "Document type",
+      "description": "Whether this is the final interview summary, an optional supporting file, or a legacy per-topic document. Use \"final\" for the handover and \"supporting\" for a user-confirmed attachment. Do not use \"topic\" in the normal flow \u2014 call generate_topic_document instead; \"topic\" remains only for recovering a topic file the generator cannot produce.",
+      "placeholder": null,
+      "type": "SELECT",
+      "required": true,
+      "options": [
+        {
+          "label": "Topic summary (legacy recovery)",
+          "value": "topic"
+        },
+        {
+          "label": "Final summary",
+          "value": "final"
+        },
+        {
+          "label": "Supporting file",
+          "value": "supporting"
+        }
+      ],
+      "allowMultiSelect": false,
+      "allowMultiFile": false,
+      "maxLength": null,
+      "jsonSchema": null
+    },
+    {
+      "slug": "file",
+      "label": "File",
+      "description": "The single user-confirmed file to upload. The final document is a generated .docx; supporting files may use their original format.",
+      "placeholder": null,
+      "type": "FILE",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": null,
+      "jsonSchema": null
+    },
+    {
+      "slug": "fileName",
+      "label": "File name",
+      "description": "The unique file name to store, including its extension (e.g. Topic-1 Stakeholder map.docx, InterviewFinalSummary_42.docx, or Process-Checklist.pdf). Supporting files are stored under Supporting documents/; final and legacy topic files stay at the interview-folder root.",
+      "placeholder": null,
+      "type": "TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 400,
+      "jsonSchema": null
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "slug": "save_discovery",
+  "name": "Save discovery",
+  "description": "Saves the pre-interview discovery profile for the caller's open interview and advances it to the topic-generation stage.",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": false,
+  "inputFields": [
+    {
+      "slug": "businessUnit",
+      "label": "Business unit",
+      "description": "The employee's department, business unit, or team.",
+      "placeholder": null,
+      "type": "TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 400,
+      "jsonSchema": null
+    },
+    {
+      "slug": "focusTopics",
+      "label": "Focus topics",
+      "description": "Topics the employee considers most important to capture before they leave.",
+      "placeholder": null,
+      "type": "MULTI_LINE_TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 8000,
+      "jsonSchema": null
+    },
+    {
+      "slug": "responsibilities",
+      "label": "Responsibilities",
+      "description": "The employee's core responsibilities and recurring tasks, in their own words.",
+      "placeholder": null,
+      "type": "MULTI_LINE_TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 8000,
+      "jsonSchema": null
+    },
+    {
+      "slug": "role",
+      "label": "Role",
+      "description": "The departing employee's role or job title.",
+      "placeholder": null,
+      "type": "TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 400,
+      "jsonSchema": null
+    },
+    {
+      "slug": "tools",
+      "label": "Tools and systems",
+      "description": "Tools, systems, and applications the employee works with day to day.",
+      "placeholder": null,
+      "type": "MULTI_LINE_TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 8000,
+      "jsonSchema": null
+    },
+    {
+      "slug": "kpisAndConstraints",
+      "label": "KPIs and constraints",
+      "description": "Optional. KPIs the employee owns and any constraints or dependencies worth recording. Send only when the employee provides them.",
+      "placeholder": null,
+      "type": "MULTI_LINE_TEXT",
+      "required": false,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 8000,
+      "jsonSchema": null
+    }
+  ]
+}

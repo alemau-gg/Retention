@@ -1,0 +1,65 @@
+{
+  "slug": "list_skills",
+  "name": "List skills",
+  "description": "Lists configured Knowledge Retention skills with bounded metadata. Use query or slug to narrow the catalog; instructions and file contents are returned by detail actions. Requires trustedSkillIds connection configuration.",
+  "activeLabel": "Listing skills",
+  "doneLabel": "Listed skills",
+  "failedLabel": "Failed to list skills",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": false,
+  "inputFields": [
+    {
+      "slug": "limit",
+      "label": "Result limit",
+      "description": "Optional number of skills to return, from 1 to 250. Defaults to 50 when omitted.",
+      "placeholder": "50",
+      "type": "NUMBER",
+      "required": false,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": null,
+      "jsonSchema": null
+    },
+    {
+      "slug": "query",
+      "label": "Search query",
+      "description": "Optional text used by Langdock to search skill names and descriptions. Omit it to list the first page.",
+      "placeholder": "retention",
+      "type": "TEXT",
+      "required": false,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 100,
+      "jsonSchema": null
+    },
+    {
+      "slug": "slug",
+      "label": "Skill slug",
+      "description": "Optional exact lowercase skill slug filter, containing only letters, numbers, and dashes.",
+      "placeholder": "knowledge-retention-contributing",
+      "type": "TEXT",
+      "required": false,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 100,
+      "jsonSchema": null
+    },
+    {
+      "slug": "cursor",
+      "label": "Page cursor",
+      "description": "Optional UUID cursor returned by the previous skill catalog response. Omit it for the first page.",
+      "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "type": "TEXT",
+      "required": false,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 36,
+      "jsonSchema": null
+    }
+  ]
+}

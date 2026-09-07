@@ -1,0 +1,26 @@
+{
+  "slug": "get_agent",
+  "name": "Get agent details",
+  "description": "Reads the current published agent configuration, or its draft when it has never been published, by agent UUID. The documented Agent API has no workspace-wide list_agents endpoint.",
+  "activeLabel": "Reading agent details",
+  "doneLabel": "Read agent details",
+  "failedLabel": "Failed to read agent details",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": false,
+  "inputFields": [
+    {
+      "slug": "agentId",
+      "label": "Agent ID",
+      "description": "UUID of the agent to inspect. Use a trusted ID supplied by the administrator; this read action does not enumerate agents.",
+      "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "type": "TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 36,
+      "jsonSchema": null
+    }
+  ]
+}

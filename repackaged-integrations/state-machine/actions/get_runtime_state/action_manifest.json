@@ -1,0 +1,9 @@
+{
+  "slug": "get_runtime_state",
+  "name": "Get runtime state",
+  "description": "Loads the caller's interview, topics, and questions and returns the computed next action plus a backend-authored instruction. Call once at the start of a conversation.",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": false,
+  "inputFields": []
+}

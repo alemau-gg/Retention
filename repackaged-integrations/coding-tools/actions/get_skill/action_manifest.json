@@ -1,0 +1,26 @@
+{
+  "slug": "get_skill",
+  "name": "Get skill details",
+  "description": "Reads one configured Knowledge Retention skill's bounded instructions and stored-file metadata without file contents. Requires trustedSkillIds connection configuration.",
+  "activeLabel": "Reading skill details",
+  "doneLabel": "Read skill details",
+  "failedLabel": "Failed to read skill details",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": false,
+  "inputFields": [
+    {
+      "slug": "skillId",
+      "label": "Skill ID",
+      "description": "UUID of the skill to inspect. Use an ID returned by the skill catalog or supplied by the administrator.",
+      "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "type": "TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 36,
+      "jsonSchema": null
+    }
+  ]
+}

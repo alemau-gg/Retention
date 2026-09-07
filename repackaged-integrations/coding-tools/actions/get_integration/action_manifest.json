@@ -1,0 +1,26 @@
+{
+  "slug": "get_integration",
+  "name": "Get integration details",
+  "description": "Reads allowlisted Dev or Staging integration metadata, nested action definitions, and complete stored action code without credentials.",
+  "activeLabel": "Reading integration details",
+  "doneLabel": "Read integration details",
+  "failedLabel": "Failed to read integration details",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": false,
+  "inputFields": [
+    {
+      "slug": "integrationId",
+      "label": "Integration ID",
+      "description": "UUID of the configured Dev or Staging integration to inspect. Use an ID from the integration catalog and skip this action if it is not allowlisted in the connection.",
+      "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "type": "TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 36,
+      "jsonSchema": null
+    }
+  ]
+}

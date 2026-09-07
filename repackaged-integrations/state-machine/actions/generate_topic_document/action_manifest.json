@@ -1,0 +1,23 @@
+{
+  "slug": "generate_topic_document",
+  "name": "Generate topic document",
+  "description": "Creates the standardized Word document for one already-approved topic and files it in the caller's interview folder. The summary text is read from Dataverse, never from the caller, so save_topic_summary must have stored it first; pass only the topic order. Also ensures the Source transcripts/ and Supporting documents/ subfolders, files a Markdown source transcript under Source transcripts/, and lists the actual contents of Supporting documents/ in a closing section. Returns the .docx as a file attachment. Reruns best-effort replace the canonical generated .docx; if SharePoint cannot delete that existing file, the new document is filed with a deterministic -FINAL suffix. Reruns never touch user-supplied supporting files. Use this instead of building or uploading a topic .docx yourself.",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": false,
+  "inputFields": [
+    {
+      "slug": "topicOrder",
+      "label": "Topic order",
+      "description": "The order number of the topic whose document should be generated, taken verbatim from the last state (e.g. 2). Everything else \u2014 the summary text, file name, folder path, and interview \u2014 is resolved server-side. A topic without an approved stored summary is refused with a conflict and nothing is written.",
+      "placeholder": null,
+      "type": "NUMBER",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": null,
+      "jsonSchema": null
+    }
+  ]
+}

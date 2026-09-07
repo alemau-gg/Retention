@@ -1,0 +1,26 @@
+{
+  "slug": "verify_helpers",
+  "name": "Verify helpers",
+  "description": "Fetches a fresh integration and verifies KnowledgeRetentionUtils helper consistency, action coverage, action slugs, and sandbox restrictions.",
+  "activeLabel": "Verifying helpers",
+  "doneLabel": "Verified helpers",
+  "failedLabel": "Failed to verify helpers",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": false,
+  "inputFields": [
+    {
+      "slug": "integrationId",
+      "label": "Integration ID",
+      "description": "UUID of the configured Dev integration to verify. Do not use a Staging or Prod ID.",
+      "placeholder": null,
+      "type": "TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": null,
+      "jsonSchema": null
+    }
+  ]
+}
