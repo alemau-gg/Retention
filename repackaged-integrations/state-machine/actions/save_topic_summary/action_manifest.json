@@ -1,7 +1,7 @@
 {
   "slug": "save_topic_summary",
   "name": "Save topic summary",
-  "description": "Saves the user-approved Markdown summary FILE for the current topic in Dataverse and advances the topic to completed. The user can review and edit the attached Markdown before saving. This stores content only; it creates no Word file. Call generate_topic_document afterwards with the same topic order. Rejects the write with a conflict if the expected topic order no longer matches the backend.",
+  "description": "Saves the exact user-approved Markdown summary FILE for the current topic in Dataverse and advances the topic to completed. The agent must create or update it with the write document tool, attach or show that exact file, and get explicit approval before calling this action. This stores content only; it creates no Word file. Call generate_topic_document afterwards with the same topic order. Rejects the write with a conflict if the expected topic order no longer matches the backend.",
   "nativeActionType": "NONE",
   "actionType": "API",
   "requiresConfirmation": false,

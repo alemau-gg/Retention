@@ -587,7 +587,7 @@ const KnowledgeRetentionUtils = {
     const M = KnowledgeRetentionUtils.MESSAGES;
     const prefillEnabled = String(data.auth.prefillEnabled).toLowerCase() === 'true';
     const supportingFileInstruction =
-      ' If the user attaches a file that appears useful for this interview, explain why and ask for explicit confirmation. Only after the interview folder exists (sharePointFolderUrl is present), call upload_document with docType "supporting" and a unique filename. If the folder does not exist yet, explain that documents can be filed after folder setup and keep the attachment available for later. Never generate or upload a supporting file automatically. After a confirmed supporting file is available, read it and treat its contents as interview source material: include relevant facts in the current answer (rawUserMessages and finalAnswer) when mid-question, and in every later topic summary and the final handover, naming the source file. Then resume the current step.';
+      ' If the user attaches a file that appears useful for this interview, explain why and ask for explicit confirmation. Only after the interview folder exists (sharePointFolderUrl is present), call upload_document with docType "supporting" and a unique filename. If the folder does not exist yet, explain that documents can be filed after folder setup and keep the attachment available for later. Never generate or upload a supporting file automatically. After a confirmed supporting file is available, read it and treat its contents as interview source material: when mid-question, include relevant facts in finalAnswer only; never put supporting-file facts in rawUserMessages, which must contain only the interviewee messages verbatim. Include relevant facts in every later topic summary and the final handover, naming the source file. Then resume the current step.';
 
     const base = {
       nextAction: null,
@@ -842,7 +842,7 @@ if (!topic || Number(topic[S.topic.order]) !== expectedOrder) {
   return {
     conflict: true,
     nextAction: state.nextAction,
-    instruction: state.instruction,
+    instruction: `The topic summary was not saved because the interview moved to a different topic. Do not retry this save; use the returned state and instruction to continue from the current topic. ${state.instruction}`,
     language: state.language,
     progressLabel: state.progressLabel,
     nextQuestionText: state.nextQuestionText,
@@ -926,8 +926,8 @@ const documentStep = `The summary text is saved, but its document does not exist
 return {
   conflict: false,
   savedTopicOrder: expectedOrder,
-  nextAction: state.nextAction,
-  instruction: `${documentStep} ${state.instruction}`,
+  nextAction: 'GenerateTopicDocument',
+  instruction: documentStep,
   language: state.language,
   progressLabel: state.progressLabel,
   nextQuestionText: state.nextQuestionText,
