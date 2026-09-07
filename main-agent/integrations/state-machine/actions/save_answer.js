@@ -587,7 +587,7 @@ const KnowledgeRetentionUtils = {
     const M = KnowledgeRetentionUtils.MESSAGES;
     const prefillEnabled = String(data.auth.prefillEnabled).toLowerCase() === 'true';
     const supportingFileInstruction =
-      ' If the user attaches a file that appears useful for this interview, explain why and ask for explicit confirmation. Only after the interview folder exists (sharePointFolderUrl is present), call upload_document with docType "supporting" and a unique filename. If the folder does not exist yet, explain that documents can be filed after folder setup and keep the attachment available for later. Never generate or upload a supporting file automatically. After a confirmed supporting file is available, read it and treat its contents as interview source material: include relevant facts in the current answer (rawUserMessages and finalAnswer) when mid-question, and in every later topic summary and the final handover, naming the source file. Then resume the current step.';
+      ' If the user attaches a file that appears useful for this interview, explain why and ask for explicit confirmation. Only after the interview folder exists (sharePointFolderUrl is present), call upload_document with docType "supporting" and a unique filename. If the folder does not exist yet, explain that documents can be filed after folder setup and keep the attachment available for later. Never generate or upload a supporting file automatically. After a confirmed supporting file is available, read it and treat its contents as interview source material: when mid-question, include relevant facts in finalAnswer only; never put supporting-file facts in rawUserMessages, which must contain only the interviewee messages verbatim. Include relevant facts in every later topic summary and the final handover, naming the source file. Then resume the current step.';
 
     const base = {
       nextAction: null,
@@ -824,6 +824,11 @@ const KnowledgeRetentionUtils = {
 // duplicate retry after the question already advanced) returns a conflict and
 // writes nothing. Topic order is required because question order restarts at 1
 // in every topic.
+const rawUserMessages = data.input.rawUserMessages;
+if (typeof rawUserMessages !== 'string' || rawUserMessages.trim() === '') {
+  throw new Error('rawUserMessages is required and must contain only the interviewee\'s verbatim messages.');
+}
+
 const identity = KnowledgeRetentionUtils.resolveIdentity(data);
 const email = identity.email;
 const token = await KnowledgeRetentionUtils.dataverseToken(data);
@@ -860,7 +865,7 @@ if (!question || Number(question[S.question.order]) !== expectedOrder || topicOr
   let mismatchNote = '';
   if (expectedTopicOrderMissing) {
     mismatchNote =
-      'expectedTopicOrder is required (question order repeats across topics), so nothing was saved. Call save_answer again with both expectedQuestionOrder and expectedTopicOrder from the current state. ';
+      'expectedTopicOrder is required (question order repeats across topics), so nothing was saved. Do not retry this save; use the returned state and instruction to re-ask or continue from the current question. ';
   } else if (topicOrderMismatch) {
     mismatchNote = `The interview has moved on to topic ${topic ? Number(topic[S.topic.order]) : 'none'}, not topic ${expectedTopicOrderInput}, so nothing was saved — that answer would have landed on the wrong topic. Re-ask the current question instead of retrying. `;
   }
@@ -890,9 +895,7 @@ answerBody[S.answer.name] = String(question[S.question.text]).slice(0, 100);
 // retry hits the conflict path above because the question is no longer active).
 answerBody[S.answer.confirmedAnswer] = data.input.finalAnswer;
 answerBody[S.answer.answerText] = data.input.finalAnswer;
-if (data.input.rawUserMessages) {
-  answerBody[S.answer.rawUserMessages] = data.input.rawUserMessages;
-}
+answerBody[S.answer.rawUserMessages] = rawUserMessages;
 answerBody[S.answer.answeredOn] = now;
 answerBody[S.answer.sequence] = 1;
 answerBody[S.answer.isLatest] = true;
@@ -936,7 +939,7 @@ if (topicReadyForSummary) {
 const syntheticAnswer = {};
 syntheticAnswer[S.answer.text] = data.input.finalAnswer;
 syntheticAnswer[S.answer.confirmedAnswer] = data.input.finalAnswer;
-syntheticAnswer[S.answer.rawUserMessages] = data.input.rawUserMessages || null;
+syntheticAnswer[S.answer.rawUserMessages] = rawUserMessages;
 syntheticAnswer[S.answer.sequence] = 1;
 syntheticAnswer[S.answer.isLatest] = true;
 syntheticAnswer[S.answer.questionLookupValue] = question[S.question.id];

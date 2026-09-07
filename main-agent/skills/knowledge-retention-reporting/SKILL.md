@@ -44,7 +44,7 @@ For a topic summary, do **not** open: `references/final-document.md`, `reference
 
 Do not create a supporting file automatically. If the user attaches a file and explicitly confirms that it is useful for the interview, file that original attachment with `upload_document` using `docType: supporting` and a unique filename. Supporting uploads do not use the topic-summary format or the branded final template.
 
-Confirmed supporting files **are** source material for this skill. When writing a topic summary or the final handover, read each such file (chat attachment) and include every relevant concrete fact. Name the source filename. Do not invent contents you could not read.
+Confirmed supporting files **are** source material for this skill. When writing a topic summary or the final handover, read each such file (chat attachment); if a confirmed file is missing from chat, use the optional `read_supporting_document` action with its exact basename, including extension (never a path or URL), when available. Include every relevant concrete fact and name the source filename. Do not invent contents you could not read. Do not attach this optional action to the agent by default.
 
 ---
 
@@ -79,10 +79,10 @@ If any of that appears in a draft, discard it and restart from `references/summa
 
 ### Deliver
 
-After explicit approval:
+Create or update the complete Markdown summary file with the `write` document tool, attach or show the exact file the user reviews, and get explicit approval. Then:
 
-1. Create or update the complete Markdown summary file, attach the exact file the user reviews, and get explicit approval. Then call `save_topic_summary` with `expectedTopicOrder` and that exact `summaryFile`. This saves the file's text only — no Word file exists yet.
-2. `generate_topic_document` with the same order and nothing else. The backend reads the saved summary, renders the standardized `.docx`, files it, and returns it as an attachment. Do not build, format, name, or upload that file, do not use the code interpreter for it, and do not call `upload_document` for it.
+1. Call `save_topic_summary` with `expectedTopicOrder` and that exact `summaryFile`. This saves the file's text only — no Word file exists yet.
+2. Follow the returned instruction to call `generate_topic_document` with the same order and nothing else. The backend reads the saved summary, renders the standardized `.docx`, files it, and returns it as an attachment. Do not build, format, name, or upload that file, do not use the code interpreter for it, and do not call `upload_document` for it.
 3. Show the returned attachment and the folder link. If it comes back with `conflict: true`, follow its instruction instead of improvising a file.
 
 Use the `write` document tool to create or update the editable Markdown file: headings, bullets, numbered lists, `**bold**`, `*italic*`, and pipe tables all survive into Word. Show or attach that file for user review and use the exact approved file in `save_topic_summary`. Mermaid fences are kept out of the `.docx` and preserved in the Markdown transcript the backend files under `Source transcripts/`. Never write `{}` / `[bracket]` placeholders, a cover page, TOC, exec summary, or 1.1–1.4 sections.
