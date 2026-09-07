@@ -1,0 +1,19 @@
+main-agent/integrations/state-machine/actions/save_topic_summary.js
+  s_ea3621b09a6b7d::t_16b5fc9488fde2 929
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "541ff1afead3be54c1c2c9cc3ee2c4d444313276",
+  "prompts": {},
+  "sessions": {
+    "s_ea3621b09a6b7d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "bdfaa3df-15de-46f8-975a-80035e72119e",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
