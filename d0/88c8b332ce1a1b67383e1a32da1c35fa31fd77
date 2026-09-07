@@ -1,0 +1,97 @@
+main-agent/integrations/state-machine-bundle/actions/abandon_interview/action_manifest.json
+  s_ea3621b09a6b7d::t_b5c2e5c25c4e45 1-9
+main-agent/integrations/state-machine-bundle/actions/abandon_interview/code.js
+  s_ea3621b09a6b7d::t_1ab93d2cad22c7 1-879
+main-agent/integrations/state-machine-bundle/actions/admin_describe_schema/action_manifest.json
+  s_ea3621b09a6b7d::t_8d6cc3170aa4b7 1-23
+main-agent/integrations/state-machine-bundle/actions/admin_describe_schema/code.js
+  s_ea3621b09a6b7d::t_509b70779efd10 1-227
+main-agent/integrations/state-machine-bundle/actions/admin_query_records/action_manifest.json
+  s_ea3621b09a6b7d::t_a568934ce94b2a 1-110
+main-agent/integrations/state-machine-bundle/actions/admin_query_records/code.js
+  s_ea3621b09a6b7d::t_89fc82449309d7 1-323
+main-agent/integrations/state-machine-bundle/actions/create_interview/action_manifest.json
+  s_ea3621b09a6b7d::t_2a05b971081a7b 1-48
+main-agent/integrations/state-machine-bundle/actions/create_interview/code.js
+  s_ea3621b09a6b7d::t_3233ade9734d9c 1-887
+main-agent/integrations/state-machine-bundle/actions/finalize_interview/action_manifest.json
+  s_ea3621b09a6b7d::t_653b1971633a79 1-9
+main-agent/integrations/state-machine-bundle/actions/finalize_interview/code.js
+  s_ea3621b09a6b7d::t_883cbe341a92de 1-971
+main-agent/integrations/state-machine-bundle/actions/generate_topic_document/action_manifest.json
+  s_ea3621b09a6b7d::t_1466f9cb1519ec 1-23
+main-agent/integrations/state-machine-bundle/actions/generate_topic_document/code.js
+  s_ea3621b09a6b7d::t_4e7350413c32cc 1-1937
+main-agent/integrations/state-machine-bundle/actions/get_answers/action_manifest.json
+  s_ea3621b09a6b7d::t_3d88efe5a05bca 1-36
+main-agent/integrations/state-machine-bundle/actions/get_answers/code.js
+  s_ea3621b09a6b7d::t_1468848c52bb85 1-895
+main-agent/integrations/state-machine-bundle/actions/get_discovery/action_manifest.json
+  s_ea3621b09a6b7d::t_caef17bfb12fc7 1-9
+main-agent/integrations/state-machine-bundle/actions/get_discovery/code.js
+  s_ea3621b09a6b7d::t_51eb08ca8b43f4 1-853
+main-agent/integrations/state-machine-bundle/actions/get_runtime_state/action_manifest.json
+  s_ea3621b09a6b7d::t_d2689e6bb67ce7 1-9
+main-agent/integrations/state-machine-bundle/actions/get_runtime_state/code.js
+  s_ea3621b09a6b7d::t_3845d815f7da69 1-870
+main-agent/integrations/state-machine-bundle/actions/read_supporting_document/action_manifest.json
+  s_ea3621b09a6b7d::t_a0d87913d63602 1-23
+main-agent/integrations/state-machine-bundle/actions/read_supporting_document/code.js
+  s_ea3621b09a6b7d::t_032c96afb495b2 1-1008
+main-agent/integrations/state-machine-bundle/actions/revise_answer/action_manifest.json
+  s_ea3621b09a6b7d::t_1d9d5f78a294fd 1-75
+main-agent/integrations/state-machine-bundle/actions/revise_answer/code.js
+  s_ea3621b09a6b7d::t_988e88c2bd3fa5 1-1039
+main-agent/integrations/state-machine-bundle/actions/save_answer/action_manifest.json
+  s_ea3621b09a6b7d::t_2ef61aaef3142b 1-62
+main-agent/integrations/state-machine-bundle/actions/save_answer/code.js
+  s_ea3621b09a6b7d::t_bc71b4c236b440 1-964
+main-agent/integrations/state-machine-bundle/actions/save_consent/action_manifest.json
+  s_ea3621b09a6b7d::t_d6fe4ef51f4712 1-23
+main-agent/integrations/state-machine-bundle/actions/save_consent/code.js
+  s_ea3621b09a6b7d::t_5e602accfc4300 1-856
+main-agent/integrations/state-machine-bundle/actions/save_discovery/action_manifest.json
+  s_ea3621b09a6b7d::t_47af6484d9496f 1-88
+main-agent/integrations/state-machine-bundle/actions/save_discovery/code.js
+  s_ea3621b09a6b7d::t_ef246a5f362f84 1-884
+main-agent/integrations/state-machine-bundle/actions/save_feedback/action_manifest.json
+  s_ea3621b09a6b7d::t_5688bd9d8abfd1 1-49
+main-agent/integrations/state-machine-bundle/actions/save_feedback/code.js
+  s_ea3621b09a6b7d::t_c074ee92cde2b6 1-857
+main-agent/integrations/state-machine-bundle/actions/save_topic_summary/action_manifest.json
+  s_ea3621b09a6b7d::t_c66f3e8e324420 1-36
+main-agent/integrations/state-machine-bundle/actions/save_topic_summary/code.js
+  s_ea3621b09a6b7d::t_543e4867d2bde3 1-938
+main-agent/integrations/state-machine-bundle/actions/save_topics_and_questions/action_manifest.json
+  s_ea3621b09a6b7d::t_7f4998622183f3 1-23
+main-agent/integrations/state-machine-bundle/actions/save_topics_and_questions/code.js
+  s_ea3621b09a6b7d::t_a8aa900229eee5 1-1101
+main-agent/integrations/state-machine-bundle/actions/set_up_interview_folder/action_manifest.json
+  s_ea3621b09a6b7d::t_882c11c9e875b0 1-9
+main-agent/integrations/state-machine-bundle/actions/set_up_interview_folder/code.js
+  s_ea3621b09a6b7d::t_0b599397ff932e 1-1052
+main-agent/integrations/state-machine-bundle/actions/upload_document/action_manifest.json
+  s_ea3621b09a6b7d::t_621439f1564a66 1-62
+main-agent/integrations/state-machine-bundle/actions/upload_document/code.js
+  s_ea3621b09a6b7d::t_943432aba2954f 1-1000
+main-agent/integrations/state-machine-bundle/authTest.js
+  s_ea3621b09a6b7d::t_05075dc639475a 1-74
+main-agent/integrations/state-machine-bundle/manifest.json
+  s_ea3621b09a6b7d::t_b36b0a2b8e4b0e 1-64
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "d088c8b332ce1a1b67383e1a32da1c35fa31fd77",
+  "prompts": {},
+  "sessions": {
+    "s_ea3621b09a6b7d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "bdfaa3df-15de-46f8-975a-80035e72119e",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
