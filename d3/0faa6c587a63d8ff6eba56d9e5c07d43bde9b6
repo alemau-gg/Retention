@@ -1,0 +1,21 @@
+main-agent/integrations/state-machine/manifest.json
+  s_ea3621b09a6b7d::t_85bada33dbc9f2 607
+main-agent/integrations/state-machine/actions/get_answers.js
+  s_ea3621b09a6b7d::t_e870e11e8590c1 878,886
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "d30faa6c587a63d8ff6eba56d9e5c07d43bde9b6",
+  "prompts": {},
+  "sessions": {
+    "s_ea3621b09a6b7d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "bdfaa3df-15de-46f8-975a-80035e72119e",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
