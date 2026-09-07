@@ -1,0 +1,54 @@
+main-agent/integrations/state-machine/actions/get_runtime_state.js
+  s_e9371486bd9d0e::t_c5a2247f9fa668 590
+main-agent/integrations/state-machine/actions/revise_answer.js
+  s_e9371486bd9d0e::t_0252642d608799 827-831,952,1010
+  s_e9371486bd9d0e::t_4199d25a361511 590
+main-agent/integrations/state-machine/actions/save_answer.js
+  s_e9371486bd9d0e::t_0a60ea23047ac7 827-831,898,942
+  s_e9371486bd9d0e::t_7c6a1d54250d14 590
+main-agent/integrations/state-machine/actions/save_topic_summary.js
+  s_e9371486bd9d0e::t_898dc7c2f5104a 930
+  s_e9371486bd9d0e::t_269cd78ab5a3d8 590
+main-agent/integrations/state-machine/actions/abandon_interview.js
+  s_e9371486bd9d0e::t_b83ba69cc8e008 589
+main-agent/integrations/state-machine/actions/create_interview.js
+  s_e9371486bd9d0e::t_1c1ce5268ce186 590
+main-agent/integrations/state-machine/actions/finalize_interview.js
+  s_e9371486bd9d0e::t_f47c36710aff9b 590
+main-agent/integrations/state-machine/actions/generate_topic_document.js
+  s_e9371486bd9d0e::t_a3562c0d99252c 590
+main-agent/integrations/state-machine/actions/get_answers.js
+  s_e9371486bd9d0e::t_ae027454814053 589
+main-agent/integrations/state-machine/actions/get_discovery.js
+  s_e9371486bd9d0e::t_da128ce6603c0d 589
+main-agent/integrations/state-machine/actions/read_supporting_document.js
+  s_e9371486bd9d0e::t_41dcf67ed0dcc1 137,588,687
+main-agent/integrations/state-machine/actions/save_consent.js
+  s_e9371486bd9d0e::t_5abb60ad174092 590
+main-agent/integrations/state-machine/actions/save_discovery.js
+  s_e9371486bd9d0e::t_75819644007ac6 590
+main-agent/integrations/state-machine/actions/save_feedback.js
+  s_e9371486bd9d0e::t_25e1971368f8b2 590
+main-agent/integrations/state-machine/actions/save_topics_and_questions.js
+  s_e9371486bd9d0e::t_d76d67dbc79b41 590
+main-agent/integrations/state-machine/actions/set_up_interview_folder.js
+  s_e9371486bd9d0e::t_34a703951f0d05 590
+main-agent/integrations/state-machine/actions/upload_document.js
+  s_e9371486bd9d0e::t_8eff8490f4eae7 590
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "350da1e32a2508c5d4a27f09a7976795d242d02b",
+  "prompts": {},
+  "sessions": {
+    "s_e9371486bd9d0e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "edac84f6-3fcb-4dec-8464-5daedb2283fc",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
