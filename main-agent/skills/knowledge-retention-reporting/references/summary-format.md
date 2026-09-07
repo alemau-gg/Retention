@@ -6,7 +6,7 @@ Length is exhaustive, not a recap. No upper word cap. One mini-header per answer
 
 Not the final handover. Do not use `../assets/template.docx`, `final-document.md`, `document-structure.md`, `fixed-sections-template.md`, or the BASF document template skill. No cover page, TOC, AI notice, executive summary, fixed intro 1.1–1.4, chapter framing, or `{}` / `[bracket]` placeholders.
 
-Prefer `rawUserMessages` from `get_answers` / `topicQnA` when present; otherwise the confirmed answer. Also use confirmed supporting-file contents that belong to this topic; name the file. Do not invent unread files.
+Use `topicQnA` from state as the topic-summary source; do not call `get_answers` when it contains usable raw or confirmed text. If `topicQnA` is missing, empty, or lacks usable text, use `get_answers` as the fallback. Prefer `rawUserMessages` when present, otherwise the confirmed answer. Also use confirmed supporting-file contents that belong to this topic; name the file. Do not invent unread files.
 
 ## Required sections, in order
 

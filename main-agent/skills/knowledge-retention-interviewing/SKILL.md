@@ -61,7 +61,7 @@ Collect one question at a time:
 
 ## Generating topics and questions (`GenerateTopicsAndQuestions`)
 
-**Done when:** 4–6 topics each with 3–6 questions, coverage checks pass, user saw the overview, then `save_topics_and_questions`. Do not ask interview questions yet.
+**Done when:** 4–6 topics each with 3–6 questions, coverage checks pass, user saw the overview, then `save_topics_and_questions`. Do not ask interview questions before that save succeeds. After it succeeds, follow the returned backend instruction: when `nextAction` is `AskActiveQuestion`, ask `nextQuestionText` verbatim directly without a readiness confirmation or wait. If the backend returns a consent action, follow that consent instruction; backend consent remains authoritative.
 
 **Inputs:** discovery profile; when present, CKR Company Context folder (ground topics there; do not invent org processes from training data).
 
