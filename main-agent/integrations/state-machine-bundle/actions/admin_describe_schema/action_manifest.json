@@ -1,0 +1,23 @@
+{
+  "slug": "admin_describe_schema",
+  "name": "Admin: describe schema",
+  "description": "Discovers the CKR Dataverse tables and columns that admin_query_records can filter, select, or sort by, resolved live from Dataverse's own EntityDefinitions/Attributes metadata rather than a hard-coded list, so it can't drift from what actually exists in this environment. Also resolves the human-readable labels for Choice/Picklist columns (e.g. ckr_topicstatus) where the environment supports it. Call with a table to get its columns, or omit table to list every ckr_ entity. Call this before admin_query_records if you don't already know the field names for a table.",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": false,
+  "inputFields": [
+    {
+      "slug": "table",
+      "label": "Table",
+      "description": "Optional. The CKR entity to describe, by its Dataverse logical name or entity set name (e.g. ckr_interview / ckr_interviews). Omit to list every entity whose logical name starts with ckr_.",
+      "placeholder": "ckr_interview",
+      "type": "TEXT",
+      "required": false,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": null,
+      "jsonSchema": null
+    }
+  ]
+}
