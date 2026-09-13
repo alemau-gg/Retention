@@ -1,6 +1,6 @@
 # Retention
 
-BASF Knowledge Retention agent sources, split by agent.
+Knowledge Retention agent sources, split by agent.
 
 ## Layout
 
