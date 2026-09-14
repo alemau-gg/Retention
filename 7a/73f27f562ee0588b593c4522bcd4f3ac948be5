@@ -1,0 +1,29 @@
+main-agent/integrations/sharepoint-search/manifest.json
+  s_aa9774b284cc1f::t_b6772faf373bed 5,21
+  s_aa9774b284cc1f::t_5175884635337f 10
+repackaged-integrations/sharepoint-search/manifest.json
+  s_aa9774b284cc1f::t_01e92134c94884 10
+  s_aa9774b284cc1f::t_23e5168d5f6df1 5
+main-agent/integrations/sharepoint-search/actions/search_files_in_site.js
+  s_aa9774b284cc1f::t_b706f75d6655a0 6-7,189-192
+repackaged-integrations/sharepoint-search/actions/search_files_in_site/code.js
+  s_aa9774b284cc1f::t_8819de50c8d902 6-7,189-192
+repackaged-integrations/sharepoint-search/actions/search_files_in_site/action_manifest.json
+  s_aa9774b284cc1f::t_3e3d3ea0da9349 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "7a73f27f562ee0588b593c4522bcd4f3ac948be5",
+  "prompts": {},
+  "sessions": {
+    "s_aa9774b284cc1f": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "bd1449c3-206e-4fa5-8b4c-35724af7d754",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
