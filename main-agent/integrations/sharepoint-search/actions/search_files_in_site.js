@@ -3,6 +3,8 @@
 const MAX_RETRIES = 3;
 const FALLBACK_DELAY_S = 2;
 const MAX_DELAY_MS = 30000;
+const SHAREPOINT_SITE_URL =
+  "https://basf.sharepoint.com/teams/CKRCorporateKnowledgeRetentionAgent";
 
 async function graphRequest(options) {
   let rateLimitRetries = 0;
@@ -184,21 +186,13 @@ function mapHit(hit) {
   };
 }
 
-// 1. Resolve target site URL and optional site ID / subfolder from auth and inputs
-const configuredSiteUrl = (data.auth.siteUrl || "").trim().replace(/\/+$/, "");
-const configuredSiteId = (data.auth.siteId || "").trim();
-const configuredSubfolder = (data.auth.subfolderPath || "")
-  .trim()
-  .replace(/^\/+|\/+$/g, "");
+// 1. Resolve the hard-coded site scope and optional per-search subfolder.
+const configuredSiteUrl = SHAREPOINT_SITE_URL.replace(/\/+$/, "");
+const configuredSiteId = "";
+const configuredSubfolder = "";
 const inputSubfolder = (data.input.subfolder || "")
   .trim()
   .replace(/^\/+|\/+$/g, "");
-
-if (!configuredSiteUrl && !configuredSiteId) {
-  throw new Error(
-    "SharePoint site URL or site ID must be configured in connection auth fields",
-  );
-}
 
 // Build target path prefix combining site and subfolder
 let effectivePath = configuredSiteUrl;
