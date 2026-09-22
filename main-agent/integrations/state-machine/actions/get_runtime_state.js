@@ -903,14 +903,36 @@ if (state.nextAction === 'BuildFinalDocument' && interview && interview[S.interv
       .map((segment) => encodeURIComponent(segment))
       .join('/');
     const markdownName = `InterviewFinalSummary_${interviewNumber}.md`;
-    const markdownPath = `/sites/${siteId}/drive/root:/${encodedFolder}/${encodeURIComponent('Source transcripts')}/${encodeURIComponent(markdownName)}`;
-    const markdownResponse = await KnowledgeRetentionUtils.graph(data, graphToken, {
-      method: 'GET',
-      path: markdownPath,
-    });
-    const size = markdownResponse.json && markdownResponse.json.size;
-    if (markdownResponse.status === 200 && Number(size) > 0) {
-      state.instruction = `The approved handover Markdown is already stored. Call generate_final_document with no arguments. It builds "InterviewFinalSummary_${interviewNumber}.docx" from that stored Markdown, files it, and returns it. Do not redraft, do not build a Word file, and do not call upload_document for the handover.`;
+    const markdownPath = `/sites/${siteId}/drive/root:/${encodedFolder}/${encodeURIComponent('Source transcripts')}/${encodeURIComponent(markdownName)}:/content`;
+    // Same binary read and strict UTF-8 decode as generate_final_document, so
+    // this only skips the draft when that action will find non-empty Markdown.
+    let markdownResponse;
+    for (let attempt = 0; attempt <= 3; attempt++) {
+      markdownResponse = await ld.request({
+        url: `https://graph.microsoft.com/v1.0${markdownPath}`,
+        method: 'GET',
+        headers: { Authorization: `Bearer ${graphToken}`, Accept: 'application/octet-stream' },
+        responseType: 'binary',
+      });
+      if (markdownResponse.status !== 429) break;
+      const retryAfter = parseInt(
+        (markdownResponse.headers &&
+          (markdownResponse.headers['Retry-After'] || markdownResponse.headers['retry-after'])) ||
+          '',
+        10,
+      );
+      await ld.wait(Math.min((retryAfter && retryAfter > 0 ? retryAfter : 2) * 1000, 30000));
+    }
+    let storedText = '';
+    if (markdownResponse.status === 200 && markdownResponse.buffer && typeof TextDecoder === 'function') {
+      storedText = new TextDecoder('utf-8', { fatal: true }).decode(Buffer.from(markdownResponse.buffer));
+      if (storedText.charCodeAt(0) === 0xfeff) storedText = storedText.slice(1);
+      storedText = storedText.replace(/\r\n?/g, '\n');
+    }
+    if (storedText.trim()) {
+      const supportingFileInstruction =
+        ' Every file the user attaches is read and then proposed as a supporting document, except a topic-summary draft, a topic document, or the final handover. Require explicit confirmation before upload_document. Only after the interview folder exists (sharePointFolderUrl is present), call upload_document with docType "supporting" and a unique filename. If the folder does not exist yet, explain that documents can be filed after folder setup and keep the attachment available for later. Never generate or upload a supporting file automatically. After a confirmed supporting file is available, treat its contents as interview source material: when mid-question, include relevant facts in finalAnswer only; never put supporting-file facts in rawUserMessages, which must contain only the interviewee messages verbatim. Include relevant facts in every later topic summary and the final handover, naming the source file. Then resume the current step.';
+      state.instruction = `The approved handover Markdown is already stored. Call generate_final_document with no arguments. It builds "InterviewFinalSummary_${interviewNumber}.docx" from that stored Markdown, files it, and returns it. Do not redraft, do not build a Word file, and do not call upload_document for the handover.${supportingFileInstruction}`;
     }
   } catch (_error) {
     // Keep the draft instruction. This check must not block the interview.

@@ -980,8 +980,8 @@ const interviewNumber = interview[S.interview.number];
 const completedQuestionCount = KnowledgeRetentionUtils.answeredQuestionCount(children.questions, children.answers);
 const feedbackQuestions = KnowledgeRetentionUtils.MESSAGES.feedbackQuestions;
 
-// Cover metadata for the final summary document (no record IDs leak to the LLM).
-const coverMetadata = {
+// Handover metadata for the final handover document (no record IDs leak to the LLM).
+const handoverMetadata = {
   employeeName: interview[S.interview.displayName] || null,
   roleTitle: interview[S.interview.role] || null,
   businessUnit: interview[S.interview.businessUnit] || null,
@@ -999,7 +999,7 @@ return {
   completedQuestionCount,
   sharePointFolderUrl: folderUrl,
   summaries,
-  coverMetadata,
+  handoverMetadata,
   feedbackQuestions,
   instruction: `In ${languageName}: every canonical topic document is already in the interview folder, so do not rebuild those files. Load the knowledge-retention-reporting skill and open references/final-document.md. Draft the handover as Markdown from get_discovery and get_answers (start from rawUserMessages; if raw is empty or shorter than the confirmed answer, use the longer of the two) and confirmed supporting-file contents. Topic summaries are only a theme checklist and must not shrink the source. The handover must exceed the detail of the topic documents, not shorten them into an executive recap. Each chapter must keep every concrete fact from the longer of rawUserMessages and the confirmed answer, plus relevant supporting-file facts, and must add cross-topic dependencies and successor steps that no single topic summary contains. The executive summary is additional front matter and must not replace or compress the chapters. If a chapter is thinner than the source answers or the topic summaries it covers, expand it before asking for approval. Confirm chapter titles as a map; write chapters scannable like topic summaries (bullets and breaks when useful; leave the shape if it does not fit); show full chapter text before asking approval; after each draft, reread the source answers and add any missing concrete fact or mark it as an open gap. Whenever the Markdown draft is presented, tell the user in ${languageName} that conversion and formatting into Word is handled after approval, and ask them to focus on the contents. After explicit approval of the full text, call save_final_document with that exact file, then generate_final_document with no arguments. The resulting file is InterviewFinalSummary_${interviewNumber}.docx. Do not build, format, or upload a Word file. Do not use the BASF document template skill. Do not call upload_document for the handover. After generate_final_document succeeds, ask these three feedback questions one at a time, translated with meaning preserved exactly: 1) "${feedbackQuestions[0]}" 2) "${feedbackQuestions[1]}" 3) "${feedbackQuestions[2]}". Then call save_feedback. Finally send a warm, concise closing message in ${languageName} that states the completed question count (${completedQuestionCount}), includes the SharePoint folder link as both a clickable link and the raw URL, and reminds them they can share that folder from SharePoint with their manager or anyone else they consider relevant. The closing message is terminal: nothing follows it.`,
 };

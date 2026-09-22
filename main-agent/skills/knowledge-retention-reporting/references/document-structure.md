@@ -7,6 +7,7 @@ Section order for the handover Markdown. The backend renders `InterviewFinalSumm
 ## 1. Headline
 
 - **Headline**: official role title; leadership/governance tone. No shorthand.
+- **AI-generation notice** immediately under the headline, written by you into the handover Markdown in the interview language: short disclosure that the document was produced with AI assistance and should be reviewed before treating as final.
 
 ## 2. Executive summary
 

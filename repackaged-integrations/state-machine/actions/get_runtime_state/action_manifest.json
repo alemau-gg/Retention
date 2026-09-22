@@ -1,7 +1,7 @@
 {
   "slug": "get_runtime_state",
   "name": "Get runtime state",
-  "description": "Loads the caller's interview, topics, and questions and returns the computed next action plus a backend-authored instruction. Call once at the start of a conversation.",
+  "description": "Loads the caller's interview, topics, and questions and returns the computed next action plus a backend-authored instruction. Call once at the start of a conversation, and again when the user pauses if questionsRemaining is not in the latest tool result.",
   "nativeActionType": "NONE",
   "actionType": "API",
   "requiresConfirmation": false,

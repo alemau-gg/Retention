@@ -67,7 +67,7 @@ authorize inspecting or changing an unallowlisted resource.
 
 HOW’s own “Authority (do not invert)” ladder describes the **interview agent at runtime** (backend `instruction` beats chat). Do not confuse that with your edit authority above.
 
-Canonical conflicts (blank topic doc vs branded final, follow-ups 2–3, etc.) are in HOW → “Canonical when sources disagree”. Follow that table.
+Canonical conflicts (Markdown drafts → backend-rendered topic and final docs, follow-up cap 3 used more often than not, etc.) are in HOW → “Canonical when sources disagree”. Follow that table.
 
 **Load `debug-agent` immediately whenever** the administrator reports that the Knowledge Retention agent threw an error, a tool call failed, or runtime behavior was unexpected. For tool errors, it requires the exact action and verbatim error before live action-code diagnosis.
 

@@ -1720,45 +1720,61 @@ function decodeUtf8Bytes(bytes) {
 }
 
 function storedMarkdownText(response) {
-  const bytes = response.buffer || (response.body && typeof response.body !== 'string' ? response.body : null);
-  let text;
-  if (bytes) {
-    text = decodeUtf8Bytes(bytes);
-  } else if (typeof response.text === 'string') {
-    text = response.text;
-  } else if (typeof response.body === 'string') {
-    text = response.body;
-  } else {
-    throw new Error(
-      KnowledgeRetentionUtils.failureMessage(response.status, 'The stored handover Markdown response had no readable body.'),
-    );
-  }
+  let text = response.buffer ? decodeUtf8Bytes(response.buffer) : '';
   if (text.charCodeAt(0) === 0xfeff) text = text.slice(1);
   return text.replace(/\r\n?/g, '\n');
 }
 
-const markdownResponse = await KnowledgeRetentionUtils.graph(data, graphToken, {
-  method: 'GET',
-  path: `/sites/${siteId}/drive/root:/${encodedFolder}/${encodeURIComponent(SOURCE_FOLDER)}/${encodeURIComponent(markdownFileName)}:/content`,
-  headers: { Accept: 'text/markdown, text/plain;q=0.9, */*;q=0.8' },
-});
-if (markdownResponse.status === 404) {
-  return conflictResult(
-    'The handover Word file was not created because no approved Markdown is stored yet. Approve the Markdown and call save_final_document first. Do not create a Word file.',
-  );
+// Binary read like read_supporting_document, so the bytes are decoded here as
+// strict UTF-8 instead of relying on the platform's text handling.
+async function downloadStoredMarkdown(path) {
+  const MAX_RATE_LIMIT_RETRIES = 3;
+  const RETRY_FALLBACK_SECONDS = 2;
+  const MAX_WAIT_MS = 30000;
+  let rateLimitRetries = 0;
+  while (true) {
+    const response = await ld.request({
+      url: `${graphPrefix}${path}`,
+      method: 'GET',
+      headers: { Authorization: `Bearer ${graphToken}`, Accept: 'application/octet-stream' },
+      responseType: 'binary',
+    });
+    const detail =
+      (response.json && response.json.error && response.json.error.message) || response.text || '';
+    if (response.status === 429) {
+      if (rateLimitRetries >= MAX_RATE_LIMIT_RETRIES) {
+        throw new Error(KnowledgeRetentionUtils.failureMessage(429, detail));
+      }
+      rateLimitRetries++;
+      const retryAfter = parseInt(
+        (response.headers && (response.headers['Retry-After'] || response.headers['retry-after'])) || '',
+        10,
+      );
+      await ld.wait(Math.min((retryAfter && retryAfter > 0 ? retryAfter : RETRY_FALLBACK_SECONDS) * 1000, MAX_WAIT_MS));
+      continue;
+    }
+    if (response.status === 404) return response;
+    if (response.status !== 200) {
+      throw new Error(KnowledgeRetentionUtils.failureMessage(response.status, detail));
+    }
+    return response;
+  }
 }
-if (markdownResponse.status !== 200) {
-  const detail =
-    (markdownResponse.json && markdownResponse.json.error && markdownResponse.json.error.message) ||
-    markdownResponse.text ||
-    '';
-  throw new Error(KnowledgeRetentionUtils.failureMessage(markdownResponse.status, detail));
+
+const noStoredMarkdownNote = (reason) =>
+  status >= ST.interview.documentGenerated
+    ? 'No stored handover draft exists, and the handover document is already filed. No Word file was created.'
+    : `The handover Word file was not created because ${reason}. Approve the Markdown and call save_final_document first. Do not create a Word file.`;
+
+const markdownResponse = await downloadStoredMarkdown(
+  `/sites/${siteId}/drive/root:/${encodedFolder}/${encodeURIComponent(SOURCE_FOLDER)}/${encodeURIComponent(markdownFileName)}:/content`,
+);
+if (markdownResponse.status === 404) {
+  return conflictResult(noStoredMarkdownNote('no approved Markdown is stored yet'));
 }
 const markdownText = storedMarkdownText(markdownResponse);
 if (!markdownText.trim()) {
-  return conflictResult(
-    'The handover Word file was not created because the stored Markdown is empty. Approve the Markdown and call save_final_document first. Do not create a Word file.',
-  );
+  return conflictResult(noStoredMarkdownNote('the stored Markdown is empty'));
 }
 
 const supportingNames = [];
@@ -1788,8 +1804,49 @@ while (listPath) {
 }
 supportingNames.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 
-const documentTitle = `Final handover · Interview ${interviewNumber}`;
-const subtitleParts = [`Knowledge retention interview ${interviewNumber}`];
+// Renderer-added display text in the interview language; English fallback.
+const LABELS = {
+  en: {
+    title: 'Final handover · Interview',
+    subtitle: 'Knowledge retention interview',
+    supporting: 'Supporting documents',
+    noSupporting: NO_SUPPORTING,
+  },
+  de: {
+    title: 'Finale Übergabe · Interview',
+    subtitle: 'Wissenssicherungsinterview',
+    supporting: 'Unterstützende Dokumente',
+    noSupporting: 'Es wurden keine unterstützenden Dokumente bereitgestellt.',
+  },
+  zh: {
+    title: '最终交接 · 访谈',
+    subtitle: '知识保留访谈',
+    supporting: '支持文档',
+    noSupporting: '未提供支持文档。',
+  },
+  fr: {
+    title: 'Passation finale · Entretien',
+    subtitle: 'Entretien de rétention des connaissances',
+    supporting: 'Documents complémentaires',
+    noSupporting: 'Aucun document complémentaire n’a été fourni.',
+  },
+  es: {
+    title: 'Traspaso final · Entrevista',
+    subtitle: 'Entrevista de retención del conocimiento',
+    supporting: 'Documentos de apoyo',
+    noSupporting: 'No se proporcionaron documentos de apoyo.',
+  },
+  pt: {
+    title: 'Passagem final · Entrevista',
+    subtitle: 'Entrevista de retenção de conhecimento',
+    supporting: 'Documentos de apoio',
+    noSupporting: 'Não foram fornecidos documentos de apoio.',
+  },
+};
+const L = LABELS[interview[S.interview.language]] || LABELS.en;
+
+const documentTitle = `${L.title} ${interviewNumber}`;
+const subtitleParts = [`${L.subtitle} ${interviewNumber}`];
 const employeeName = interview[S.interview.displayName] || email || '';
 if (employeeName) subtitleParts.push(employeeName);
 const roleLine = [interview[S.interview.role], interview[S.interview.businessUnit]].filter(Boolean).join(', ');
@@ -1802,13 +1859,13 @@ const bodyParts = [];
 bodyParts.push(DOCX.paragraphXml(documentTitle, { style: 'DocTitle', literal: true }));
 bodyParts.push(DOCX.paragraphXml(subtitle, { style: 'DocSubtitle', literal: true }));
 bodyParts.push(DOCX.renderBlocks(DOCX.parseBlocks(markdownText), renderContext));
-bodyParts.push(DOCX.paragraphXml('Supporting documents', { style: 'Heading1', literal: true }));
+bodyParts.push(DOCX.paragraphXml(L.supporting, { style: 'Heading1', literal: true }));
 if (supportingNames.length > 0) {
   for (const name of supportingNames) {
     bodyParts.push(DOCX.paragraphXml(name, { style: 'ListParagraph', numId: 1, level: 0, literal: true }));
   }
 } else {
-  bodyParts.push(DOCX.paragraphXml(NO_SUPPORTING, { literal: true }));
+  bodyParts.push(DOCX.paragraphXml(L.noSupporting, { literal: true }));
 }
 
 const docxBytes = DOCX.build(bodyParts.join(''), renderContext.orderedNums, {

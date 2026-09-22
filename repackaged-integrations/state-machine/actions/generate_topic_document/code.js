@@ -1832,8 +1832,35 @@ supportingNames.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 // ===========================================================================
 // Assemble the document.
 // ===========================================================================
+// Renderer-added display text in the interview language; English fallback.
+const LABELS = {
+  en: { subtitle: 'Knowledge retention interview', supporting: 'Supporting documents', noSupporting: NO_SUPPORTING },
+  de: {
+    subtitle: 'Wissenssicherungsinterview',
+    supporting: 'Unterstützende Dokumente',
+    noSupporting: 'Es wurden keine unterstützenden Dokumente bereitgestellt.',
+  },
+  zh: { subtitle: '知识保留访谈', supporting: '支持文档', noSupporting: '未提供支持文档。' },
+  fr: {
+    subtitle: 'Entretien de rétention des connaissances',
+    supporting: 'Documents complémentaires',
+    noSupporting: 'Aucun document complémentaire n’a été fourni.',
+  },
+  es: {
+    subtitle: 'Entrevista de retención del conocimiento',
+    supporting: 'Documentos de apoyo',
+    noSupporting: 'No se proporcionaron documentos de apoyo.',
+  },
+  pt: {
+    subtitle: 'Entrevista de retenção de conhecimento',
+    supporting: 'Documentos de apoio',
+    noSupporting: 'Não foram fornecidos documentos de apoio.',
+  },
+};
+const L = LABELS[interview[S.interview.language]] || LABELS.en;
+
 const documentTitle = `Topic ${requestedOrder}: ${topicName}`;
-const subtitleParts = [`Knowledge retention interview ${interview[S.interview.number]}`];
+const subtitleParts = [`${L.subtitle} ${interview[S.interview.number]}`];
 const employeeName = interview[S.interview.displayName] || email || '';
 if (employeeName) subtitleParts.push(employeeName);
 const roleLine = [interview[S.interview.role], interview[S.interview.businessUnit]].filter(Boolean).join(', ');
@@ -1846,13 +1873,13 @@ bodyParts.push(DOCX.paragraphXml(subtitleParts.join(' \u00b7 '), { style: 'DocSu
 
 bodyParts.push(DOCX.renderBlocks(DOCX.parseBlocks(summaryText), renderContext));
 
-bodyParts.push(DOCX.paragraphXml('Supporting documents', { style: 'Heading1', literal: true }));
+bodyParts.push(DOCX.paragraphXml(L.supporting, { style: 'Heading1', literal: true }));
 if (supportingNames.length > 0) {
   for (const name of supportingNames) {
     bodyParts.push(DOCX.paragraphXml(name, { style: 'ListParagraph', numId: 1, level: 0, literal: true }));
   }
 } else {
-  bodyParts.push(DOCX.paragraphXml(NO_SUPPORTING, { literal: true }));
+  bodyParts.push(DOCX.paragraphXml(L.noSupporting, { literal: true }));
 }
 
 const docxBytes = DOCX.build(bodyParts.join(''), renderContext.orderedNums, {

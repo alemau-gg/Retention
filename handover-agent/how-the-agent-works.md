@@ -35,7 +35,7 @@ When structure changes, update this file in the same change as the code/prompt/s
 | Interview stage / next step | Backend `instruction` | Never invent from chat |
 | Topic summary `.docx` | Reporting `summary-format.md` (Markdown draft) → `save_topic_summary` → `generate_topic_document` | Backend renders the standardized Word file; overrides system prompt “BASF template for all docs” |
 | Final handover `.docx` | Reporting `final-document.md` (Markdown draft) → `save_final_document` → `generate_final_document` | Backend renders the Word file; no `assets/template.docx`, no BASF template skill |
-| Clarifying follow-ups | System prompt | Wording says both “at most 3” and “these two” → treat **2–3** as intent |
+| Clarifying follow-ups | System prompt | Cap **3** per question; follow up more often than not, each one probing something the interviewee has not said |
 | Discovery methodology | Interviewing skill | Backend does **not** load it at `created`; soft spot unless the agent loads it unprompted |
 
 ---
@@ -84,7 +84,7 @@ External systems (backend / adjacent, not conversational skills):
 |---|---|
 | **Dataverse** (`ckr_*`) | Interview, topics, questions, versioned answers, consent, feedback |
 | **SharePoint (CKR site)** | Folder + `.docx` uploads; invite verified, non-fatal; user can always share further |
-| **Outlook Calendar** | Optional pause reminder only — not in the state machine |
+| **Outlook Calendar** | Pause scheduling proposal only — not in the state machine |
 | **CKR Company Context folder** | Optional grounding for topic generation |
 | **WorkIQ / prefill** | Optional; gated by `prefillEnabled` |
 
@@ -106,7 +106,7 @@ External systems (backend / adjacent, not conversational skills):
 - Ask questions **verbatim** from `nextQuestionText` — no rephrase, skip, merge, or invent.
 - After saving an answer: no summary chatter — only the next question (or next instructed step).
 
-**Also owns (outside the backend state machine):** interview overview, discovery save-status messaging, clarifying follow-ups (2–3; successor needs; vague contacts), pause + optional Outlook reminder, failure UX (retry once), language-switch → restart only on explicit confirm. Document tooling: see “Canonical when sources disagree” — the agent drafts Markdown with the `write` tool and never builds, formats, or uploads a Word file for topic documents or the final handover.
+**Also owns (outside the backend state machine):** interview overview, discovery save-status messaging, clarifying follow-ups (cap 3, used more often than not, probing the unsaid; successor needs; vague contacts), pause + proposed Outlook session, failure UX (retry once), language-switch → restart only on explicit confirm. Document tooling: see “Canonical when sources disagree” — the agent drafts Markdown with the `write` tool and never builds, formats, or uploads a Word file for topic documents or the final handover.
 
 ---
 
@@ -340,7 +340,7 @@ flowchart TD
 
 ### Optional supporting files
 
-An actually attached file may be offered as a supporting artifact when it appears useful to the interview. The agent explains its relevance and requires explicit user confirmation. The interview folder must exist first: before folder setup, the agent tells the user that the file can be filed after `set_up_interview_folder` and does not call `upload_document`. Once the folder exists, it uploads one file at a time under a clear, unique filename, preserves the original extension, refuses an existing filename, and resumes the current backend instruction afterward. Supporting uploads are never generated automatically, are not summaries, and do not change interview status, question progress, topic summaries, or final-document handling.
+Every actually attached file is read and then proposed as a supporting document, except a topic-summary draft, a topic document, or the final handover. This is mandatory, not a judgment call. The agent uploads only after an explicit yes. The interview folder must exist first: before folder setup, the agent tells the user that the file can be filed after `set_up_interview_folder` and does not call `upload_document`. Once the folder exists, it uploads one file at a time under a clear, unique filename, preserves the original extension, refuses an existing filename, and resumes the current backend instruction afterward. Supporting uploads are never generated automatically, are not summaries, and do not change interview status, question progress, topic summaries, or final-document handling.
 
 9. **Finalize (`FinalizeInterview` → `FinalizeAndCollectFeedback`)**  
    All topics summarized → user confirms → `finalize_interview` (status → 60). Same-session instruction: open `references/final-document.md`, draft the handover as Markdown with the `write` tool from `get_discovery` + `get_answers` (+ confirmed supporting files), show the full text and get explicit approval, then `save_final_document` (`handoverFile`) → `generate_final_document` (no arguments; renders and files `InterviewFinalSummary_{n}.docx`, returns it, and advances the row to 70), then ask the three feedback questions, then `save_feedback`. The instruction explicitly tells the agent **not** to rebuild per-topic files (finalize already verified them), and not to build, format, or upload a Word file for the handover.
@@ -397,7 +397,7 @@ The document gate is a status check, not a question to the user: `generate_final
 Because the two gates are read independently, feedback given before the document was filed is not lost — the row keeps status 60 until `generate_final_document` lands, and the instruction on that branch skips the feedback questions when the columns are already populated.
 
 ### Pause (not abandon)
-User wants to stop before finalize. Agent reassures that **only confirmed** saves persist; may nudge finishing the current discovery/answer confirmation. Optionally offers an Outlook calendar reminder (user must accept; timezone from Outlook settings; user as attendee). If Outlook not connected: explain once, no retry loop. Progress remains; next open resumes.
+User wants to stop before finalize. Agent reassures that **only confirmed** saves persist; may nudge finishing the current discovery/answer confirmation. Always proposes an Outlook session to continue: about 6 minutes per remaining question from `questionsRemaining`, rounded up to the next 15 minutes; above 1 hour it may also offer two sessions. If `questionsRemaining` is null, no duration is given; if it is 0, there is nothing to schedule. The event is created only if the user accepts (timezone from Outlook settings; user as attendee). If Outlook not connected: explain once, no retry loop. Progress remains; next open resumes.
 
 ### Abandon
 User explicitly wants to discard the open interview → `abandon_interview` (confirmed, irreversible — also `requiresConfirmation: true` in the manifest, alongside `finalize_interview`). Sets status `cancelled` (80). Children are left in Dataverse but become **permanently unreachable** via normal lookups (80 fails both the open filter `lt 60` and the closed range `ge 60 and lt 80`). Needed because `create_interview` refuses if an open interview already exists. After abandon, the action returns `CollectProfile` (computeState with no interview) so the user can start fresh in the same turn. Idempotent no-op if nothing is open.

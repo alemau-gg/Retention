@@ -65,7 +65,7 @@
     {
       "slug": "get_runtime_state",
       "name": "Get runtime state",
-      "description": "Loads the caller's interview, topics, and questions and returns the computed next action plus a backend-authored instruction. Call once at the start of a conversation.",
+      "description": "Loads the caller's interview, topics, and questions and returns the computed next action plus a backend-authored instruction. Call once at the start of a conversation, and again when the user pauses if questionsRemaining is not in the latest tool result.",
       "activeLabel": "Checking where we were",
       "doneLabel": "Checked where we were",
       "failedLabel": "Failed to check where we were",
@@ -814,7 +814,7 @@
     {
       "slug": "get_discovery",
       "name": "Get discovery profile",
-      "description": "Reads back the caller's saved pre-interview discovery profile (role, business unit, responsibilities, tools, focus topics, KPIs/constraints). Read-only; use this when building the final summary document, since finalize_interview's cover metadata only carries role and business unit.",
+      "description": "Reads back the caller's saved pre-interview discovery profile (role, business unit, responsibilities, tools, focus topics, KPIs/constraints). Read-only; use this when building the final summary document, since finalize_interview's handover metadata only carries role and business unit.",
       "nativeActionType": "NONE",
       "actionType": "API",
       "requiresConfirmation": false,
