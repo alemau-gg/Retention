@@ -1016,6 +1016,12 @@ const uploadedNote = `${fileName} was uploaded successfully; it is filed in the 
   documentGenerated ? ' The interview is now marked as Document Generated.' : ''
 }`;
 
+// A supporting upload is usually mid-question; the computed AskActiveQuestion
+// instruction would otherwise re-ask a question already answered in chat.
+const resumeNote = state.nextAction === 'AskActiveQuestion'
+  ? 'The current question is still open: resume it from where the conversation is, do not start it over. If the user already answered it in this conversation, do not ask it again; continue with the remaining follow-ups or the confirmation recap, then call save_answer as described below. Only ask the question if it has not been asked yet. '
+  : '';
+
 return {
   uploaded: true,
   docType,
@@ -1023,7 +1029,7 @@ return {
   fileWebUrl: (uploadResponse.json && uploadResponse.json.webUrl) || null,
   documentGenerated,
   nextAction: state.nextAction,
-  instruction: `${uploadedNote} ${state.instruction}`,
+  instruction: `${uploadedNote} ${resumeNote}${state.instruction}`,
   language: state.language,
   progressLabel: state.progressLabel,
   questionsRemaining: state.questionsRemaining,

@@ -1063,6 +1063,13 @@ const sharingReminder = accessGranted
   // granted" — the invite result does not prove the current sharing state.
   : `Tell the user the folder is ready at ${webUrl}, but that automatic access could not be confirmed (${accessFailureDetail}); if the folder was set up earlier they may already have access. Ask them to open it in SharePoint and, if they cannot, share it with themselves, their manager, and anyone else they consider relevant. Their documents will still be filed there either way.`;
 
+// Folder setup can happen while a question is open (e.g. to file a supporting
+// document). The computed AskActiveQuestion instruction reads as "ask it now",
+// which re-asks a question the user may already have answered in chat.
+const resumeNote = state.nextAction === 'AskActiveQuestion'
+  ? 'The current question is still open: resume it from where the conversation is, do not start it over. If the user already answered it in this conversation, do not ask it again; continue with the remaining follow-ups or the confirmation recap, then call save_answer as described below. Only ask the question if it has not been asked yet. '
+  : '';
+
 return {
   folderCreated: true,
   accessGranted,
@@ -1075,7 +1082,7 @@ return {
   partialOutcome,
   sharePointFolderWebUrl: webUrl,
   nextAction: state.nextAction,
-  instruction: `${sharingReminder} ${state.instruction}`,
+  instruction: `${sharingReminder} ${resumeNote}${state.instruction}`,
   language: state.language,
   progressLabel: state.progressLabel,
   questionsRemaining: state.questionsRemaining,

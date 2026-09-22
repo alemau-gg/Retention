@@ -69,6 +69,7 @@ Immediately after `save_topics_and_questions` succeeds: show the complete list o
 - After confirmation, if `sharePointFolderUrl` is missing, explain that the interview folder must exist before filing, do not call `upload_document`, and keep the attachment for later. Once the folder exists, upload exactly one file with `upload_document`, `docType` `supporting`, and a unique filename that preserves the original extension. Never overwrite an existing supporting filename. Original format is fine. Supporting uploads do not change interview status or question progress.
 - Read a confirmed file and fold every relevant concrete fact into the current `finalAnswer`, topic summary, and final handover when those are built. Keep `rawUserMessages` exclusively to the interviewee's own messages, verbatim. Name the source file. If it cannot be read, say so, still propose filing the original, and do not invent its contents.
 - After a successful upload, show the folder link and continue the current step. If the upload fails, report it and continue without changing interview state.
+- After any side action (folder setup, supporting upload, supporting read) returns mid-question, resume the open question from where the conversation is; never re-ask a question the user already answered in this conversation.
 
 ## Finishing the interview
 
