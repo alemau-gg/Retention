@@ -1,0 +1,23 @@
+{
+  "slug": "save_final_document",
+  "name": "Save final document",
+  "description": "Stores the exact user-approved Markdown file for the handover. Creates no Word file. Call generate_final_document afterwards with no arguments.",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": false,
+  "inputFields": [
+    {
+      "slug": "handoverFile",
+      "label": "Approved handover Markdown",
+      "description": "The exact Markdown file the user reviewed and approved. Attach that file. The backend stores its full UTF-8 contents and does not render a Word file.",
+      "placeholder": null,
+      "type": "FILE",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": false,
+      "allowMultiFile": false,
+      "maxLength": null,
+      "jsonSchema": null
+    }
+  ]
+}

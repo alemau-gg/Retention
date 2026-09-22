@@ -165,4 +165,4 @@ Every non-admin KR Backend action carries the complete `KnowledgeRetentionUtils`
 
 Never trim helper methods because an action does not call `computeState`. Actions such as `finalize_interview`, `save_feedback`, `get_answers`, and `get_discovery` still receive the full helper.
 
-Action-authored `nextAction` values such as `FinalizeAndCollectFeedback` and `SendClosingMessage` remain in those action bodies, not in `computeState`, unless the change deliberately moves them and updates all coupled artifacts.
+Action-authored `nextAction` values such as `FinalizeAndCollectFeedback`, `GenerateFinalDocument`, and `SendClosingMessage` remain in those action bodies, not in `computeState`, unless the change deliberately moves them and updates all coupled artifacts.

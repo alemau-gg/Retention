@@ -17,7 +17,7 @@ Methodology only. Progress, saves, and `nextQuestionText` come from the backend 
 |---|---|---|
 | Yes | `RunPreInterviewDiscovery` | Thin-answer bar + required discovery fields |
 | Yes | `GenerateTopicsAndQuestions` | 4–6 topics × 3–6 questions; overview; then `save_topics_and_questions` |
-| No | `AskActiveQuestion` | Ask `nextQuestionText` verbatim; clarifying follow-ups are system-prompt, not this skill |
+| No | `AskActiveQuestion` | Ask `nextQuestionText` verbatim. Probing follow-ups (max 3, used much more often than not) are the system prompt, not this skill |
 | No | `GenerateOrReviewTopicSummary`, `BuildFinalDocument`, `FinalizeAndCollectFeedback` | Load `knowledge-retention-reporting` instead |
 
 Do not load for consent, folder setup, finalize, feedback, or document upload — follow the backend instruction.
@@ -43,6 +43,8 @@ Undocumented know-how that would leave with this person — not process manuals.
 - Stakeholder maps and unwritten escalation
 - System quirks and tribal workarounds
 - Judgment criteria (thresholds, heuristics, red flags)
+
+Live follow-ups are the system prompt (this skill is not loaded on `AskActiveQuestion`). Cap stays 3. Within it, follow up much more often than not, one gap at a time, and do not repeat what was already said. Go after assumptions, exceptions, failure cases, who else depends on this, numbers, sequence, and what would break if this person left.
 
 ## Discovery (`RunPreInterviewDiscovery`)
 

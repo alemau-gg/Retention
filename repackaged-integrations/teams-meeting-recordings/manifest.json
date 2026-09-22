@@ -1,0 +1,28 @@
+{
+  "id": "117b0c3a-20b0-48a6-b094-42aaf34f179e",
+  "name": "Teams Meeting Recordings",
+  "color": "#4B53BC",
+  "description": "List and download Microsoft Teams cloud recordings for meetings you organized, and poll when a new recording is ready.",
+  "samplePrompts": [
+    {
+      "prompt": "List my recent Teams meeting recordings"
+    },
+    {
+      "prompt": "Download the recording for this Teams meeting join URL"
+    },
+    {
+      "prompt": "What can I use this integration for?"
+    }
+  ],
+  "category": "MESSAGING",
+  "suite": "MICROSOFT",
+  "authType": "OAUTH",
+  "integrationType": "API",
+  "authFields": [],
+  "oauthClient": {
+    "id": "06b05a67-8b37-4019-88e2-8f3567295958",
+    "scope": "openid offline_access User.Read OnlineMeetings.Read OnlineMeetingRecording.Read.All Chat.ReadBasic Calendars.Read",
+    "scopeSeparator": "space",
+    "label": "Teams recordings - {{data.input.mail}}"
+  }
+}

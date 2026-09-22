@@ -313,6 +313,74 @@ const KnowledgeRetentionUtils = {
     }
   },
 
+  // Blank, null, or omitted cr32c_aisuiteid means the column was never written.
+  // Dataverse omits nulls from GET payloads, so absence and '' are the same case.
+  storedUserId(row) {
+    const value = row && row[KnowledgeRetentionUtils.SCHEMA.interview.userId];
+    if (value === null || value === undefined) return '';
+    return String(value).trim();
+  },
+
+  // 'stable' — row already has this caller's Langdock id.
+  // 'legacy' — ckr_employeeemail is this caller's email and the id was never written.
+  // null — a different non-empty id is already stored; never claim that row.
+  claimKind(row, identity) {
+    const stored = KnowledgeRetentionUtils.storedUserId(row);
+    if (identity.userId && stored === identity.userId) return 'stable';
+    if (stored) return null;
+    const email = row && row[KnowledgeRetentionUtils.SCHEMA.interview.email];
+    if (identity.email && typeof email === 'string' && email === identity.email) return 'legacy';
+    return null;
+  },
+
+  // Email fallback is only a bridge. Once a legacy row is claimed, persist the
+  // stable id so the next lookup matches on cr32c_aisuiteid.
+  async backfillStableId(data, token, row, identity) {
+    if (!identity.userId || KnowledgeRetentionUtils.storedUserId(row)) return row;
+    const S = KnowledgeRetentionUtils.SCHEMA;
+    await KnowledgeRetentionUtils.dv(data, token, {
+      method: 'PATCH',
+      path: `/${S.entitySets.interviews}(${row[S.interview.id]})`,
+      body: { [S.interview.userId]: identity.userId },
+    });
+    row[S.interview.userId] = identity.userId;
+    return row;
+  },
+
+  // Stable id first. Email is consulted only for this caller's own
+  // ckr_employeeemail, and only to bridge rows whose id column is still empty.
+  // `userId eq null` is intentionally not in the email filter: that predicate
+  // misses never-written text columns, which is how in-progress interviews
+  // disappeared after the id switch. Rows that already have a different id are
+  // skipped in claimKind.
+  async findOwnedInterview(data, token, identity, statusFilter) {
+    const S = KnowledgeRetentionUtils.SCHEMA;
+    const query = async (filter, top) => {
+      const result = await KnowledgeRetentionUtils.dv(data, token, {
+        method: 'GET',
+        path: `/${S.entitySets.interviews}?$filter=${encodeURIComponent(filter)}&$orderby=createdon desc&$top=${top}`,
+      });
+      return result && result.value ? result.value : [];
+    };
+    const withStatus = (filter) => (statusFilter ? `${filter} and ${statusFilter}` : filter);
+
+    if (identity.userId) {
+      const safeUserId = KnowledgeRetentionUtils.escapeODataLiteral(identity.userId);
+      const current = await query(withStatus(`${S.interview.userId} eq '${safeUserId}'`), 1);
+      if (current.length > 0) return current[0];
+    }
+    if (identity.email) {
+      const safeEmail = KnowledgeRetentionUtils.escapeODataLiteral(identity.email);
+      const candidates = await query(withStatus(`${S.interview.email} eq '${safeEmail}'`), 25);
+      for (const row of candidates) {
+        const kind = KnowledgeRetentionUtils.claimKind(row, identity);
+        if (kind === 'stable') return row;
+        if (kind === 'legacy') return KnowledgeRetentionUtils.backfillStableId(data, token, row, identity);
+      }
+    }
+    return null;
+  },
+
   // ===========================================================================
   // State loading — the user's open interview, or the most recent completed one.
   // ===========================================================================
@@ -325,52 +393,13 @@ const KnowledgeRetentionUtils = {
     const statusFilter = completed
       ? `${S.interview.status} ge ${ST.interview.finalized} and ${S.interview.status} lt ${ST.interview.cancelled}`
       : `${S.interview.status} lt ${ST.interview.finalized}`;
-    const find = async (filter) => {
-      const result = await KnowledgeRetentionUtils.dv(data, token, {
-        method: 'GET',
-        path: `/${S.entitySets.interviews}?$filter=${encodeURIComponent(filter)}&$orderby=createdon desc&$top=1`,
-      });
-      return result && result.value && result.value.length > 0 ? result.value[0] : null;
-    };
-
-    // Stable ID is authoritative. Email fallback is restricted to legacy rows
-    // whose new ID field is null, so a row owned by another stable ID can never
-    // be returned by the fallback.
-    if (identity.userId) {
-      const safeUserId = KnowledgeRetentionUtils.escapeODataLiteral(identity.userId);
-      const current = await find(`${S.interview.userId} eq '${safeUserId}' and ${statusFilter}`);
-      if (current) return current;
-    }
-    if (identity.email) {
-      const safeEmail = KnowledgeRetentionUtils.escapeODataLiteral(identity.email);
-      return find(
-        `${S.interview.email} eq '${safeEmail}' and ${S.interview.userId} eq null and ${statusFilter}`,
-      );
-    }
-    return null;
+    return KnowledgeRetentionUtils.findOwnedInterview(data, token, identity, statusFilter);
   },
 
-  // Same stable-ID-first/legacy-null-ID candidate logic as loadInterviewRow,
-  // used by get_runtime_state's latest-cancelled guard.
+  // Same ownership rule as loadInterviewRow, without a status gate.
+  // Used by get_runtime_state's latest-cancelled guard.
   async loadLatestInterviewRow(data, token, identity) {
-    const S = KnowledgeRetentionUtils.SCHEMA;
-    const find = async (filter) => {
-      const result = await KnowledgeRetentionUtils.dv(data, token, {
-        method: 'GET',
-        path: `/${S.entitySets.interviews}?$filter=${encodeURIComponent(filter)}&$orderby=createdon desc&$top=1`,
-      });
-      return result && result.value && result.value.length > 0 ? result.value[0] : null;
-    };
-    if (identity.userId) {
-      const safeUserId = KnowledgeRetentionUtils.escapeODataLiteral(identity.userId);
-      const current = await find(`${S.interview.userId} eq '${safeUserId}'`);
-      if (current) return current;
-    }
-    if (identity.email) {
-      const safeEmail = KnowledgeRetentionUtils.escapeODataLiteral(identity.email);
-      return find(`${S.interview.email} eq '${safeEmail}' and ${S.interview.userId} eq null`);
-    }
-    return null;
+    return KnowledgeRetentionUtils.findOwnedInterview(data, token, identity, '');
   },
 
   // One FetchXML join (SE-3215) instead of three child GETs. FetchXML omits
@@ -587,13 +616,14 @@ const KnowledgeRetentionUtils = {
     const M = KnowledgeRetentionUtils.MESSAGES;
     const prefillEnabled = String(data.auth.prefillEnabled).toLowerCase() === 'true';
     const supportingFileInstruction =
-      ' If the user attaches a file that appears useful for this interview, explain why and ask for explicit confirmation. Only after the interview folder exists (sharePointFolderUrl is present), call upload_document with docType "supporting" and a unique filename. If the folder does not exist yet, explain that documents can be filed after folder setup and keep the attachment available for later. Never generate or upload a supporting file automatically. After a confirmed supporting file is available, read it and treat its contents as interview source material: when mid-question, include relevant facts in finalAnswer only; never put supporting-file facts in rawUserMessages, which must contain only the interviewee messages verbatim. Include relevant facts in every later topic summary and the final handover, naming the source file. Then resume the current step.';
+      ' Every file the user attaches is read and then proposed as a supporting document, except a topic-summary draft, a topic document, or the final handover. Require explicit confirmation before upload_document. Only after the interview folder exists (sharePointFolderUrl is present), call upload_document with docType "supporting" and a unique filename. If the folder does not exist yet, explain that documents can be filed after folder setup and keep the attachment available for later. Never generate or upload a supporting file automatically. After a confirmed supporting file is available, treat its contents as interview source material: when mid-question, include relevant facts in finalAnswer only; never put supporting-file facts in rawUserMessages, which must contain only the interviewee messages verbatim. Include relevant facts in every later topic summary and the final handover, naming the source file. Then resume the current step.';
 
     const base = {
       nextAction: null,
       instruction: null,
       language: null,
       progressLabel: null,
+      questionsRemaining: null,
       nextQuestionText: null,
       expectedQuestionOrder: null,
       expectedTopicOrder: null,
@@ -630,6 +660,9 @@ const KnowledgeRetentionUtils = {
     }
 
     const children_ = children || { topics: [], questions: [], answers: [] };
+    base.questionsRemaining = children_.questions.filter(
+      (question) => !KnowledgeRetentionUtils.isAnswered(question, children_.answers),
+    ).length;
 
     if (status === ST.interview.generated) {
       const consentStatus = Number(interview[S.interview.consentStatus] || ST.consent.notAsked);
@@ -664,7 +697,7 @@ const KnowledgeRetentionUtils = {
             expectedQuestionOrder: Number(question[S.question.order]),
             expectedTopicOrder: topicOrder,
             progressLabel: `Topic ${topicOrder} of ${children_.topics.length} · question ${answeredCount + 1} of ${topicQuestions.length}`,
-            instruction: `Ask the current question for topic "${topic[S.topic.name]}" in ${language}. Present the progressLabel and topic name in bold on its own line, then the question text exactly as provided in nextQuestionText — do not paraphrase or translate the wording you save. At most 3 clarifying follow-ups if the answer is thin, then you must confirm and call save_answer. Never a 4th follow-up. Before saving, show a slightly fuller recap of finalAnswer (a short paragraph or a few bullets, not a slogan). Tell them this is only a checkpoint for this question: if it feels tight or restrictive, that is expected; a more detailed summary is written after all questions in this topic. Then get explicit confirmation. Call save_answer with the confirmed answer as finalAnswer, the full chronological transcript of the interviewee's own messages for this question (initial answer plus every follow-up, verbatim, not condensed) as rawUserMessages, expectedQuestionOrder ${Number(question[S.question.order])}, and expectedTopicOrder ${topicOrder}. Do not save on a soft or implicit reply.${supportingFileInstruction}`,
+            instruction: `Ask the current question for topic "${topic[S.topic.name]}" in ${language}. Present the progressLabel and topic name in bold on its own line, then the question text exactly as provided in nextQuestionText — do not paraphrase or translate the wording you save. At most 3 clarifying follow-ups. Within that cap, follow up much more often than not; each follow-up asks one thing they have not said (assumptions, exceptions, failure cases, who else depends on this, numbers, sequence, what would break if they left); do not repeat them; skip only when the answer already covers those gaps. Then you must confirm and call save_answer. Never a 4th follow-up. Before saving, show a slightly fuller recap of finalAnswer (a short paragraph or a few bullets, not a slogan). Tell them this is only a checkpoint for this question: if it feels tight or restrictive, that is expected; a more detailed summary is written after all questions in this topic. Then get explicit confirmation. Call save_answer with the confirmed answer as finalAnswer, the full chronological transcript of the interviewee's own messages for this question (initial answer plus every follow-up, verbatim, not condensed) as rawUserMessages, expectedQuestionOrder ${Number(question[S.question.order])}, and expectedTopicOrder ${topicOrder}. Do not save on a soft or implicit reply.${supportingFileInstruction}`,
           });
         }
 
@@ -686,7 +719,7 @@ const KnowledgeRetentionUtils = {
           expectedTopicOrder: topicOrder,
           topicQnA: KnowledgeRetentionUtils.topicQnA(children_.questions, children_.answers, topic[S.topic.id]),
           progressLabel: `Topic ${topicOrder} of ${children_.topics.length} · summary`,
-          instruction: `Tell the user in ${language} that ${summaryLead} Load the knowledge-retention-reporting skill and use its default topic-summary workflow. Open references/summary-format.md only; do not open final-document.md, the final-document supporting references, or assets/template.docx. Build a faithful summary from topicQnA (prefer rawUserMessages when present, else the confirmed answer) and from any confirmed supporting files: read those attachments and include every relevant concrete fact, naming the source file. The summary must be exhaustive: one mini-header per answered question. Prefer a short paragraph, then bullets when there are several facts, then a translated For-example from the interviewee (never invented), with line breaks between blocks; leave that shape if a quote, table, or one tight paragraph fits better. Then a short how-this-fits-together paragraph. First draft already this dense and scannable; do not wait for the user to ask for more examples. At least as long as the combined rawUserMessages (or confirmed answers if raw is empty) plus supporting-file facts, no upper word cap. If shorter or missing examples, expand before presenting. Translate every section heading into ${language}. Invent nothing, and use only the sections allowed by summary-format.md. After the user approves, call save_topic_summary with expectedTopicOrder ${topicOrder} and the exact approved summaryFile, then follow the instruction it returns. Do not write, format, or upload the topic document yourself: generate_topic_document builds "${topicFileName}" from the saved summary server-side, files it in the interview folder, and returns it. Never hand it summary text, a file name, or a folder path.${supportingFileInstruction}`,
+          instruction: `Tell the user in ${language} that ${summaryLead} Load the knowledge-retention-reporting skill and use its default topic-summary workflow. Open references/summary-format.md only; do not open final-document.md, the final-document supporting references, or assets/template.docx. Build a faithful summary from topicQnA (prefer rawUserMessages when present, else the confirmed answer) and from any confirmed supporting files: read those attachments and include every relevant concrete fact, naming the source file. The summary must be exhaustive: one mini-header per answered question. Prefer a short paragraph, then bullets when there are several facts, then a translated For-example from the interviewee (never invented), with line breaks between blocks; leave that shape if a quote, table, or one tight paragraph fits better. Then a short how-this-fits-together paragraph. First draft already this dense and scannable; do not wait for the user to ask for more examples. At least as long as the combined rawUserMessages (or confirmed answers if raw is empty) plus supporting-file facts, no upper word cap. If shorter or missing examples, expand before presenting. Translate every section heading into ${language}. Invent nothing, and use only the sections allowed by summary-format.md. Whenever the Markdown draft is presented, before save, tell them in the interview language that you handle conversion and formatting into Word, and ask them to focus on the contents and adjust those where needed. After the user approves, call save_topic_summary with expectedTopicOrder ${topicOrder} and the exact approved summaryFile, then follow the instruction it returns. Do not write, format, or upload the topic document yourself: generate_topic_document builds "${topicFileName}" from the saved summary server-side, files it in the interview folder, and returns it. Never hand it summary text, a file name, or a folder path.${supportingFileInstruction}`,
         });
       }
 
@@ -711,13 +744,14 @@ const KnowledgeRetentionUtils = {
       const closingStep = `restate the closing message with the completed question count and the folder link, remind them they can share that folder from SharePoint with their manager or anyone else they consider relevant, and end`;
 
       // The interview row records whether the final document was filed:
-      // finalize_interview writes finalized (60) and upload_document advances to
+      // finalize_interview writes finalized (60). generate_final_document, and a
+      // legacy upload_document with docType final, advance that interview to
       // documentGenerated (70) once the handover file lands. A resumed session
       // therefore knows the answer instead of asking the user to go and look.
       if (status < ST.interview.documentGenerated) {
         return Object.assign(base, {
           nextAction: 'BuildFinalDocument',
-          instruction: `This interview is finalized but its final handover document has not been filed yet. Load the knowledge-retention-reporting skill, open references/final-document.md, and follow that workflow to build InterviewFinalSummary_${interview[S.interview.number]}.docx from get_discovery, get_answers (start from rawUserMessages; if raw is empty or shorter than the confirmed answer, use the longer of the two), and any confirmed supporting-file contents; walk stored topic summaries as a theme checklist only so they cannot shrink the source. Confirm chapter titles as a map; write chapters scannable like topic summaries (bullets and breaks when useful; leave the shape if it does not fit); show full chapter text before asking approval; after each draft, reread the source answers and add any missing concrete fact or mark it as an open gap, then upload it with upload_document using docType "final" — that upload is what marks the document as generated. After the upload succeeds, ${feedbackMissing ? feedbackStep : closingStep}.${supportingFileInstruction}`,
+          instruction: `This interview is finalized but its final handover document has not been filed yet. Load the knowledge-retention-reporting skill and open references/final-document.md. Draft the handover as Markdown from get_discovery and get_answers (start from rawUserMessages; if raw is empty or shorter than the confirmed answer, use the longer of the two) and confirmed supporting-file contents. Topic summaries are only a theme checklist and must not shrink the source. The handover must exceed the detail of the topic documents, not shorten them into an executive recap. Each chapter must keep every concrete fact from the longer of rawUserMessages and the confirmed answer, plus relevant supporting-file facts, and must add cross-topic dependencies and successor steps that no single topic summary contains. The executive summary is additional front matter and must not replace or compress the chapters. If a chapter is thinner than the source answers or the topic summaries it covers, expand it before asking for approval. Confirm chapter titles as a map; write chapters scannable like topic summaries (bullets and breaks when useful; leave the shape if it does not fit); show full chapter text before asking approval; after each draft, reread the source answers and add any missing concrete fact or mark it as an open gap. Whenever the Markdown draft is presented, tell the user in ${language} that conversion and formatting into Word is handled after approval, and ask them to focus on the contents. After explicit approval of the full text, call save_final_document with that exact file, then generate_final_document with no arguments. The resulting file is InterviewFinalSummary_${interview[S.interview.number]}.docx. Do not build, format, or upload a Word file. Do not use the BASF document template skill. Do not call upload_document for the handover. After generate_final_document succeeds, ${feedbackMissing ? feedbackStep : closingStep}.${supportingFileInstruction}`,
         });
       }
 
@@ -901,6 +935,7 @@ if (answeredMatches.length !== 1) {
     instruction: `${reason} ${remedy} Do not retry blindly. ${state.instruction}`,
     language: state.language,
     progressLabel: state.progressLabel,
+    questionsRemaining: state.questionsRemaining,
     nextQuestionText: state.nextQuestionText,
     expectedQuestionOrder: state.expectedQuestionOrder,
     expectedTopicOrder: state.expectedTopicOrder,
@@ -927,6 +962,7 @@ if (
     instruction: `That answer was changed since you last read it (expected version ${data.input.expectedSequence}, current ${priorSequence}). Re-read the current answer with the user before revising again. ${state.instruction}`,
     language: state.language,
     progressLabel: state.progressLabel,
+    questionsRemaining: state.questionsRemaining,
     nextQuestionText: state.nextQuestionText,
     expectedQuestionOrder: state.expectedQuestionOrder,
     expectedTopicOrder: state.expectedTopicOrder,
@@ -1035,6 +1071,7 @@ return {
   instruction: `${savedNote}${cascadeNote} ${state.instruction}`,
   language: state.language,
   progressLabel: state.progressLabel,
+  questionsRemaining: state.questionsRemaining,
   nextQuestionText: state.nextQuestionText,
   expectedQuestionOrder: state.expectedQuestionOrder,
   expectedTopicOrder: state.expectedTopicOrder,

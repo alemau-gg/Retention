@@ -1,0 +1,16 @@
+{
+  "slug": "new_meeting_recording",
+  "name": "New meeting recording",
+  "description": "Triggers when a cloud recording of 100 MB or smaller becomes available for a Teams meeting you own. You must be the meeting owner (the organizer), including for Meet Now. This does not fire for meetings you only attended. Recordings larger than 100 MB are not downloaded.",
+  "type": "POLLING",
+  "inputFields": [
+    {
+      "slug": "meetingIdentifier",
+      "label": "Meeting identifier",
+      "description": "Optional filter to only trigger for a specific meeting you organized. Accepts a join URL, meetingRecap URL, or conference ID (e.g., '398 774 104 902 21'). You still must be the meeting owner. If not provided, triggers for all meetings you organized that have recordings.",
+      "placeholder": "https://teams.microsoft.com/l/meetup-join/... or 398774104902",
+      "type": "TEXT",
+      "required": false
+    }
+  ]
+}

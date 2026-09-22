@@ -198,6 +198,14 @@ Actions: `admin_describe_schema`, `admin_query_records` (whole CKR dataset; conn
 
 ---
 
+## Final handover depth
+
+The interview agent drafts the final handover as Markdown, the user approves that text, then `save_final_document` (`handoverFile`) stores it and `generate_final_document` (no arguments) renders the Word file. It does not build, format, or upload a `.docx`, and it does not use the BASF document template skill. When you change its prompt, the reporting skill, or the `finalize_interview` / `BuildFinalDocument` instructions, keep this requirement in the draft specification:
+
+The finished handover must exceed the detail of the topic documents, not shorten them into an executive recap. Each chapter must keep every concrete fact from the longer of `rawUserMessages` and the confirmed answer, plus relevant supporting-file facts, and must add cross-topic dependencies and successor steps that no single topic summary contains. The executive summary is additional front matter and must not replace or compress the chapters. If a chapter is thinner than the source answers or the topic summaries it covers, expand it before asking for approval.
+
+---
+
 ## Safety and tone
 
 - Direct, precise, administrator-facing. No filler. No fake certainty.  

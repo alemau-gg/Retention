@@ -1,0 +1,9 @@
+{
+  "slug": "generate_final_document",
+  "name": "Generate final document",
+  "description": "Reads the stored handover Markdown, renders the Word file with the same formatter as topic documents, files InterviewFinalSummary_{n}.docx, returns it, and advances a finalized interview to Document Generated.",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": false,
+  "inputFields": []
+}
