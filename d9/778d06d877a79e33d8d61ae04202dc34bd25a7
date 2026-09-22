@@ -1,0 +1,105 @@
+main-agent/skills/knowledge-retention-reporting/references/summary-format.md
+  s_09473ab7800b93::t_0668bca0935490 7
+repackaged-integrations/state-machine/actions/abandon_interview/code.js
+  s_09473ab7800b93::t_2a18456eccb203 721
+handover-agent/how-the-agent-works.md
+  s_09473ab7800b93::t_2bc1fb7b21dc97 120
+  s_09473ab7800b93::t_b127849ebdde5c 461
+  s_09473ab7800b93::t_32c8d3dd955c8c 458
+  s_09473ab7800b93::t_c1075ea5a34cb9 37
+main-agent/integrations/state-machine/actions/generate_final_document.js
+  s_09473ab7800b93::t_2a18456eccb203 722
+repackaged-integrations/state-machine/actions/get_runtime_state/code.js
+  s_09473ab7800b93::t_2a18456eccb203 722
+repackaged-integrations/state-machine/actions/generate_topic_document/code.js
+  s_09473ab7800b93::t_2a18456eccb203 722
+repackaged-integrations/state-machine/actions/revise_answer/code.js
+  s_09473ab7800b93::t_2a18456eccb203 722
+repackaged-integrations/state-machine/actions/save_consent/code.js
+  s_09473ab7800b93::t_2a18456eccb203 722
+repackaged-integrations/state-machine/actions/save_discovery/code.js
+  s_09473ab7800b93::t_2a18456eccb203 722
+repackaged-integrations/state-machine/actions/set_up_interview_folder/code.js
+  s_09473ab7800b93::t_2a18456eccb203 722
+main-agent/integrations/state-machine/actions/save_feedback.js
+  s_09473ab7800b93::t_2a18456eccb203 722
+main-agent/skills/knowledge-retention-reporting/references/final-document.md
+  s_09473ab7800b93::t_3bc7c772c8cf7e 12
+main-agent/integrations/state-machine/actions/abandon_interview.js
+  s_09473ab7800b93::t_2a18456eccb203 721
+main-agent/integrations/state-machine/actions/save_topic_summary.js
+  s_09473ab7800b93::t_2a18456eccb203 722
+repackaged-integrations/state-machine/actions/create_interview/code.js
+  s_09473ab7800b93::t_2a18456eccb203 722
+main-agent/integrations/state-machine/actions/generate_topic_document.js
+  s_09473ab7800b93::t_2a18456eccb203 722
+main-agent/integrations/state-machine/actions/save_final_document.js
+  s_09473ab7800b93::t_2a18456eccb203 722
+repackaged-integrations/state-machine/actions/save_topics_and_questions/code.js
+  s_09473ab7800b93::t_2a18456eccb203 722
+repackaged-integrations/state-machine/actions/upload_document/code.js
+  s_09473ab7800b93::t_2a18456eccb203 722
+main-agent/integrations/state-machine/actions/save_discovery.js
+  s_09473ab7800b93::t_2a18456eccb203 722
+main-agent/integrations/state-machine/actions/revise_answer.js
+  s_09473ab7800b93::t_2a18456eccb203 722
+main-agent/integrations/state-machine/actions/read_supporting_document.js
+  s_09473ab7800b93::t_2a18456eccb203 720
+main-agent/integrations/state-machine/actions/save_consent.js
+  s_09473ab7800b93::t_2a18456eccb203 722
+repackaged-integrations/state-machine/actions/finalize_interview/code.js
+  s_09473ab7800b93::t_2a18456eccb203 722
+repackaged-integrations/state-machine/actions/get_discovery/code.js
+  s_09473ab7800b93::t_2a18456eccb203 721
+main-agent/integrations/state-machine/actions/upload_document.js
+  s_09473ab7800b93::t_2a18456eccb203 722
+repackaged-integrations/state-machine/actions/save_final_document/code.js
+  s_09473ab7800b93::t_2a18456eccb203 722
+main-agent/integrations/state-machine/actions/save_topics_and_questions.js
+  s_09473ab7800b93::t_2a18456eccb203 722
+main-agent/integrations/state-machine/actions/set_up_interview_folder.js
+  s_09473ab7800b93::t_2a18456eccb203 722
+repackaged-integrations/state-machine/actions/generate_final_document/code.js
+  s_09473ab7800b93::t_2a18456eccb203 722
+repackaged-integrations/state-machine/actions/save_topic_summary/code.js
+  s_09473ab7800b93::t_2a18456eccb203 722
+main-agent/skills/knowledge-retention-reporting/SKILL.md
+  s_09473ab7800b93::t_8c7564060fd4d3 41
+  s_09473ab7800b93::t_3c2f9fe74e0cc8 39
+main-agent/integrations/state-machine/actions/get_discovery.js
+  s_09473ab7800b93::t_2a18456eccb203 721
+repackaged-integrations/state-machine/actions/get_answers/code.js
+  s_09473ab7800b93::t_2a18456eccb203 721
+main-agent/integrations/state-machine/actions/get_answers.js
+  s_09473ab7800b93::t_2a18456eccb203 721
+repackaged-integrations/state-machine/actions/read_supporting_document/code.js
+  s_09473ab7800b93::t_2a18456eccb203 720
+main-agent/integrations/state-machine/actions/create_interview.js
+  s_09473ab7800b93::t_2a18456eccb203 722
+main-agent/integrations/state-machine/actions/get_runtime_state.js
+  s_09473ab7800b93::t_716628b7ebfd40 722
+main-agent/integrations/state-machine/actions/finalize_interview.js
+  s_09473ab7800b93::t_2a18456eccb203 722
+main-agent/integrations/state-machine/actions/save_answer.js
+  s_09473ab7800b93::t_2a18456eccb203 722
+repackaged-integrations/state-machine/actions/save_feedback/code.js
+  s_09473ab7800b93::t_2a18456eccb203 722
+repackaged-integrations/state-machine/actions/save_answer/code.js
+  s_09473ab7800b93::t_2a18456eccb203 722
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "d9778d06d877a79e33d8d61ae04202dc34bd25a7",
+  "prompts": {},
+  "sessions": {
+    "s_09473ab7800b93": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3a874d40-450d-41c0-a22c-bf90a01ab3f1",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
