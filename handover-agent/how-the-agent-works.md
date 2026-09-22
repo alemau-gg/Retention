@@ -22,20 +22,20 @@ When structure changes, update this file in the same change as the code/prompt/s
 | `system-prompt.md` | System prompt for the administrator-facing handover agent |
 | `knowledge-retention-contributing` | Edit playbook skill (`references/integration-modification.md`, `scripts/` for sync/verify) |
 | `knowledge-retention-interviewing` | Discovery bar + topic/question generation |
-| `knowledge-retention-reporting` | Topic summaries + final handover (branded template asset for the final doc) |
+| `knowledge-retention-reporting` | Topic summaries + final handover, both drafted as Markdown (the backend renders the `.docx`) |
 | Interview system prompt | Employee-facing agent in Langdock |
 | Knowledge Retention Backend | Live integration in Langdock — fetch via Langdock API tools before any code change |
 
-**Also used, not owned here:** the Langdock “BASF document template” skill (branding tooling for the final document — call it; never edit it). Connection provisioning and agent wiring live in the Langdock workspace.
+**Not owned here:** the Langdock “BASF document template” skill. It is no longer used for the final handover (the backend renders that file); never edit it. Connection provisioning and agent wiring live in the Langdock workspace.
 
 ### Canonical when sources disagree
 
 | Topic | Canonical | Notes |
 |---|---|---|
 | Interview stage / next step | Backend `instruction` | Never invent from chat |
-| Topic summary `.docx` | Reporting skill: **blank** doc | Overrides system prompt “BASF template for all docs” |
-| Final handover `.docx` | Reporting `final-document.md` + `assets/template.docx` | Branded path only |
-| Clarifying follow-ups | System prompt | Wording says both “at most 3” and “these two” → treat **2–3** as intent |
+| Topic summary `.docx` | Reporting `summary-format.md` (Markdown draft) → `save_topic_summary` → `generate_topic_document` | Backend renders the standardized Word file; overrides system prompt “BASF template for all docs” |
+| Final handover `.docx` | Reporting `final-document.md` (Markdown draft) → `save_final_document` → `generate_final_document` | Backend renders the Word file; no `assets/template.docx`, no BASF template skill |
+| Clarifying follow-ups | System prompt | Cap **3** per question; follow up more often than not, each one probing something the interviewee has not said |
 | Discovery methodology | Interviewing skill | Backend does **not** load it at `created`; soft spot unless the agent loads it unprompted |
 
 ---
@@ -44,8 +44,8 @@ When structure changes, update this file in the same change as the code/prompt/s
 
 One employee, one interview, one question at a time. Capture undocumented know-how (workarounds, failure modes, stakeholder maps, judgment criteria), not process manuals. Outputs:
 
-1. Per-topic summary Word docs (`Topic-{n}.docx`)
-2. Final branded handover (`InterviewFinalSummary_{interviewNumber}.docx`)
+1. Per-topic summary Word docs (`Topic-{n}-{slug}.docx`, rendered by the backend from the approved Markdown)
+2. Final handover (`InterviewFinalSummary_{interviewNumber}.docx`, rendered by the backend from the approved Markdown)
 3. SharePoint folder `Interviews/{interviewNumber}` on the CKR site (employee + manager when resolvable)
 
 ---
@@ -66,15 +66,15 @@ Three layers. Conversation face → methodology skills → backend as source of 
 ┌─────────────────────────────────────────────────────────────┐
 │  INTEGRATION: Knowledge Retention Backend                   │
 │  Dataverse state machine + SharePoint filing                │
-│  Returns nextAction + instruction (+ nextQuestionText, …)   │
+│  Returns nextAction + instruction (+ questionsRemaining, …) │
+│  Renders topic + final .docx from approved Markdown         │
 └──────────────────────────┬──────────────────────────────────┘
                            │ when instruction says "load skill"
                            ▼
 ┌─────────────────────────────────────────────────────────────┐
 │  SKILLS                                                     │
 │  interviewing → discovery quality + topic/question gen      │
-│  reporting    → topic summaries + final handover docx       │
-│  (+ BASF template skill — branded tooling; call, never edit) │
+│  reporting    → topic summaries + final handover Markdown   │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -84,7 +84,7 @@ External systems (backend / adjacent, not conversational skills):
 |---|---|
 | **Dataverse** (`ckr_*`) | Interview, topics, questions, versioned answers, consent, feedback |
 | **SharePoint (CKR site)** | Folder + `.docx` uploads; invite verified, non-fatal; user can always share further |
-| **Outlook Calendar** | Optional pause reminder only — not in the state machine |
+| **Outlook Calendar** | Pause scheduling proposal only — not in the state machine |
 | **CKR Company Context folder** | Optional grounding for topic generation |
 | **WorkIQ / prefill** | Optional; gated by `prefillEnabled` |
 
@@ -106,7 +106,7 @@ External systems (backend / adjacent, not conversational skills):
 - Ask questions **verbatim** from `nextQuestionText` — no rephrase, skip, merge, or invent.
 - After saving an answer: no summary chatter — only the next question (or next instructed step).
 
-**Also owns (outside the backend state machine):** interview overview, discovery save-status messaging, clarifying follow-ups (2–3; successor needs; vague contacts), pause + optional Outlook reminder, failure UX (retry once), language-switch → restart only on explicit confirm. Document tooling: see “Canonical when sources disagree” — blank topic docs, branded final only.
+**Also owns (outside the backend state machine):** interview overview, discovery save-status messaging, clarifying follow-ups (cap 3, used more often than not, probing the unsaid; successor needs; vague contacts), pause + proposed Outlook session, failure UX (retry once), language-switch → restart only on explicit confirm. Document tooling: see “Canonical when sources disagree” — the agent drafts Markdown with the `write` tool and never builds, formats, or uploads a Word file for topic documents or the final handover.
 
 ---
 
@@ -117,8 +117,8 @@ Skills are methodology packs the agent loads when told to. They do **not** own p
 | Skill | When loaded | What it does | What it does not do |
 |---|---|---|---|
 | **`knowledge-retention-interviewing`** | Backend: `GenerateTopicsAndQuestions` (not auto-loaded at `created`) | Thin-answer discovery bar; **4–6 topics × 3–6 questions** grounded in discovery (+ Company Context) | No live question rewrite in `AskActiveQuestion`; no summaries |
-| **`knowledge-retention-reporting`** | Topic summary (default); final doc when asked | Topic: `summary-format.md` only, blank `Topic-{n}.docx`. Final: `final-document.md` + `assets/template.docx` | No discovery/questions; never blend topic and final passes |
-| **BASF document template skill** | Out of folder; prompt hooks it for branded tooling | `.docx` branding helpers | Not summary methodology |
+| **`knowledge-retention-reporting`** | Topic summary (default); final doc when asked | Topic: `summary-format.md` only → summary Markdown drafted with the `write` tool; the backend renders `Topic-{n}-{slug}.docx`. Final: `final-document.md` → handover Markdown drafted with the `write` tool; the backend renders the `.docx` | No discovery/questions; never blend topic and final passes; no `assets/template.docx` for the final |
+| **BASF document template skill** | Not loaded — no longer used for the handover | — | Not summary methodology; never edit it |
 
 Both content skills: no invented knowledge; preserve specifics; visible gaps beat smooth prose; language = interview language. Always use manifest action slugs (`get_answers`, not legacy names).
 
@@ -128,22 +128,25 @@ Both content skills: no invented knowledge; preserve specifics; visible gaps bea
 
 **Role:** Authoritative state machine over Dataverse + SharePoint. Every mutating action returns fresh state with `nextAction` and `instruction`.
 
-**Auth:** Service account (app-only) against Entra / Dataverse / Graph. Identity of the interviewee comes from the Langdock session (UPN, else email) — the backend scopes all non-admin actions to that caller’s interview. The value is **not** lowercased: OData `eq` on `ckr_employeeemail` is case-sensitive in practice, matching the original Copilot Studio flows. `alternativeEmail` is never consulted. Actions never take a record ID as input; targets are resolved server-side from status columns.
+**Auth:** Service account (app-only) against Entra / Dataverse / Graph. Identity of the interviewee comes from the Langdock session: the stable Langdock user id, plus UPN (else email) as a snapshot — the backend scopes all non-admin actions to that caller’s interview. Ownership lookup (shared helper, every non-admin action): match the stable id in `cr32c_aisuiteid` first; only if that finds nothing, fall back to the caller’s own `ckr_employeeemail`, and claim a matching row **only when its id column is blank** — the stable id is then written back so the next lookup matches on id. A row that already carries a different id is never claimed. The email is **not** lowercased: OData `eq` on `ckr_employeeemail` is case-sensitive in practice, matching the original Copilot Studio flows. `alternativeEmail` is never consulted. Actions never take a record ID as input; targets are resolved server-side from status columns.
 
 **Core actions (user path):**
 
 | Action | Advances / does |
 |---|---|
-| `get_runtime_state` | Computes next step for the open interview, or for a closed one that still owes its final document or feedback; no mutation |
+| `get_runtime_state` | Computes next step for the open interview, or for a closed one that still owes its final document or feedback; no Dataverse state change (apart from the one-time stable-id write-back above). Returns `nextAction`, `instruction`, `language`, `progressLabel`, `questionsRemaining`, `nextQuestionText`, `expectedQuestionOrder`, `expectedTopicOrder`, `sharePointFolderUrl`, `topicQnA`. `questionsRemaining` = unanswered saved questions across all topics, including the open one; `null` before topics exist. On status 60 it checks for the stored handover Markdown (§6) |
 | `create_interview` | Creates interview in chosen language (`created`) |
 | `save_discovery` | Writes the complete confirmed profile together and sets status `discovery`; before this succeeds, discovery fields are not retained for resume. Refuses with `conflict: true` once status is `>= generated` |
 | `save_topics_and_questions` | Topics/questions → status `generated` (idempotent no-op if already `>= generated`). Validates that topic and per-topic question orders are positive integers with no duplicates **before** cleaning up any partial rows from a failed prior attempt |
 | `save_consent` | Prefill yes/no (only when prefill enabled) |
 | `save_answer` | Confirmed answer; concurrency via required `expectedQuestionOrder` and `expectedTopicOrder` |
 | `set_up_interview_folder` | Creates SharePoint folder + grants; idempotent; reports `accessGranted` from the actual invite response and `managerGranted` only when a manager was found *and* the invite succeeded. A failed invite is non-fatal (uploads are app-only) and turns the instruction into “share it yourself”. Reloads the interview with the open-or-completed fallback, so the finalize-without-folder recovery path works |
-| `save_topic_summary` | Approved summary; topic → summarized; concurrency via `expectedTopicOrder` |
-| `upload_document` | Files a `topic`, `final`, or user-confirmed `supporting` file into the interview folder; prefers the open interview, falls back to the latest closed one so post-finalize uploads work. Supporting files are never overwritten and do not change state. A `final` upload on a status-60 interview also advances it to `documentGenerated` (70) and returns `documentGenerated: true` |
-| `finalize_interview` | Interview → `finalized` (60, requires confirmation); returns action-authored `FinalizeAndCollectFeedback`, whose instruction states that the `final` upload is what records the document |
+| `save_topic_summary` | Stores the exact user-approved Markdown `summaryFile` in Dataverse; topic → summarized; concurrency via `expectedTopicOrder`. Creates no Word file; returns action-authored `GenerateTopicDocument` |
+| `generate_topic_document` | Input `topicOrder` only. Reads the stored summary, renders the standardized `Topic-{n}-{slug}.docx` server-side with the backend renderer, files it at the interview-folder root, files a Markdown source transcript (`Topic-{n}-{slug}.md`) under `Source transcripts/`, lists the actual `Supporting documents/` names in a closing section, and returns the `.docx`. A topic without an approved stored summary → `conflict: true`, nothing written |
+| `upload_document` | Files a user-confirmed `supporting` file into `Supporting documents/`; prefers the open interview, falls back to the latest closed one so post-finalize uploads work. Supporting files are never overwritten and do not change state. `docType: final` (and `topic`) remain only as legacy compatibility, not the agent path — a legacy `final` upload on a status-60 interview still advances it to 70 |
+| `finalize_interview` | Interview → `finalized` (60, requires confirmation); returns action-authored `FinalizeAndCollectFeedback`, whose instruction is to draft the handover Markdown, then `save_final_document` → `generate_final_document` |
+| `save_final_document` | Input `handoverFile` (the exact user-approved Markdown). Stores it at `Source transcripts/InterviewFinalSummary_{n}.md` in the interview folder (overwrites a previous copy). No Word file, no status change; returns action-authored `GenerateFinalDocument`. Requires status ≥ 60 and an existing folder (else `conflict: true`) |
+| `generate_final_document` | No arguments. Reads the stored Markdown, renders `InterviewFinalSummary_{n}.docx` with the same renderer as topic documents, files it at the interview-folder root, returns it as an attachment, and advances 60 → 70 (`documentGenerated: true`). If already 70, replaces the file. No stored Markdown → `conflict: true`, nothing created |
 | `save_feedback` | Three post-interview feedback answers on the latest **completed** interview; returns `SendClosingMessage` |
 
 **Side-path actions:**
@@ -181,12 +184,12 @@ Progress is not one enum. Dataverse keeps **five independent status columns** th
 | 20 | `discovery` | Discovery saved; topics/questions not yet saved |
 | 30 | `generated` | Topics exist; all Q&A, consent, folder setup, and topic summaries happen here |
 | 60 | `finalized` | All topics summarized and confirmed; the final handover document is still owed |
-| 70 | `documentGenerated` | `InterviewFinalSummary_{n}.docx` was filed by `upload_document` (`docType: final`) |
+| 70 | `documentGenerated` | `InterviewFinalSummary_{n}.docx` was filed by `generate_final_document` (or, legacy only, `upload_document` with `docType: final`) |
 | 80 | `cancelled` | Abandoned via `abandon_interview` |
 
-Open = `status < 60`. Closed = `60 ≤ status < 80`, which spans both 60 and 70 — every post-finalize lookup (`completed: true`) uses that range, so a document-generated interview stays reachable for `save_feedback`, `get_answers`, `get_discovery`, `upload_document`, and `set_up_interview_folder`. Cancelled (80) is reachable by neither lookup.
+Open = `status < 60`. Closed = `60 ≤ status < 80`, which spans both 60 and 70 — every post-finalize lookup (`completed: true`) uses that range, so a document-generated interview stays reachable for `save_feedback`, `get_answers`, `get_discovery`, `upload_document`, `save_final_document`, `generate_final_document`, and `set_up_interview_folder`. Cancelled (80) is reachable by neither lookup.
 
-60 → 70 is the one status transition SharePoint drives: `finalize_interview` writes 60, and the final upload is what advances the row. That is why the resume path can tell “finalized, document still owed” from “fully closed out” without inspecting the folder (§6). Codes 40 (In Progress) and 50 (Awaiting Confirmation) exist in the Dataverse picklist but this integration never writes them — question-level status already carries that granularity. All 15 non-admin action files carry the full map including 70 and 80.
+60 → 70 is the one status transition SharePoint drives: `finalize_interview` writes 60, and `generate_final_document` filing the Word file is what advances the row (`save_final_document` alone does not). That is why the resume path can tell “finalized, document still owed” from “fully closed out” without inspecting the folder (§6). Codes 40 (In Progress) and 50 (Awaiting Confirmation) exist in the Dataverse picklist but this integration never writes them — question-level status already carries that granularity. All 19 non-admin action files carry the full map including 70 and 80.
 
 #### Topic — `ckr_topicstatus`
 
@@ -248,7 +251,7 @@ When `prefillEnabled` is false, this gate is skipped server-side regardless of v
 | `SetupInterviewFolder` | Topic ready for summary, but no SharePoint folder yet |
 | `GenerateOrReviewTopicSummary` | Topic `readyForSummary` (including `needsReview`) and folder exists |
 | `FinalizeInterview` | `generated` and every topic is `summarized` |
-| `BuildFinalDocument` | Interview `finalized` (60) with the final document not yet filed. Instruction: build `InterviewFinalSummary_{n}.docx` through the reporting skill and upload it with `docType: final`; then collect feedback, or close if feedback already exists. |
+| `BuildFinalDocument` | Interview `finalized` (60) with the final document not yet filed. Instruction: draft the handover Markdown through the reporting skill’s `final-document.md`, get approval of the full text, `save_final_document`, then `generate_final_document` (no arguments); never build a Word file, use the BASF template skill, or call `upload_document` for it. If `get_runtime_state` finds the stored Markdown already, the instruction is only to call `generate_final_document`. Then collect feedback, or close if feedback already exists. |
 | `InterviewComplete` | Interview `documentGenerated` (70) — the handover file is filed. Collect feedback if it is missing, otherwise restate the closing message. |
 | `Unknown` | Unrecognized status column value; practically unreachable for normal 10/20/30/60/70 values (80 never reaches `computeState`, since neither lookup returns a cancelled row) |
 
@@ -258,10 +261,13 @@ When `prefillEnabled` is false, this gate is skipped server-side regardless of v
 
 | `nextAction` | Returned by | When |
 |---|---|---|
-| `FinalizeAndCollectFeedback` | `finalize_interview` | Immediately after status flips to 60; instruction: build/upload final docx, then ask feedback, then `save_feedback` |
+| `GenerateTopicDocument` | `save_topic_summary` | After the approved summary is stored; instruction: call `generate_topic_document` with that `topicOrder`, do not build or upload the `.docx` |
+| `UploadMissingTopicDocuments` | `finalize_interview` | Finalize refused (status stays 30) because canonical topic files are missing; instruction: `generate_topic_document` per `missingTopicFiles` entry, then finalize again |
+| `FinalizeAndCollectFeedback` | `finalize_interview` | Immediately after status flips to 60; instruction: draft handover Markdown → approval → `save_final_document` → `generate_final_document`, then ask feedback, then `save_feedback` |
+| `GenerateFinalDocument` | `save_final_document` | After the approved Markdown is stored; instruction: call `generate_final_document` with no arguments, do not build or upload a Word file |
 | `SendClosingMessage` | `save_feedback` | After feedback saved; instruction: terminal closing message |
 
-Only the computed table survives a context wipe. The two action-authored values exist only in the unbroken post-finalize session.
+Only the computed table survives a context wipe. The action-authored values exist only in the unbroken post-finalize session; a wipe between save and generate is covered by the stored-Markdown check in `get_runtime_state`.
 
 ---
 
@@ -292,12 +298,12 @@ flowchart TD
   P -->|No| Q[set_up_interview_folder]
   Q --> R[GenerateOrReviewTopicSummary]
   P -->|Yes| R
-  R --> S[User approves → save_topic_summary → upload Topic-n.docx]
+  R --> S[User approves → save_topic_summary → generate_topic_document]
   S --> T{More topics?}
   T -->|Yes| N
   T -->|No| U[FinalizeInterview]
   U --> V[finalize_interview → FinalizeAndCollectFeedback]
-  V --> W[Build final docx → upload final → status 70]
+  V --> W[Draft handover Markdown → approve → save_final_document → generate_final_document → status 70]
   W --> X[3 feedback questions → save_feedback → SendClosingMessage]
   X --> Y[Closing message + SharePoint link + share reminder]
 ```
@@ -324,22 +330,22 @@ flowchart TD
 6. **Interview Q&A (`AskActiveQuestion`)**  
    For each topic in order: show **topic name** (bold), then ask `nextQuestionText` verbatim. Clarify → confirm → `save_answer` with both `expectedQuestionOrder` and `expectedTopicOrder`. One question per message; never preview the next question.
 
-7. **Folder setup (once, before first summary upload)**  
+7. **Folder setup (once, before first topic document)**  
    When the first topic’s questions are done and no folder URL yet: `set_up_interview_folder`. Path: `Interviews/{interviewNumber}`. The employee and (when resolvable) their manager are invited with edit rights, but the invite response is checked rather than assumed: `accessGranted` is true only on HTTP 200/201; `managerGranted` is true only when a manager was found *and* the invite succeeded. A failed invite is non-fatal (uploads run app-only). On a failed or unconfirmed invite the instruction says access “could not be confirmed” (idempotent re-runs can hit this even when access was granted earlier) and asks the user to open/share the folder themselves. Either way the agent reminds them they can share with their manager or anyone else they consider relevant — automatic grants never cover colleagues. The same reminder repeats in the closing message.
 
 8. **Topic summary (`GenerateOrReviewTopicSummary`)**  
-   Agent loads **reporting** skill (topic-summary path only). Builds from `topicQnA` in state (and may also call `get_answers` per the system prompt) using `summary-format.md` — never from the branded template. User may revise until explicit approval → `save_topic_summary` → blank `Topic-{order}.docx` → `upload_document` → show folder link. Repeat for each topic.
+   Agent loads **reporting** skill (topic-summary path only). Builds from `topicQnA` in state (and may also call `get_answers` per the system prompt) using `summary-format.md` — never from the branded template. The agent drafts the summary as a Markdown file with the `write` tool; the user may revise until explicit approval → `save_topic_summary` (stores that exact file) → `generate_topic_document` (`topicOrder` only; renders, files, and returns `Topic-{order}-{slug}.docx`) → show the returned file and folder link. The agent never builds or uploads a topic `.docx`; `upload_document` with `docType: topic` is legacy only. Repeat for each topic.
 
-   The upload survives the state advance only because `save_topic_summary` says so itself: once the topic is `summarized`, `computeState` has already moved to the next topic and stops mentioning the file, so the action prepends the “create and upload `Topic-{order}.docx`” step to the instruction it returns. Unlike the final document, nothing on the topic row records whether the file landed — there is no per-topic equivalent of status 70 — so a session that dies between the save and the upload leaves that file missing, permanently. This is accepted rather than fixed: closing it would need a new topic-level column plus a topic-status gate, and the earlier mitigation (`finalize_interview` telling the agent to “regenerate any missing `Topic-{n}.docx`”) was removed because **no action can list folder contents**, so the agent could never tell which files were missing. An instruction the agent cannot execute is worse than no instruction: it invites guessing and duplicate uploads. The approved summaries themselves are never lost — they live in Dataverse and in the final handover document.
+   The document step survives the state advance only because `save_topic_summary` says so itself: once the topic is `summarized`, `computeState` has already moved to the next topic and stops mentioning the file, so the action returns `GenerateTopicDocument` with the “call `generate_topic_document` with this topic order” step. Unlike the final document, nothing on the topic row records whether the file landed — there is no per-topic equivalent of status 70 — so a session that dies between the save and the generate leaves that file missing until finalize. `finalize_interview` closes that gap: it lists the interview-folder root and refuses (`UploadMissingTopicDocuments`, `missingTopicFiles`) while any canonical `Topic-{n}-{slug}.docx` is absent (a legacy `Topic-{n} {name}.docx` or a `-FINAL` fallback also counts); the agent regenerates each with `generate_topic_document` from the stored summary. The approved summaries themselves are never lost — they live in Dataverse.
 
 ### Optional supporting files
 
-An actually attached file may be offered as a supporting artifact when it appears useful to the interview. The agent explains its relevance and requires explicit user confirmation. The interview folder must exist first: before folder setup, the agent tells the user that the file can be filed after `set_up_interview_folder` and does not call `upload_document`. Once the folder exists, it uploads one file at a time under a clear, unique filename, preserves the original extension, refuses an existing filename, and resumes the current backend instruction afterward. Supporting uploads are never generated automatically, are not summaries, and do not change interview status, question progress, topic summaries, or final-document handling.
+Every actually attached file is read and then proposed as a supporting document, except a topic-summary draft, a topic document, or the final handover. This is mandatory, not a judgment call. The agent uploads only after an explicit yes. The interview folder must exist first: before folder setup, the agent tells the user that the file can be filed after `set_up_interview_folder` and does not call `upload_document`. Once the folder exists, it uploads one file at a time under a clear, unique filename, preserves the original extension, refuses an existing filename, and resumes the current backend instruction afterward. Supporting uploads are never generated automatically, are not summaries, and do not change interview status, question progress, topic summaries, or final-document handling.
 
 9. **Finalize (`FinalizeInterview` → `FinalizeAndCollectFeedback`)**  
-   All topics summarized → user confirms → `finalize_interview` (status → 60). Same-session instruction: open `references/final-document.md`, build `InterviewFinalSummary_{n}.docx` from the branded template, upload it with `docType: final` (which advances the row to 70), then ask the three feedback questions, then `save_feedback`. The instruction explicitly tells the agent **not** to check or rebuild per-topic files, since it has no way to see them.
+   All topics summarized → user confirms → `finalize_interview` (status → 60). Same-session instruction: open `references/final-document.md`, draft the handover as Markdown with the `write` tool from `get_discovery` + `get_answers` (+ confirmed supporting files), show the full text and get explicit approval, then `save_final_document` (`handoverFile`) → `generate_final_document` (no arguments; renders and files `InterviewFinalSummary_{n}.docx`, returns it, and advances the row to 70), then ask the three feedback questions, then `save_feedback`. The instruction explicitly tells the agent **not** to rebuild per-topic files (finalize already verified them), and not to build, format, or upload a Word file for the handover.
 
-   Uploads work in this window because `upload_document` falls back to the latest closed interview, the same way `get_answers` / `get_discovery` / `save_feedback` do — and the final upload is also what moves the row from 60 to 70.
+   Both actions work in this window because they resolve the latest closed interview, the same way `get_answers` / `get_discovery` / `save_feedback` do — and `generate_final_document` is what moves the row from 60 to 70.
 
 10. **Feedback + close (`SendClosingMessage`)**  
     Three questions (helpfulness 1–5, intuitiveness 1–5, improvements), one at a time → `save_feedback` → terminal closing message with answered-question count + SharePoint link + reminder that they can share the folder further themselves. Nothing further in that session. The same share reminder is also baked into `BuildFinalDocument` / `InterviewComplete` instructions when a later session resumes.
@@ -357,11 +363,13 @@ An actually attached file may be offered as a supporting artifact when it appear
 | Topic has open questions and status `< readyForSummary` | `save_answer` | Next question, or topic → `readyForSummary` |
 | Topic ready, no folder | — | `SetupInterviewFolder` |
 | Topic ready, folder exists | — | `GenerateOrReviewTopicSummary` |
-| Summary approved | `save_topic_summary` (+ upload) | Next topic Q&A, or `FinalizeInterview` |
+| Summary approved | `save_topic_summary` → `generate_topic_document` | Next topic Q&A, or `FinalizeInterview` |
+| All topics summarized, a canonical topic file missing | `finalize_interview` | Stay `generated` → `UploadMissingTopicDocuments` (regenerate, then finalize again) |
 | All topics summarized | `finalize_interview` | `finalized` (60) + **same-session** `FinalizeAndCollectFeedback` |
-| `finalized` (60) | `upload_document` (`docType: final`) | `documentGenerated` (70) |
+| `finalized` (60), handover Markdown approved | `save_final_document` | Stay 60; Markdown stored → `GenerateFinalDocument` |
+| `finalized` (60), Markdown stored | `generate_final_document` | `documentGenerated` (70); `.docx` filed and returned |
 | Post-finalize, same session | `save_feedback` | `SendClosingMessage` |
-| Post-finalize, **new** session, final document unfiled | `get_runtime_state` | `BuildFinalDocument` (build + upload, then feedback/close) |
+| Post-finalize, **new** session, final document unfiled | `get_runtime_state` | `BuildFinalDocument` (draft → save → generate if no Markdown is stored; generate only if it is; then feedback/close) |
 | `documentGenerated` (70), **new** session, feedback missing | `get_runtime_state` | `InterviewComplete` (feedback, then close) |
 | `documentGenerated` (70), **new** session, feedback stored | `get_runtime_state` | `CollectProfile` (free to start a second interview) |
 
@@ -384,12 +392,12 @@ A finalized interview has two independent gates left: the final handover documen
 | yes (status 70) | no | `InterviewComplete` — feedback, then close |
 | yes (status 70) | yes | `CollectProfile` — nothing outstanding, free to start a second interview |
 
-The document gate is a status check, not a question to the user. There is still no action that lists folder contents, but there no longer needs to be: `upload_document` with `docType: final` writes `ckr_interviewstatus = 70` in the same call that files the file, so the row itself answers “was it uploaded?”. A resumed session that finds 60 rebuilds the document through the reporting skill’s `references/final-document.md` workflow from `get_discovery` + `get_answers` and uploads it (which works post-finalize thanks to the closed-interview fallback); one that finds 70 never re-checks or rebuilds it.
+The document gate is a status check, not a question to the user: `generate_final_document` writes `ckr_interviewstatus = 70` in the same call that files the Word file, so the row itself answers “was it filed?”. A resumed session that finds 60 gets one extra check from `get_runtime_state`: it looks for `Source transcripts/InterviewFinalSummary_{n}.md` in the interview folder. If that stored Markdown exists and is non-empty, the instruction is **generate only** — call `generate_final_document`, no redraft. Otherwise (missing, empty, or any Graph error — the check never blocks) the instruction is to draft the handover through the reporting skill’s `references/final-document.md` workflow from `get_discovery` + `get_answers`, then `save_final_document` → `generate_final_document` (both work post-finalize thanks to the closed-interview fallback). A session that finds 70 never re-checks or rebuilds it.
 
-Because the two gates are read independently, feedback given before the document was filed is not lost — the row keeps status 60 until the upload lands, and the instruction on that branch skips the feedback questions when the columns are already populated.
+Because the two gates are read independently, feedback given before the document was filed is not lost — the row keeps status 60 until `generate_final_document` lands, and the instruction on that branch skips the feedback questions when the columns are already populated.
 
 ### Pause (not abandon)
-User wants to stop before finalize. Agent reassures that **only confirmed** saves persist; may nudge finishing the current discovery/answer confirmation. Optionally offers an Outlook calendar reminder (user must accept; timezone from Outlook settings; user as attendee). If Outlook not connected: explain once, no retry loop. Progress remains; next open resumes.
+User wants to stop before finalize. Agent reassures that **only confirmed** saves persist; may nudge finishing the current discovery/answer confirmation. Always proposes an Outlook session to continue: about 6 minutes per remaining question from `questionsRemaining`, rounded up to the next 15 minutes; above 1 hour it may also offer two sessions. If `questionsRemaining` is null, no duration is given; if it is 0, there is nothing to schedule. The event is created only if the user accepts (timezone from Outlook settings; user as attendee). If Outlook not connected: explain once, no retry loop. Progress remains; next open resumes.
 
 ### Abandon
 User explicitly wants to discard the open interview → `abandon_interview` (confirmed, irreversible — also `requiresConfirmation: true` in the manifest, alongside `finalize_interview`). Sets status `cancelled` (80). Children are left in Dataverse but become **permanently unreachable** via normal lookups (80 fails both the open filter `lt 60` and the closed range `ge 60 and lt 80`). Needed because `create_interview` refuses if an open interview already exists. After abandon, the action returns `CollectProfile` (computeState with no interview) so the user can start fresh in the same turn. Idempotent no-op if nothing is open.
@@ -447,12 +455,14 @@ The `final-document.md` workflow must re-fetch discovery and answers via tools (
 
 | Artifact | When | How |
 |---|---|---|
-| `Topic-{order}.docx` | After each approved topic summary (while interview still open) | **Blank** doc from approved summary sections only — never `assets/template.docx` — → `upload_document` (`topic`) |
-| `InterviewFinalSummary_{n}.docx` | Instructed immediately after `finalize_interview`, and re-instructed on every reopen until status is 70 | `final-document.md` phases → populate `assets/template.docx` (BASF branded) → `upload_document` (`final`), which resolves the closed interview via its completed-interview fallback and advances the row to `documentGenerated` (70) |
+| `Topic-{order}-{slug}.docx` | After each approved topic summary (while interview still open), or on finalize recovery | `save_topic_summary` stores the approved Markdown → `generate_topic_document` (`topicOrder` only) renders it server-side with the backend renderer — never `assets/template.docx` — files it at the interview-folder root, and returns it. `{slug}` is the topic name ASCII-folded, other characters → `-`, max 80 (`Topic-{order}.docx` if empty). `upload_document` (`topic`) is legacy only |
+| `Source transcripts/Topic-{order}-{slug}.md` | Same call as the topic `.docx` | Markdown source transcript filed by `generate_topic_document`; not returned to chat |
+| `Source transcripts/InterviewFinalSummary_{n}.md` | After the user approves the full handover text | `final-document.md` phases → Markdown drafted with the `write` tool → `save_final_document` (`handoverFile`); no Word file, no status change |
+| `InterviewFinalSummary_{n}.docx` | Instructed immediately after `finalize_interview`, and re-instructed on every reopen until status is 70 | `generate_final_document` (no arguments) renders the stored Markdown with the same renderer as topic documents, files it at the interview-folder root, returns it as an attachment, and advances the row to `documentGenerated` (70); at 70 it replaces the file. No `assets/template.docx`, no BASF template skill |
 | User-confirmed supporting file | Only when the user attaches a useful file and explicitly approves filing it | Original file format and a unique filename → `upload_document` (`supporting`); no state transition and no automatic generation |
 | SharePoint folder `Interviews/{n}` | First time before summary filing | `set_up_interview_folder`; URL shown as markdown link + raw URL |
 
-Folder link: show when first available and again whenever a document is saved. Template vs blank: see “Canonical when sources disagree”.
+Folder link: show when first available and again whenever a document is saved. Rendering path: see “Canonical when sources disagree”.
 
 ---
 
@@ -472,7 +482,7 @@ Structural SoT: **this document**. Edit playbook: **contributing skill**. Live i
 
 - **Agent:** Conductor; obeys backend instructions; never guesses stage from chat.
 - **Interviewing skill:** Discover the role; invent the right topics/questions for *this* person.
-- **Reporting skill:** Confirmed Q&A → successor-ready topic notes and branded final record; no invented facts.
+- **Reporting skill:** Confirmed Q&A → successor-ready topic notes and final handover Markdown (the backend renders the Word files); no invented facts.
 - **Backend:** Stage, next question, concurrency, consent, SharePoint filing, completion — helpers duplicated per action file.
 
 If agent and chat disagree on where the interview is, the backend wins — including past finalize, until status 70 **and** feedback are both done.

@@ -65,7 +65,10 @@
     {
       "slug": "get_runtime_state",
       "name": "Get runtime state",
-      "description": "Loads the caller's interview, topics, and questions and returns the computed next action plus a backend-authored instruction. Call once at the start of a conversation.",
+      "description": "Loads the caller's interview, topics, and questions and returns the computed next action plus a backend-authored instruction. Call once at the start of a conversation, and again when the user pauses if questionsRemaining is not in the latest tool result.",
+      "activeLabel": "Checking where we were",
+      "doneLabel": "Checked where we were",
+      "failedLabel": "Failed to check where we were",
       "nativeActionType": "NONE",
       "actionType": "API",
       "requiresConfirmation": false,
@@ -384,9 +387,47 @@
       ]
     },
     {
+      "slug": "save_final_document",
+      "name": "Save final document",
+      "description": "Stores the exact user-approved Markdown file for the handover. Creates no Word file. Call generate_final_document afterwards with no arguments.",
+      "activeLabel": "Saving handover draft",
+      "doneLabel": "Saved handover draft",
+      "failedLabel": "Failed to save handover draft",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": [
+        {
+          "slug": "handoverFile",
+          "label": "Approved handover Markdown",
+          "description": "The exact Markdown file the user reviewed and approved. Attach that file. The backend stores its full UTF-8 contents and does not render a Word file.",
+          "placeholder": null,
+          "type": "FILE",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": false,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        }
+      ]
+    },
+    {
+      "slug": "generate_final_document",
+      "name": "Generate final document",
+      "description": "Reads the stored handover Markdown, renders the Word file with the same formatter as topic documents, files InterviewFinalSummary_{n}.docx, returns it, and advances a finalized interview to Document Generated.",
+      "activeLabel": "Creating handover document",
+      "doneLabel": "Created handover document",
+      "failedLabel": "Failed to create handover document",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": []
+    },
+    {
       "slug": "upload_document",
       "name": "Upload document",
-      "description": "Uploads the final handover or a user-confirmed supporting file on the central CKR site. Final and legacy topic files are stored at the caller's interview-folder root; supporting files are stored in the fixed Supporting documents/ subfolder. The destination is resolved server-side from the caller's identity. Uploading with docType \"final\" also advances a finalized interview to Document Generated, which is what tells a later session the handover file was filed. Do NOT use this for per-topic documents: generate_topic_document produces those from the stored summary. If recovery reports a missing topic document, call generate_topic_document with its returned topic order. The docType \"topic\" contract remains only for backend legacy compatibility.",
+      "description": "Uploads a user-confirmed supporting file, or a legacy .docx, on the central CKR site. Supporting files are stored in the fixed Supporting documents/ subfolder; legacy final and topic files are stored at the caller's interview-folder root. The destination is resolved server-side from the caller's identity. Do not use this action for the handover. The agent path is save_final_document, then generate_final_document with no arguments: that pair stores the approved Markdown, renders InterviewFinalSummary_{n}.docx, returns it, and advances a finalized interview to Document Generated. The docType \"final\" code path remains only for a legacy uploaded .docx. Do NOT use this for per-topic documents: generate_topic_document produces those from the stored summary. If recovery reports a missing topic document, call generate_topic_document with its returned topic order. The docType \"topic\" contract remains only for backend legacy compatibility.",
       "nativeActionType": "NONE",
       "actionType": "API",
       "requiresConfirmation": false,
@@ -394,7 +435,7 @@
         {
           "slug": "docType",
           "label": "Document type",
-          "description": "Whether this is the final interview summary, an optional supporting file, or a legacy per-topic document. Use \"final\" for the handover and \"supporting\" for a user-confirmed attachment. For per-topic documents, including recovery, call generate_topic_document with topicOrder instead; do not use \"topic\" in the agent flow. The \"topic\" value remains for backend legacy compatibility.",
+          "description": "Whether this is a legacy final .docx, an optional supporting file, or a legacy per-topic document. Do not use \"final\" for the handover; call save_final_document then generate_final_document. Use \"supporting\" for a user-confirmed attachment. For per-topic documents, including recovery, call generate_topic_document with topicOrder instead; do not use \"topic\" in the agent flow. The \"final\" and \"topic\" values remain for backend legacy compatibility.",
           "placeholder": null,
           "type": "SELECT",
           "required": true,
@@ -404,7 +445,7 @@
               "value": "topic"
             },
             {
-              "label": "Final summary",
+              "label": "Final summary (legacy)",
               "value": "final"
             },
             {
@@ -420,7 +461,7 @@
         {
           "slug": "file",
           "label": "File",
-          "description": "The single user-confirmed file to upload. The final document is a generated .docx; supporting files may use their original format.",
+          "description": "The single user-confirmed file to upload. Supporting files may use their original format. A legacy final or topic file is a .docx. Do not upload the handover with this action.",
           "placeholder": null,
           "type": "FILE",
           "required": true,
@@ -773,7 +814,7 @@
     {
       "slug": "get_discovery",
       "name": "Get discovery profile",
-      "description": "Reads back the caller's saved pre-interview discovery profile (role, business unit, responsibilities, tools, focus topics, KPIs/constraints). Read-only; use this when building the final summary document, since finalize_interview's cover metadata only carries role and business unit.",
+      "description": "Reads back the caller's saved pre-interview discovery profile (role, business unit, responsibilities, tools, focus topics, KPIs/constraints). Read-only; use this when building the final summary document, since finalize_interview's handover metadata only carries role and business unit.",
       "nativeActionType": "NONE",
       "actionType": "API",
       "requiresConfirmation": false,

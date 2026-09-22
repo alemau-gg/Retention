@@ -4,7 +4,7 @@ Supporting file for `final-document.md` only. Do not load during a topic-summary
 
 These headings are unnumbered front matter. They are **not** Chapter 1.
 
-English below is source meaning only. If the interview language is not English, the finished document must contain a full translation of every heading and paragraph. Copying this English into a German, Portuguese, or other non-English handover is a defect: discard that draft and rewrite before upload. Replace every `[…]` token with the real value. Never leave brackets in the docx.
+English below is source meaning only. If the interview language is not English, the finished document must contain a full translation of every heading and paragraph. Copying this English into a German, Portuguese, or other non-English handover is a defect: discard that draft and rewrite it before `save_final_document`. Replace every `[…]` token with the real value. Never leave brackets in the Markdown.
 
 ## What This Document Is
 

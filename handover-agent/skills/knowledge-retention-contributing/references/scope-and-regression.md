@@ -111,7 +111,7 @@ Preserve the manifest contract. `sharepointSiteId` uses lowercase `p`; `authTest
 - Flip status last when possible.
 - Never invent a stage from chat or expose internal mechanics to interviewees.
 - Do not add a folder-listing action unless a separate HOW redesign addresses the topic-upload gap.
-- Topic files have no `filed` flag; only final upload advances `60 → 70`.
+- Topic files have no `filed` flag; only `generate_final_document` (legacy: `upload_document` with `docType: final`) advances `60 → 70`.
 
 ## Minimum regression matrix
 
@@ -124,9 +124,9 @@ concrete test plan. The agent does not execute actions:
 4. Concurrency conflict tokens
 5. Prefill on and off
 6. Abandon → restart
-7. Finalize → final upload (`70`) → feedback → close
-8. Reopen: `BuildFinalDocument`, `InterviewComplete`, and `CollectProfile`
-9. Blank topic document and branded final-document path
+7. Finalize → handover Markdown → `save_final_document` → `generate_final_document` (`70`) → feedback → close
+8. Reopen: `BuildFinalDocument` (with and without stored handover Markdown), `InterviewComplete`, and `CollectProfile`
+9. Topic document and final-document paths (both backend-rendered from Markdown)
 
 ## Admin Dataverse
 
@@ -143,5 +143,5 @@ Use `admin_describe_schema` before `admin_query_records` and before any recommen
 ## Content-skill boundaries
 
 - Interviewing owns discovery and topic/question generation. It must not rewrite live `AskActiveQuestion` text.
-- Reporting owns topic summaries and final handover. Keep the blank topic-document path separate from the branded final-template path, which is called rather than edited.
+- Reporting owns topic summaries and final handover. Keep the topic-document path separate from the final-handover path (Markdown → `save_final_document` → `generate_final_document`); the BASF document template skill is no longer used for the handover and is never edited.
 - Topic summary gaps use the heading **Open gaps**.

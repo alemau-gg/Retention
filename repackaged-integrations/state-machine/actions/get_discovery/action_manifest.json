@@ -1,7 +1,7 @@
 {
   "slug": "get_discovery",
   "name": "Get discovery profile",
-  "description": "Reads back the caller's saved pre-interview discovery profile (role, business unit, responsibilities, tools, focus topics, KPIs/constraints). Read-only; use this when building the final summary document, since finalize_interview's cover metadata only carries role and business unit.",
+  "description": "Reads back the caller's saved pre-interview discovery profile (role, business unit, responsibilities, tools, focus topics, KPIs/constraints). Read-only; use this when building the final summary document, since finalize_interview's handover metadata only carries role and business unit.",
   "nativeActionType": "NONE",
   "actionType": "API",
   "requiresConfirmation": false,

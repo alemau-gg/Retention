@@ -156,7 +156,7 @@ const KnowledgeRetentionUtils = {
 
   // The slug this copy is deployed as. Baked in per file so a failure can name the
   // action that produced it; this is the only helper line that differs by copy.
-  ACTION_SLUG: 'save_discovery',
+  ACTION_SLUG: 'generate_final_document',
 
   // User-facing text for an API failure. Keeps the "contact your administrator"
   // guidance but also hands over the two things an administrator needs to act:
@@ -852,29 +852,824 @@ const KnowledgeRetentionUtils = {
 
 };
 
-// Saves the pre-interview discovery profile and advances the interview to the
-// topic-generation stage. The interview is resolved server-side from identity.
+// same renderer as generate_topic_document
+const DOCX = {
+  // A4 with 2 cm margins. Fixed so every topic document looks the same.
+  PAGE: { width: 11906, height: 16838, margin: 1134 },
+  ACCENT: '004A96',
+  MUTED: '5A6672',
+  RULE: 'C7D0D9',
+  HEADER_FILL: 'E8EEF5',
+
+  contentWidth() {
+    return DOCX.PAGE.width - 2 * DOCX.PAGE.margin;
+  },
+
+  // XML 1.0 forbids most C0 control characters outright; they cannot be
+  // escaped, only removed, or Word reports the file as corrupt.
+  esc(value) {
+    return String(value === null || value === undefined ? '' : value)
+      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]/g, '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;');
+  },
+
+  utf8Bytes(text) {
+    const source = String(text);
+    const out = [];
+    for (let i = 0; i < source.length; i++) {
+      const code = source.charCodeAt(i);
+      if (code < 0x80) {
+        out.push(code);
+      } else if (code < 0x800) {
+        out.push(0xc0 | (code >> 6), 0x80 | (code & 0x3f));
+      } else if (code >= 0xd800 && code <= 0xdbff) {
+        const low = source.charCodeAt(i + 1);
+        if (low >= 0xdc00 && low <= 0xdfff) {
+          const point = 0x10000 + ((code - 0xd800) << 10) + (low - 0xdc00);
+          out.push(
+            0xf0 | (point >> 18),
+            0x80 | ((point >> 12) & 0x3f),
+            0x80 | ((point >> 6) & 0x3f),
+            0x80 | (point & 0x3f),
+          );
+          i++;
+        } else {
+          out.push(0xef, 0xbf, 0xbd);
+        }
+      } else if (code >= 0xdc00 && code <= 0xdfff) {
+        out.push(0xef, 0xbf, 0xbd);
+      } else {
+        out.push(0xe0 | (code >> 12), 0x80 | ((code >> 6) & 0x3f), 0x80 | (code & 0x3f));
+      }
+    }
+    return out;
+  },
+
+  crcTable: null,
+
+  crc32(bytes) {
+    if (!DOCX.crcTable) {
+      const table = [];
+      for (let n = 0; n < 256; n++) {
+        let c = n;
+        for (let k = 0; k < 8; k++) {
+          c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+        }
+        table[n] = c >>> 0;
+      }
+      DOCX.crcTable = table;
+    }
+    let crc = 0xffffffff;
+    for (let i = 0; i < bytes.length; i++) {
+      crc = (crc >>> 8) ^ DOCX.crcTable[(crc ^ bytes[i]) & 0xff];
+    }
+    return (crc ^ 0xffffffff) >>> 0;
+  },
+
+  // Stored (method 0) ZIP with a fixed 1980-01-01 DOS timestamp on every
+  // entry, so the same input always produces byte-identical output.
+  zip(entries) {
+    const DOS_TIME = 0;
+    const DOS_DATE = 0x0021;
+    const out = [];
+    const u16 = (target, value) => {
+      target.push(value & 0xff, (value >>> 8) & 0xff);
+    };
+    const u32 = (target, value) => {
+      target.push(value & 0xff, (value >>> 8) & 0xff, (value >>> 16) & 0xff, (value >>> 24) & 0xff);
+    };
+    const central = [];
+    for (const entry of entries) {
+      const nameBytes = DOCX.utf8Bytes(entry.name);
+      const dataBytes = entry.bytes;
+      const crc = DOCX.crc32(dataBytes);
+      const offset = out.length;
+
+      u32(out, 0x04034b50);
+      u16(out, 20);
+      u16(out, 0);
+      u16(out, 0);
+      u16(out, DOS_TIME);
+      u16(out, DOS_DATE);
+      u32(out, crc);
+      u32(out, dataBytes.length);
+      u32(out, dataBytes.length);
+      u16(out, nameBytes.length);
+      u16(out, 0);
+      for (let i = 0; i < nameBytes.length; i++) out.push(nameBytes[i]);
+      for (let i = 0; i < dataBytes.length; i++) out.push(dataBytes[i]);
+
+      u32(central, 0x02014b50);
+      u16(central, 20);
+      u16(central, 20);
+      u16(central, 0);
+      u16(central, 0);
+      u16(central, DOS_TIME);
+      u16(central, DOS_DATE);
+      u32(central, crc);
+      u32(central, dataBytes.length);
+      u32(central, dataBytes.length);
+      u16(central, nameBytes.length);
+      u16(central, 0);
+      u16(central, 0);
+      u16(central, 0);
+      u16(central, 0);
+      u32(central, 0);
+      u32(central, offset);
+      for (let i = 0; i < nameBytes.length; i++) central.push(nameBytes[i]);
+    }
+
+    const centralOffset = out.length;
+    for (let i = 0; i < central.length; i++) out.push(central[i]);
+    u32(out, 0x06054b50);
+    u16(out, 0);
+    u16(out, 0);
+    u16(out, entries.length);
+    u16(out, entries.length);
+    u32(out, central.length);
+    u32(out, centralOffset);
+    u16(out, 0);
+    return out;
+  },
+
+  // btoa needs a binary string; chunk it so a large document cannot blow the
+  // argument limit of String.fromCharCode.apply.
+  base64(bytes) {
+    const CHUNK = 0x2000;
+    let binary = '';
+    for (let i = 0; i < bytes.length; i += CHUNK) {
+      binary += String.fromCharCode.apply(null, bytes.slice(i, i + CHUNK));
+    }
+    return btoa(binary);
+  },
+
+  // =========================================================================
+  // Markdown → block model. Anything not recognized stays as paragraph text
+  // rather than being dropped: a summary must never lose a sentence here.
+  // =========================================================================
+  splitTableRow(line) {
+    let text = line.trim();
+    if (text.startsWith('|')) text = text.slice(1);
+    if (text.endsWith('|') && !text.endsWith('\\|')) text = text.slice(0, -1);
+    const cells = [];
+    let current = '';
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+      if (ch === '\\' && text[i + 1] === '|') {
+        current += '|';
+        i++;
+        continue;
+      }
+      if (ch === '|') {
+        cells.push(current.trim());
+        current = '';
+        continue;
+      }
+      current += ch;
+    }
+    cells.push(current.trim());
+    return cells;
+  },
+
+  isTableSeparator(line) {
+    if (!line || line.indexOf('-') < 0 || line.indexOf('|') < 0) return false;
+    return DOCX.splitTableRow(line).every((cell) => /^:?-{1,}:?$/.test(cell.trim()));
+  },
+
+  cellAlignment(cell) {
+    const text = cell.trim();
+    const left = text.startsWith(':');
+    const right = text.endsWith(':');
+    if (left && right) return 'center';
+    if (right) return 'right';
+    return 'left';
+  },
+
+  parseBlocks(markdown) {
+    const lines = String(markdown === null || markdown === undefined ? '' : markdown)
+      .replace(/\r\n?/g, '\n')
+      .replace(/\t/g, '    ')
+      .split('\n');
+    const blocks = [];
+    let paragraph = null;
+    let list = null;
+
+    const closeParagraph = () => {
+      if (paragraph && paragraph.text.trim()) blocks.push({ type: 'paragraph', text: paragraph.text });
+      paragraph = null;
+    };
+    const closeList = () => {
+      if (list && list.items.length) blocks.push(list);
+      list = null;
+    };
+    const closeAll = () => {
+      closeParagraph();
+      closeList();
+    };
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const trimmed = line.trim();
+
+      const fence = trimmed.match(/^(`{3,}|~{3,})\s*([A-Za-z0-9_+-]*)\s*$/);
+      if (fence) {
+        closeAll();
+        const closing = fence[1][0] === '~' ? /^\s*~{3,}\s*$/ : /^\s*`{3,}\s*$/;
+        const language = (fence[2] || '').toLowerCase();
+        const body = [];
+        i++;
+        while (i < lines.length && !closing.test(lines[i])) {
+          body.push(lines[i]);
+          i++;
+        }
+        // Mermaid stays out of the Word file (Word cannot render it and the raw
+        // source is noise there); the Markdown transcript keeps it verbatim.
+        if (language === 'mermaid') {
+          blocks.push({ type: 'mermaid', lines: body });
+        } else {
+          blocks.push({ type: 'code', lines: body });
+        }
+        continue;
+      }
+
+      if (!trimmed) {
+        closeAll();
+        continue;
+      }
+
+      const heading = trimmed.match(/^(#{1,6})\s+(.*?)\s*#*\s*$/);
+      if (heading) {
+        closeAll();
+        blocks.push({ type: 'heading', level: heading[1].length, text: heading[2] });
+        continue;
+      }
+
+      if (/^(-{3,}|\*{3,}|_{3,})$/.test(trimmed.replace(/\s+/g, ''))) {
+        closeAll();
+        blocks.push({ type: 'rule' });
+        continue;
+      }
+
+      if (trimmed.indexOf('|') > -1 && DOCX.isTableSeparator(lines[i + 1])) {
+        closeAll();
+        const alignments = DOCX.splitTableRow(lines[i + 1]).map(DOCX.cellAlignment);
+        const rows = [DOCX.splitTableRow(line)];
+        i += 2;
+        while (i < lines.length && lines[i].trim() && lines[i].indexOf('|') > -1) {
+          rows.push(DOCX.splitTableRow(lines[i]));
+          i++;
+        }
+        i--;
+        blocks.push({ type: 'table', rows, alignments });
+        continue;
+      }
+
+      const quote = line.match(/^\s*>\s?(.*)$/);
+      if (quote) {
+        closeAll();
+        const quoted = [quote[1]];
+        while (i + 1 < lines.length && /^\s*>\s?/.test(lines[i + 1])) {
+          quoted.push(lines[i + 1].replace(/^\s*>\s?/, ''));
+          i++;
+        }
+        blocks.push({ type: 'quote', text: quoted.join(' ').trim() });
+        continue;
+      }
+
+      const item = line.match(/^(\s*)([-*+]|\d+[.)])\s+(.*)$/);
+      if (item) {
+        closeParagraph();
+        const ordered = !/^[-*+]$/.test(item[2]);
+        const level = Math.min(Math.floor(item[1].length / 2), 2);
+        if (!list || list.ordered !== ordered) {
+          closeList();
+          list = { type: 'list', ordered, items: [] };
+        }
+        list.items.push({ level, text: item[3] });
+        continue;
+      }
+
+      if (list) {
+        // Lazy continuation of the previous list item.
+        list.items[list.items.length - 1].text += ` ${trimmed}`;
+        continue;
+      }
+
+      if (paragraph) {
+        paragraph.text += ` ${trimmed}`;
+      } else {
+        paragraph = { text: trimmed };
+      }
+    }
+
+    closeAll();
+    return blocks;
+  },
+
+  // =========================================================================
+  // Inline markdown → runs. Emphasis opens only when a matching closing
+  // delimiter exists and both ends satisfy CommonMark-style flanking rules,
+  // so "5 * 3", "snake_case_word", and a lone "_" survive as literal text
+  // instead of being eaten as formatting.
+  // =========================================================================
+  parseInline(text, depth) {
+    const source = String(text === null || text === undefined ? '' : text);
+    const runs = [];
+    let buffer = '';
+    let bold = false;
+    let italic = false;
+    let boldClose = -1;
+    let italicClose = -1;
+    const flush = () => {
+      if (buffer) {
+        runs.push({ text: buffer, bold, italic, code: false });
+        buffer = '';
+      }
+    };
+
+    const alphanumeric = (ch) => Boolean(ch) && /[A-Za-z0-9]/.test(ch);
+    const canOpen = (index, length, ch) => {
+      const after = source[index + length];
+      if (!after || /\s/.test(after)) return false;
+      return !(ch === '_' && alphanumeric(source[index - 1]));
+    };
+    const canClose = (index, length, ch) => {
+      const before = source[index - 1];
+      if (!before || /\s/.test(before)) return false;
+      return !(ch === '_' && alphanumeric(source[index + length]));
+    };
+    const findClose = (from, length, ch) => {
+      const marker = length === 2 ? ch + ch : ch;
+      let cursor = from;
+      while (cursor < source.length) {
+        const at = source.indexOf(marker, cursor);
+        if (at < 0) return -1;
+        if (canClose(at, length, ch)) return at;
+        cursor = at + length;
+      }
+      return -1;
+    };
+
+    let i = 0;
+    while (i < source.length) {
+      const ch = source[i];
+      const next = source[i + 1];
+
+      if (ch === '\\' && next && '\\`*_[]()#+-.!|>{}~'.indexOf(next) > -1) {
+        buffer += next;
+        i += 2;
+        continue;
+      }
+
+      if (ch === '`') {
+        const end = source.indexOf('`', i + 1);
+        if (end > i + 1) {
+          flush();
+          runs.push({ text: source.slice(i + 1, end), bold, italic, code: true });
+          i = end + 1;
+          continue;
+        }
+      }
+
+      if (ch === '*' || ch === '_') {
+        const double = next === ch;
+        if (double && bold && i === boldClose) {
+          flush();
+          bold = false;
+          boldClose = -1;
+          i += 2;
+          continue;
+        }
+        if (!double && italic && i === italicClose) {
+          flush();
+          italic = false;
+          italicClose = -1;
+          i += 1;
+          continue;
+        }
+        if (double && !bold && canOpen(i, 2, ch)) {
+          const close = findClose(i + 2, 2, ch);
+          if (close > -1) {
+            flush();
+            bold = true;
+            boldClose = close;
+            i += 2;
+            continue;
+          }
+        }
+        if (!double && !italic && canOpen(i, 1, ch)) {
+          const close = findClose(i + 1, 1, ch);
+          if (close > -1) {
+            flush();
+            italic = true;
+            italicClose = close;
+            i += 1;
+            continue;
+          }
+        }
+      }
+
+      if (ch === '[' && (depth || 0) < 3) {
+        const close = source.indexOf('](', i);
+        if (close > i) {
+          const end = source.indexOf(')', close + 2);
+          if (end > close) {
+            const label = source.slice(i + 1, close);
+            const url = source.slice(close + 2, end).trim();
+            flush();
+            for (const run of DOCX.parseInline(label, (depth || 0) + 1)) {
+              runs.push({ text: run.text, bold: run.bold || bold, italic: run.italic || italic, code: run.code });
+            }
+            if (url && url !== label) {
+              runs.push({ text: ` (${url})`, bold, italic, code: false });
+            }
+            i = end + 1;
+            continue;
+          }
+        }
+      }
+
+      buffer += ch;
+      i += 1;
+    }
+    flush();
+    return runs;
+  },
+
+  // =========================================================================
+  // WordprocessingML fragments.
+  // =========================================================================
+  // Child order inside w:rPr is fixed by the OOXML schema (rFonts, b, i,
+  // color, sz); Word repairs or rejects a file that emits them out of order.
+  runXml(run, options) {
+    const settings = options || {};
+    const properties = [];
+    if (run.code) properties.push('<w:rFonts w:ascii="Consolas" w:hAnsi="Consolas" w:cs="Consolas"/>');
+    if (run.bold || settings.forceBold) properties.push('<w:b/>');
+    if (run.italic) properties.push('<w:i/>');
+    if (settings.color) properties.push(`<w:color w:val="${settings.color}"/>`);
+    if (settings.size) properties.push(`<w:sz w:val="${settings.size}"/><w:szCs w:val="${settings.size}"/>`);
+    const rPr = properties.length ? `<w:rPr>${properties.join('')}</w:rPr>` : '';
+    return `<w:r>${rPr}<w:t xml:space="preserve">${DOCX.esc(run.text)}</w:t></w:r>`;
+  },
+
+  runsXml(text, options) {
+    return DOCX.parseInline(text, 0)
+      .map((run) => DOCX.runXml(run, options))
+      .join('');
+  },
+
+  paragraphXml(text, options) {
+    const settings = options || {};
+    const properties = [];
+    if (settings.style) properties.push(`<w:pStyle w:val="${settings.style}"/>`);
+    if (settings.numId) {
+      properties.push(
+        `<w:numPr><w:ilvl w:val="${settings.level || 0}"/><w:numId w:val="${settings.numId}"/></w:numPr>`,
+      );
+    }
+    if (settings.border) {
+      properties.push(
+        `<w:pBdr><w:bottom w:val="single" w:sz="6" w:space="4" w:color="${DOCX.RULE}"/></w:pBdr>`,
+      );
+    }
+    if (settings.spacing) properties.push(`<w:spacing ${settings.spacing}/>`);
+    if (settings.indent) properties.push(`<w:ind w:left="${settings.indent}"/>`);
+    if (settings.alignment && settings.alignment !== 'left') {
+      properties.push(`<w:jc w:val="${settings.alignment === 'right' ? 'right' : 'center'}"/>`);
+    }
+    const pPr = properties.length ? `<w:pPr>${properties.join('')}</w:pPr>` : '';
+    // `literal` skips inline markdown parsing — used for values the backend
+    // controls (topic name, file names) so a "*" in them is never eaten.
+    const runs =
+      settings.raw !== undefined
+        ? settings.raw
+        : settings.literal
+          ? DOCX.runXml({ text }, settings)
+          : DOCX.runsXml(text, settings);
+    return `<w:p>${pPr}${runs}</w:p>`;
+  },
+
+  tableXml(rows, alignments, options) {
+    const tableOptions = options || {};
+    const columnCount = rows.reduce((max, row) => Math.max(max, row.length), 1);
+    const total = DOCX.contentWidth();
+    const ratios =
+      tableOptions.ratios && tableOptions.ratios.length === columnCount ? tableOptions.ratios : null;
+    const widths = [];
+    let assigned = 0;
+    for (let i = 0; i < columnCount - 1; i++) {
+      const width = ratios ? Math.floor(total * ratios[i]) : Math.floor(total / columnCount);
+      widths.push(width);
+      assigned += width;
+    }
+    widths.push(total - assigned);
+    const border = (side) =>
+      `<w:${side} w:val="single" w:sz="4" w:space="0" w:color="${DOCX.RULE}"/>`;
+    const borders = `<w:tblBorders>${border('top')}${border('left')}${border('bottom')}${border('right')}${border('insideH')}${border('insideV')}</w:tblBorders>`;
+    const grid = widths.map((width) => `<w:gridCol w:w="${width}"/>`).join('');
+
+    const body = rows
+      .map((row, rowIndex) => {
+        const isHeader = rowIndex === 0 && !tableOptions.noHeader;
+        const cells = [];
+        for (let column = 0; column < columnCount; column++) {
+          const alignment = (alignments && alignments[column]) || 'left';
+          const shading = isHeader ? `<w:shd w:val="clear" w:color="auto" w:fill="${DOCX.HEADER_FILL}"/>` : '';
+          const content = DOCX.paragraphXml(row[column] === undefined ? '' : row[column], {
+            style: 'TableCell',
+            alignment,
+            forceBold: isHeader || (tableOptions.boldFirstColumn && column === 0),
+            literal: tableOptions.literal,
+          });
+          cells.push(
+            `<w:tc><w:tcPr><w:tcW w:w="${widths[column]}" w:type="dxa"/>${shading}<w:vAlign w:val="center"/></w:tcPr>${content}</w:tc>`,
+          );
+        }
+        const rowProperties = isHeader ? '<w:trPr><w:cantSplit/><w:tblHeader/></w:trPr>' : '';
+        return `<w:tr>${rowProperties}${cells.join('')}</w:tr>`;
+      })
+      .join('');
+
+    return `<w:tbl><w:tblPr><w:tblW w:w="${total}" w:type="dxa"/>${borders}<w:tblLayout w:type="fixed"/><w:tblCellMar><w:top w:w="60" w:type="dxa"/><w:left w:w="108" w:type="dxa"/><w:bottom w:w="60" w:type="dxa"/><w:right w:w="108" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid>${grid}</w:tblGrid>${body}</w:tbl>${DOCX.paragraphXml('', { spacing: 'w:after="0" w:line="120" w:lineRule="auto"' })}`;
+  },
+
+  // Renders the block model. `context.orderedNums` accumulates one numbering
+  // id per ordered list so each list restarts at 1.
+  renderBlocks(blocks, context) {
+    const parts = [];
+    for (const block of blocks) {
+      if (block.type === 'heading') {
+        const style = block.level <= 1 ? 'Heading1' : block.level === 2 ? 'Heading2' : 'Heading3';
+        parts.push(DOCX.paragraphXml(block.text, { style }));
+        continue;
+      }
+      if (block.type === 'paragraph') {
+        parts.push(DOCX.paragraphXml(block.text, {}));
+        continue;
+      }
+      if (block.type === 'quote') {
+        parts.push(DOCX.paragraphXml(block.text, { style: 'Quote' }));
+        continue;
+      }
+      if (block.type === 'rule') {
+        parts.push(
+          DOCX.paragraphXml('', { border: true, spacing: 'w:before="80" w:after="160"', raw: '' }),
+        );
+        continue;
+      }
+      if (block.type === 'code') {
+        for (const line of block.lines) {
+          parts.push(
+            DOCX.paragraphXml('', {
+              style: 'CodeLine',
+              raw: `<w:r><w:rPr><w:rFonts w:ascii="Consolas" w:hAnsi="Consolas" w:cs="Consolas"/></w:rPr><w:t xml:space="preserve">${DOCX.esc(line)}</w:t></w:r>`,
+            }),
+          );
+        }
+        continue;
+      }
+      if (block.type === 'mermaid') {
+        context.mermaidCount = (context.mermaidCount || 0) + 1;
+        parts.push(
+          DOCX.paragraphXml('', {
+            style: 'Quote',
+            raw: `<w:r><w:rPr><w:i/><w:color w:val="${DOCX.MUTED}"/></w:rPr><w:t xml:space="preserve">[Diagram ${context.mermaidCount}: Mermaid source kept in the Markdown transcript under Source transcripts/.]</w:t></w:r>`,
+          }),
+        );
+        continue;
+      }
+      if (block.type === 'list') {
+        let numId = 1;
+        if (block.ordered) {
+          numId = 2 + context.orderedNums.length;
+          context.orderedNums.push(numId);
+        }
+        for (const item of block.items) {
+          parts.push(DOCX.paragraphXml(item.text, { style: 'ListParagraph', numId, level: item.level }));
+        }
+        continue;
+      }
+      if (block.type === 'table') {
+        parts.push(DOCX.tableXml(block.rows, block.alignments));
+        continue;
+      }
+    }
+    return parts.join('');
+  },
+
+  numberingXml(orderedNums) {
+    const bulletChars = ['\uF0B7', 'o', '\uF0A7'];
+    const bulletFonts = ['Symbol', 'Courier New', 'Wingdings'];
+    const bulletLevels = [0, 1, 2]
+      .map(
+        (level) =>
+          `<w:lvl w:ilvl="${level}"><w:start w:val="1"/><w:numFmt w:val="bullet"/><w:lvlText w:val="${DOCX.esc(bulletChars[level])}"/><w:lvlJc w:val="left"/><w:pPr><w:ind w:left="${360 * (level + 1)}" w:hanging="360"/></w:pPr><w:rPr><w:rFonts w:ascii="${bulletFonts[level]}" w:hAnsi="${bulletFonts[level]}" w:hint="default"/></w:rPr></w:lvl>`,
+      )
+      .join('');
+    const decimalFormats = ['decimal', 'lowerLetter', 'lowerRoman'];
+    const decimalLevels = [0, 1, 2]
+      .map(
+        (level) =>
+          `<w:lvl w:ilvl="${level}"><w:start w:val="1"/><w:numFmt w:val="${decimalFormats[level]}"/><w:lvlText w:val="%${level + 1}."/><w:lvlJc w:val="left"/><w:pPr><w:ind w:left="${360 * (level + 1)}" w:hanging="360"/></w:pPr></w:lvl>`,
+      )
+      .join('');
+
+    const nums = [`<w:num w:numId="1"><w:abstractNumId w:val="0"/></w:num>`];
+    for (const numId of orderedNums) {
+      nums.push(
+        `<w:num w:numId="${numId}"><w:abstractNumId w:val="1"/><w:lvlOverride w:ilvl="0"><w:startOverride w:val="1"/></w:lvlOverride><w:lvlOverride w:ilvl="1"><w:startOverride w:val="1"/></w:lvlOverride><w:lvlOverride w:ilvl="2"><w:startOverride w:val="1"/></w:lvlOverride></w:num>`,
+      );
+    }
+
+    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:abstractNum w:abstractNumId="0"><w:multiLevelType w:val="hybridMultilevel"/>${bulletLevels}</w:abstractNum><w:abstractNum w:abstractNumId="1"><w:multiLevelType w:val="hybridMultilevel"/>${decimalLevels}</w:abstractNum>${nums.join('')}</w:numbering>`;
+  },
+
+  stylesXml() {
+    const style = (id, name, basedOn, pPr, rPr, extra) =>
+      `<w:style w:type="paragraph" w:styleId="${id}"${extra || ''}><w:name w:val="${name}"/><w:basedOn w:val="${basedOn}"/><w:qFormat/>${pPr ? `<w:pPr>${pPr}</w:pPr>` : ''}${rPr ? `<w:rPr>${rPr}</w:rPr>` : ''}</w:style>`;
+
+    return (
+      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' +
+      '<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/><w:sz w:val="22"/><w:szCs w:val="22"/></w:rPr></w:rPrDefault>' +
+      '<w:pPrDefault><w:pPr><w:spacing w:after="140" w:line="276" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>' +
+      '<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style>' +
+      style(
+        'DocTitle',
+        'Title',
+        'Normal',
+        '<w:spacing w:before="0" w:after="80"/>',
+        `<w:b/><w:color w:val="${DOCX.ACCENT}"/><w:sz w:val="40"/><w:szCs w:val="40"/>`,
+      ) +
+      style(
+        'DocSubtitle',
+        'Subtitle',
+        'Normal',
+        `<w:pBdr><w:bottom w:val="single" w:sz="8" w:space="6" w:color="${DOCX.RULE}"/></w:pBdr><w:spacing w:before="0" w:after="240"/>`,
+        `<w:color w:val="${DOCX.MUTED}"/><w:sz w:val="20"/><w:szCs w:val="20"/>`,
+      ) +
+      style(
+        'Heading1',
+        'heading 1',
+        'Normal',
+        '<w:keepNext/><w:spacing w:before="320" w:after="120"/><w:outlineLvl w:val="0"/>',
+        `<w:b/><w:color w:val="${DOCX.ACCENT}"/><w:sz w:val="32"/><w:szCs w:val="32"/>`,
+      ) +
+      style(
+        'Heading2',
+        'heading 2',
+        'Normal',
+        '<w:keepNext/><w:spacing w:before="260" w:after="100"/><w:outlineLvl w:val="1"/>',
+        `<w:b/><w:color w:val="${DOCX.ACCENT}"/><w:sz w:val="26"/><w:szCs w:val="26"/>`,
+      ) +
+      style(
+        'Heading3',
+        'heading 3',
+        'Normal',
+        '<w:keepNext/><w:spacing w:before="200" w:after="80"/><w:outlineLvl w:val="2"/>',
+        '<w:b/><w:color w:val="333F48"/><w:sz w:val="24"/><w:szCs w:val="24"/>',
+      ) +
+      style('ListParagraph', 'List Paragraph', 'Normal', '<w:spacing w:after="60"/><w:contextualSpacing/>', '') +
+      style(
+        'Quote',
+        'Quote',
+        'Normal',
+        `<w:pBdr><w:left w:val="single" w:sz="12" w:space="8" w:color="${DOCX.RULE}"/></w:pBdr><w:spacing w:before="120" w:after="120"/><w:ind w:left="360"/>`,
+        `<w:i/><w:color w:val="${DOCX.MUTED}"/>`,
+      ) +
+      style(
+        'CodeLine',
+        'Code',
+        'Normal',
+        '<w:spacing w:after="0" w:line="240" w:lineRule="auto"/><w:ind w:left="360"/>',
+        '<w:rFonts w:ascii="Consolas" w:hAnsi="Consolas" w:cs="Consolas"/><w:sz w:val="20"/><w:szCs w:val="20"/>',
+      ) +
+      style('TableCell', 'Table Cell', 'Normal', '<w:spacing w:before="40" w:after="40" w:line="240" w:lineRule="auto"/>', '<w:sz w:val="20"/><w:szCs w:val="20"/>') +
+      '</w:styles>'
+    );
+  },
+
+  documentXml(bodyXml) {
+    const page = DOCX.PAGE;
+    return (
+      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" ' +
+      'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' +
+      `<w:body>${bodyXml}` +
+      `<w:sectPr><w:pgSz w:w="${page.width}" w:h="${page.height}"/>` +
+      `<w:pgMar w:top="${page.margin}" w:right="${page.margin}" w:bottom="${page.margin}" w:left="${page.margin}" w:header="709" w:footer="709" w:gutter="0"/>` +
+      '<w:cols w:space="708"/><w:docGrid w:linePitch="360"/></w:sectPr></w:body></w:document>'
+    );
+  },
+
+  // Assembles the OPC package. Part order is fixed so the ZIP is reproducible.
+  build(bodyXml, orderedNums, meta) {
+    const contentTypes =
+      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+      '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+      '<Default Extension="xml" ContentType="application/xml"/>' +
+      '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>' +
+      '<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>' +
+      '<Override PartName="/word/numbering.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"/>' +
+      '<Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/>' +
+      '<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>' +
+      '<Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>' +
+      '</Types>';
+
+    const rootRels =
+      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>' +
+      '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>' +
+      '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>' +
+      '</Relationships>';
+
+    const documentRels =
+      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>' +
+      '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/>' +
+      '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings" Target="settings.xml"/>' +
+      '</Relationships>';
+
+    const settings =
+      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' +
+      '<w:zoom w:percent="100"/><w:defaultTabStop w:val="708"/><w:characterSpacingControl w:val="doNotCompress"/>' +
+      '<w:compat><w:compatSetting w:name="compatibilityMode" w:uri="http://schemas.microsoft.com/office/word" w:val="15"/></w:compat>' +
+      '</w:settings>';
+
+    const core =
+      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" ' +
+      'xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" ' +
+      'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
+      `<dc:title>${DOCX.esc(meta.title)}</dc:title>` +
+      `<dc:subject>${DOCX.esc(meta.subject)}</dc:subject>` +
+      '<dc:creator>Knowledge Retention Backend</dc:creator>' +
+      '<cp:lastModifiedBy>Knowledge Retention Backend</cp:lastModifiedBy>' +
+      `<dcterms:created xsi:type="dcterms:W3CDTF">${DOCX.esc(meta.generatedOn)}</dcterms:created>` +
+      `<dcterms:modified xsi:type="dcterms:W3CDTF">${DOCX.esc(meta.generatedOn)}</dcterms:modified>` +
+      '</cp:coreProperties>';
+
+    const app =
+      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" ' +
+      'xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">' +
+      '<Application>Knowledge Retention Backend</Application><DocSecurity>0</DocSecurity><ScaleCrop>false</ScaleCrop>' +
+      '<SharedDoc>false</SharedDoc><HyperlinksChanged>false</HyperlinksChanged><AppVersion>1.0000</AppVersion>' +
+      '</Properties>';
+
+    const parts = [
+      { name: '[Content_Types].xml', text: contentTypes },
+      { name: '_rels/.rels', text: rootRels },
+      { name: 'docProps/core.xml', text: core },
+      { name: 'docProps/app.xml', text: app },
+      { name: 'word/_rels/document.xml.rels', text: documentRels },
+      { name: 'word/document.xml', text: DOCX.documentXml(bodyXml) },
+      { name: 'word/numbering.xml', text: DOCX.numberingXml(orderedNums) },
+      { name: 'word/settings.xml', text: settings },
+      { name: 'word/styles.xml', text: DOCX.stylesXml() },
+    ];
+    return DOCX.zip(parts.map((part) => ({ name: part.name, bytes: DOCX.utf8Bytes(part.text) })));
+  },
+};
+
+// Renders the stored handover Markdown with the topic-document formatter, files
+// the Word file at the interview-folder root, and returns it to chat.
 const identity = KnowledgeRetentionUtils.resolveIdentity(data);
 const email = identity.email;
-const token = await KnowledgeRetentionUtils.dataverseToken(data);
+const dvToken = await KnowledgeRetentionUtils.dataverseToken(data);
 const S = KnowledgeRetentionUtils.SCHEMA;
 const ST = KnowledgeRetentionUtils.STATUS;
 
-const interview = await KnowledgeRetentionUtils.loadInterviewRow(data, token, identity);
-if (!interview) {
-  throw new Error('No open interview found. Call create_interview first.');
+const SOURCE_FOLDER = 'Source transcripts';
+const SUPPORTING_FOLDER = 'Supporting documents';
+const NO_SUPPORTING = 'No supporting documents were provided.';
+const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+
+const interview = await KnowledgeRetentionUtils.loadInterviewRow(data, dvToken, identity, { completed: true });
+const status = interview ? Number(interview[S.interview.status]) : NaN;
+if (!interview || status === ST.interview.cancelled || status < ST.interview.finalized) {
+  throw new Error(
+    'No finalized interview found. The handover document can be generated only after the interview is finalized and has not been cancelled.',
+  );
 }
 
-// Never regress a generated interview to discovery. Doing so would let the next
-// topic-generation call delete existing topics/questions as "partial" rows.
-if (Number(interview[S.interview.status]) >= ST.interview.generated) {
-  const children = await KnowledgeRetentionUtils.loadChildren(data, token, interview[S.interview.id]);
-  const state = KnowledgeRetentionUtils.computeState(data, interview, children);
+const emptyChildren = { topics: [], questions: [], answers: [] };
+const conflictResult = (note) => {
+  const state = KnowledgeRetentionUtils.computeState(data, interview, emptyChildren);
   return {
+    generated: false,
     conflict: true,
-    saved: false,
     nextAction: state.nextAction,
-    instruction: `The discovery profile is locked because this interview's topics and questions were already generated, so nothing was saved. Do not call save_discovery again for this interview. ${state.instruction}`,
+    instruction: `${note} ${state.instruction}`,
     language: state.language,
     progressLabel: state.progressLabel,
     questionsRemaining: state.questionsRemaining,
@@ -884,31 +1679,247 @@ if (Number(interview[S.interview.status]) >= ST.interview.generated) {
     sharePointFolderUrl: state.sharePointFolderUrl,
     topicQnA: state.topicQnA,
   };
+};
+
+if (!interview[S.interview.folderUrl]) {
+  return conflictResult(
+    'The interview folder does not exist yet, so the handover document cannot be filed. Call set_up_interview_folder once, then call generate_final_document again. No Word file was created.',
+  );
 }
 
-const body = {};
-body[S.interview.role] = data.input.role;
-body[S.interview.businessUnit] = data.input.businessUnit;
-body[S.interview.responsibilities] = data.input.responsibilities;
-body[S.interview.tools] = data.input.tools;
-body[S.interview.focusTopics] = data.input.focusTopics;
-if (data.input.kpisAndConstraints) {
-  body[S.interview.kpisAndConstraints] = data.input.kpisAndConstraints;
-}
-body[S.interview.status] = ST.interview.discovery;
-body[S.interview.lastCheckpointOn] = new Date().toISOString();
+const interviewNumber = interview[S.interview.number];
+const markdownFileName = `InterviewFinalSummary_${interviewNumber}.md`;
+const docxFileName = `InterviewFinalSummary_${interviewNumber}.docx`;
 
-await KnowledgeRetentionUtils.dv(data, token, {
-  method: 'PATCH',
-  path: `/${S.entitySets.interviews}(${interview[S.interview.id]})`,
-  body,
+const siteId = data.auth.sharepointSiteId;
+const graphToken = await KnowledgeRetentionUtils.graphToken(data);
+const graphPrefix = 'https://graph.microsoft.com/v1.0';
+const encodePath = (path) =>
+  path
+    .split('/')
+    .map((segment) => encodeURIComponent(segment))
+    .join('/');
+const encodedFolder = encodePath(KnowledgeRetentionUtils.interviewFolderPath(interview));
+
+function decodeUtf8Bytes(bytes) {
+  const buffer = Buffer.from(bytes);
+  if (typeof TextDecoder === 'function') {
+    try {
+      return new TextDecoder('utf-8', { fatal: true }).decode(buffer);
+    } catch (_error) {
+      throw new Error('The stored handover Markdown is not valid UTF-8.');
+    }
+  }
+  let binary = '';
+  for (let i = 0; i < buffer.length; i++) binary += String.fromCharCode(buffer[i]);
+  try {
+    return decodeURIComponent(escape(binary));
+  } catch (_error) {
+    throw new Error('The stored handover Markdown is not valid UTF-8.');
+  }
+}
+
+function storedMarkdownText(response) {
+  let text = response.buffer ? decodeUtf8Bytes(response.buffer) : '';
+  if (text.charCodeAt(0) === 0xfeff) text = text.slice(1);
+  return text.replace(/\r\n?/g, '\n');
+}
+
+// Binary read like read_supporting_document, so the bytes are decoded here as
+// strict UTF-8 instead of relying on the platform's text handling.
+async function downloadStoredMarkdown(path) {
+  const MAX_RATE_LIMIT_RETRIES = 3;
+  const RETRY_FALLBACK_SECONDS = 2;
+  const MAX_WAIT_MS = 30000;
+  let rateLimitRetries = 0;
+  while (true) {
+    const response = await ld.request({
+      url: `${graphPrefix}${path}`,
+      method: 'GET',
+      headers: { Authorization: `Bearer ${graphToken}`, Accept: 'application/octet-stream' },
+      responseType: 'binary',
+    });
+    const detail =
+      (response.json && response.json.error && response.json.error.message) || response.text || '';
+    if (response.status === 429) {
+      if (rateLimitRetries >= MAX_RATE_LIMIT_RETRIES) {
+        throw new Error(KnowledgeRetentionUtils.failureMessage(429, detail));
+      }
+      rateLimitRetries++;
+      const retryAfter = parseInt(
+        (response.headers && (response.headers['Retry-After'] || response.headers['retry-after'])) || '',
+        10,
+      );
+      await ld.wait(Math.min((retryAfter && retryAfter > 0 ? retryAfter : RETRY_FALLBACK_SECONDS) * 1000, MAX_WAIT_MS));
+      continue;
+    }
+    if (response.status === 404) return response;
+    if (response.status !== 200) {
+      throw new Error(KnowledgeRetentionUtils.failureMessage(response.status, detail));
+    }
+    return response;
+  }
+}
+
+const noStoredMarkdownNote = (reason) =>
+  status >= ST.interview.documentGenerated
+    ? 'No stored handover draft exists, and the handover document is already filed. No Word file was created.'
+    : `The handover Word file was not created because ${reason}. Approve the Markdown and call save_final_document first. Do not create a Word file.`;
+
+const markdownResponse = await downloadStoredMarkdown(
+  `/sites/${siteId}/drive/root:/${encodedFolder}/${encodeURIComponent(SOURCE_FOLDER)}/${encodeURIComponent(markdownFileName)}:/content`,
+);
+if (markdownResponse.status === 404) {
+  return conflictResult(noStoredMarkdownNote('no approved Markdown is stored yet'));
+}
+const markdownText = storedMarkdownText(markdownResponse);
+if (!markdownText.trim()) {
+  return conflictResult(noStoredMarkdownNote('the stored Markdown is empty'));
+}
+
+const supportingNames = [];
+let listPath = `/sites/${siteId}/drive/root:/${encodedFolder}/${encodeURIComponent(SUPPORTING_FOLDER)}:/children?$select=name&$top=200`;
+while (listPath) {
+  const listResponse = await KnowledgeRetentionUtils.graph(data, graphToken, { method: 'GET', path: listPath });
+  if (listResponse.status === 404) {
+    break;
+  }
+  if (listResponse.status !== 200) {
+    const detail =
+      (listResponse.json && listResponse.json.error && listResponse.json.error.message) || listResponse.text || '';
+    throw new Error(KnowledgeRetentionUtils.failureMessage(listResponse.status, detail));
+  }
+  for (const item of (listResponse.json && listResponse.json.value) || []) {
+    if (item && item.name) {
+      supportingNames.push(String(item.name));
+    }
+  }
+  const nextLink = listResponse.json && listResponse.json['@odata.nextLink'];
+  const nextLinkText = nextLink ? String(nextLink) : '';
+  listPath = nextLinkText
+    ? nextLinkText.indexOf(graphPrefix) === 0
+      ? nextLinkText.slice(graphPrefix.length)
+      : nextLinkText
+    : null;
+}
+supportingNames.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+
+// Renderer-added display text in the interview language; English fallback.
+const LABELS = {
+  en: {
+    title: 'Final handover · Interview',
+    subtitle: 'Knowledge retention interview',
+    supporting: 'Supporting documents',
+    noSupporting: NO_SUPPORTING,
+  },
+  de: {
+    title: 'Finale Übergabe · Interview',
+    subtitle: 'Wissenssicherungsinterview',
+    supporting: 'Unterstützende Dokumente',
+    noSupporting: 'Es wurden keine unterstützenden Dokumente bereitgestellt.',
+  },
+  zh: {
+    title: '最终交接 · 访谈',
+    subtitle: '知识保留访谈',
+    supporting: '支持文档',
+    noSupporting: '未提供支持文档。',
+  },
+  fr: {
+    title: 'Passation finale · Entretien',
+    subtitle: 'Entretien de rétention des connaissances',
+    supporting: 'Documents complémentaires',
+    noSupporting: 'Aucun document complémentaire n’a été fourni.',
+  },
+  es: {
+    title: 'Traspaso final · Entrevista',
+    subtitle: 'Entrevista de retención del conocimiento',
+    supporting: 'Documentos de apoyo',
+    noSupporting: 'No se proporcionaron documentos de apoyo.',
+  },
+  pt: {
+    title: 'Passagem final · Entrevista',
+    subtitle: 'Entrevista de retenção de conhecimento',
+    supporting: 'Documentos de apoio',
+    noSupporting: 'Não foram fornecidos documentos de apoio.',
+  },
+};
+const L = LABELS[interview[S.interview.language]] || LABELS.en;
+
+const documentTitle = `${L.title} ${interviewNumber}`;
+const subtitleParts = [`${L.subtitle} ${interviewNumber}`];
+const employeeName = interview[S.interview.displayName] || email || '';
+if (employeeName) subtitleParts.push(employeeName);
+const roleLine = [interview[S.interview.role], interview[S.interview.businessUnit]].filter(Boolean).join(', ');
+if (roleLine) subtitleParts.push(roleLine);
+const subtitle = subtitleParts.join(' \u00b7 ');
+const generatedOn = new Date().toISOString();
+
+const renderContext = { orderedNums: [], mermaidCount: 0 };
+const bodyParts = [];
+bodyParts.push(DOCX.paragraphXml(documentTitle, { style: 'DocTitle', literal: true }));
+bodyParts.push(DOCX.paragraphXml(subtitle, { style: 'DocSubtitle', literal: true }));
+bodyParts.push(DOCX.renderBlocks(DOCX.parseBlocks(markdownText), renderContext));
+bodyParts.push(DOCX.paragraphXml(L.supporting, { style: 'Heading1', literal: true }));
+if (supportingNames.length > 0) {
+  for (const name of supportingNames) {
+    bodyParts.push(DOCX.paragraphXml(name, { style: 'ListParagraph', numId: 1, level: 0, literal: true }));
+  }
+} else {
+  bodyParts.push(DOCX.paragraphXml(L.noSupporting, { literal: true }));
+}
+
+const docxBytes = DOCX.build(bodyParts.join(''), renderContext.orderedNums, {
+  title: documentTitle,
+  subject: subtitle,
+  generatedOn,
 });
 
-const interviewForState = Object.assign({}, interview, body);
-const state = KnowledgeRetentionUtils.computeState(data, interviewForState, { topics: [], questions: [], answers: [] });
+const uploadResponse = await KnowledgeRetentionUtils.graph(data, graphToken, {
+  method: 'PUT',
+  path: `/sites/${siteId}/drive/root:/${encodedFolder}/${encodeURIComponent(docxFileName)}:/content`,
+  isBinary: true,
+  headers: { 'Content-Type': DOCX_MIME },
+  body: Buffer.from(docxBytes),
+});
+if (uploadResponse.status !== 200 && uploadResponse.status !== 201) {
+  const detail =
+    (uploadResponse.json && uploadResponse.json.error && uploadResponse.json.error.message) ||
+    uploadResponse.text ||
+    '';
+  throw new Error(KnowledgeRetentionUtils.failureMessage(uploadResponse.status, detail));
+}
+
+const currentStatus = Number(interview[S.interview.status]);
+let interviewForState = interview;
+let documentGenerated = currentStatus >= ST.interview.documentGenerated && currentStatus < ST.interview.cancelled;
+let advanced = false;
+if (currentStatus >= ST.interview.finalized && currentStatus < ST.interview.documentGenerated) {
+  const statusBody = {};
+  statusBody[S.interview.status] = ST.interview.documentGenerated;
+  statusBody[S.interview.lastCheckpointOn] = new Date().toISOString();
+  await KnowledgeRetentionUtils.dv(data, dvToken, {
+    method: 'PATCH',
+    path: `/${S.entitySets.interviews}(${interview[S.interview.id]})`,
+    body: statusBody,
+  });
+  interviewForState = Object.assign({}, interview, statusBody);
+  documentGenerated = true;
+  advanced = true;
+}
+
+const state = KnowledgeRetentionUtils.computeState(data, interviewForState, emptyChildren);
+const generatedNote = `"${docxFileName}" was generated from the stored Markdown and is attached. Show that attachment and the folder link. Do not rebuild it or call upload_document for it.${
+  advanced ? ' The interview is now marked as Document Generated.' : ''
+}`;
+
 return {
+  generated: true,
+  conflict: false,
+  fileName: docxFileName,
+  fileWebUrl: (uploadResponse.json && uploadResponse.json.webUrl) || null,
+  documentGenerated,
   nextAction: state.nextAction,
-  instruction: state.instruction,
+  instruction: `${generatedNote} ${state.instruction}`,
   language: state.language,
   progressLabel: state.progressLabel,
   questionsRemaining: state.questionsRemaining,
@@ -917,4 +1928,10 @@ return {
   expectedTopicOrder: state.expectedTopicOrder,
   sharePointFolderUrl: state.sharePointFolderUrl,
   topicQnA: state.topicQnA,
+  files: {
+    fileName: docxFileName,
+    mimeType: DOCX_MIME,
+    base64: DOCX.base64(docxBytes),
+    lastModified: generatedOn,
+  },
 };

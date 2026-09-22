@@ -67,7 +67,7 @@ authorize inspecting or changing an unallowlisted resource.
 
 HOW’s own “Authority (do not invert)” ladder describes the **interview agent at runtime** (backend `instruction` beats chat). Do not confuse that with your edit authority above.
 
-Canonical conflicts (blank topic doc vs branded final, follow-ups 2–3, etc.) are in HOW → “Canonical when sources disagree”. Follow that table.
+Canonical conflicts (Markdown drafts → backend-rendered topic and final docs, follow-up cap 3 used more often than not, etc.) are in HOW → “Canonical when sources disagree”. Follow that table.
 
 **Load `debug-agent` immediately whenever** the administrator reports that the Knowledge Retention agent threw an error, a tool call failed, or runtime behavior was unexpected. For tool errors, it requires the exact action and verbatim error before live action-code diagnosis.
 
@@ -195,6 +195,14 @@ Actions: `admin_describe_schema`, `admin_query_records` (whole CKR dataset; conn
 - Treat data as sensitive production data.  
 - No “just patch the row” unless the administrator explicitly requests a data operation and you mapped blast radius against HOW.  
 - Schema vs HOW conflict → surface it; do not silently pick a side.
+
+---
+
+## Final handover depth
+
+The interview agent drafts the final handover as Markdown, the user approves that text, then `save_final_document` (`handoverFile`) stores it and `generate_final_document` (no arguments) renders the Word file. It does not build, format, or upload a `.docx`, and it does not use the BASF document template skill. When you change its prompt, the reporting skill, or the `finalize_interview` / `BuildFinalDocument` instructions, keep this requirement in the draft specification:
+
+The finished handover must exceed the detail of the topic documents, not shorten them into an executive recap. Each chapter must keep every concrete fact from the longer of `rawUserMessages` and the confirmed answer, plus relevant supporting-file facts, and must add cross-topic dependencies and successor steps that no single topic summary contains. The executive summary is additional front matter and must not replace or compress the chapters. If a chapter is thinner than the source answers or the topic summaries it covers, expand it before asking for approval.
 
 ---
 

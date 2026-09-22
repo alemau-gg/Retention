@@ -156,7 +156,7 @@ const KnowledgeRetentionUtils = {
 
   // The slug this copy is deployed as. Baked in per file so a failure can name the
   // action that produced it; this is the only helper line that differs by copy.
-  ACTION_SLUG: 'save_discovery',
+  ACTION_SLUG: 'save_final_document',
 
   // User-facing text for an API failure. Keeps the "contact your administrator"
   // guidance but also hands over the two things an administrator needs to act:
@@ -852,29 +852,65 @@ const KnowledgeRetentionUtils = {
 
 };
 
-// Saves the pre-interview discovery profile and advances the interview to the
-// topic-generation stage. The interview is resolved server-side from identity.
+// Stores the exact approved handover Markdown in SharePoint. Creates no Word file.
 const identity = KnowledgeRetentionUtils.resolveIdentity(data);
-const email = identity.email;
-const token = await KnowledgeRetentionUtils.dataverseToken(data);
+const dvToken = await KnowledgeRetentionUtils.dataverseToken(data);
 const S = KnowledgeRetentionUtils.SCHEMA;
 const ST = KnowledgeRetentionUtils.STATUS;
 
-const interview = await KnowledgeRetentionUtils.loadInterviewRow(data, token, identity);
-if (!interview) {
-  throw new Error('No open interview found. Call create_interview first.');
+function decodeUtf8HandoverFile(file) {
+  if (!file || !file.binary || !file.binary.data) {
+    throw new Error('Attach the approved Markdown handover file before saving.');
+  }
+  const fileName = String(file.fileName || '').toLowerCase();
+  if (!fileName.endsWith('.md') && !fileName.endsWith('.markdown')) {
+    throw new Error('The handover file must be a Markdown file ending in .md or .markdown.');
+  }
+  const bytes = Buffer.from(file.binary.data);
+  let text;
+  if (typeof TextDecoder === 'function') {
+    try {
+      text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+    } catch (_error) {
+      throw new Error('The approved Markdown handover file is not valid UTF-8.');
+    }
+  } else {
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    try {
+      text = decodeURIComponent(escape(binary));
+    } catch (_error) {
+      throw new Error('The approved Markdown handover file is not valid UTF-8.');
+    }
+  }
+  if (text.charCodeAt(0) === 0xfeff) text = text.slice(1);
+  text = text.replace(/\r\n?/g, '\n');
+  if (!text.trim()) {
+    throw new Error('The approved Markdown handover file is empty.');
+  }
+  if (text.length > 1048576) {
+    throw new Error('The approved Markdown handover is longer than the supported 1048576-character limit.');
+  }
+  return text;
 }
 
-// Never regress a generated interview to discovery. Doing so would let the next
-// topic-generation call delete existing topics/questions as "partial" rows.
-if (Number(interview[S.interview.status]) >= ST.interview.generated) {
-  const children = await KnowledgeRetentionUtils.loadChildren(data, token, interview[S.interview.id]);
-  const state = KnowledgeRetentionUtils.computeState(data, interview, children);
+const markdownText = decodeUtf8HandoverFile(data.input.handoverFile);
+const interview = await KnowledgeRetentionUtils.loadInterviewRow(data, dvToken, identity, { completed: true });
+const status = interview ? Number(interview[S.interview.status]) : NaN;
+if (!interview || status === ST.interview.cancelled || status < ST.interview.finalized) {
+  throw new Error(
+    'No finalized interview found. The handover Markdown can be stored only after the interview is finalized and has not been cancelled.',
+  );
+}
+
+const emptyChildren = { topics: [], questions: [], answers: [] };
+const conflictResult = (note) => {
+  const state = KnowledgeRetentionUtils.computeState(data, interview, emptyChildren);
   return {
-    conflict: true,
     saved: false,
+    conflict: true,
     nextAction: state.nextAction,
-    instruction: `The discovery profile is locked because this interview's topics and questions were already generated, so nothing was saved. Do not call save_discovery again for this interview. ${state.instruction}`,
+    instruction: `${note} ${state.instruction}`,
     language: state.language,
     progressLabel: state.progressLabel,
     questionsRemaining: state.questionsRemaining,
@@ -884,31 +920,79 @@ if (Number(interview[S.interview.status]) >= ST.interview.generated) {
     sharePointFolderUrl: state.sharePointFolderUrl,
     topicQnA: state.topicQnA,
   };
+};
+
+if (!interview[S.interview.folderUrl]) {
+  return conflictResult(
+    'The handover Markdown was not stored because the interview folder does not exist yet. Call set_up_interview_folder first, then call save_final_document again with the same approved file.',
+  );
 }
 
-const body = {};
-body[S.interview.role] = data.input.role;
-body[S.interview.businessUnit] = data.input.businessUnit;
-body[S.interview.responsibilities] = data.input.responsibilities;
-body[S.interview.tools] = data.input.tools;
-body[S.interview.focusTopics] = data.input.focusTopics;
-if (data.input.kpisAndConstraints) {
-  body[S.interview.kpisAndConstraints] = data.input.kpisAndConstraints;
-}
-body[S.interview.status] = ST.interview.discovery;
-body[S.interview.lastCheckpointOn] = new Date().toISOString();
+const SOURCE_FOLDER = 'Source transcripts';
+const interviewNumber = interview[S.interview.number];
+const markdownFileName = `InterviewFinalSummary_${interviewNumber}.md`;
+const docxFileName = `InterviewFinalSummary_${interviewNumber}.docx`;
 
-await KnowledgeRetentionUtils.dv(data, token, {
-  method: 'PATCH',
-  path: `/${S.entitySets.interviews}(${interview[S.interview.id]})`,
-  body,
+const siteId = data.auth.sharepointSiteId;
+const graphToken = await KnowledgeRetentionUtils.graphToken(data);
+const encodePath = (path) =>
+  path
+    .split('/')
+    .map((segment) => encodeURIComponent(segment))
+    .join('/');
+const encodedFolder = encodePath(KnowledgeRetentionUtils.interviewFolderPath(interview));
+
+// Same create-or-accept-existing shape as generate_topic_document, so a rerun
+// never fails on a subfolder that is already there.
+async function ensureSubfolder(name) {
+  const lookupPath = `/sites/${siteId}/drive/root:/${encodedFolder}/${encodeURIComponent(name)}`;
+  const existing = await KnowledgeRetentionUtils.graph(data, graphToken, { method: 'GET', path: lookupPath });
+  if (existing.status === 200) {
+    return existing.json;
+  }
+  const created = await KnowledgeRetentionUtils.graph(data, graphToken, {
+    method: 'POST',
+    path: `/sites/${siteId}/drive/root:/${encodedFolder}:/children`,
+    body: { name, folder: {}, '@microsoft.graph.conflictBehavior': 'fail' },
+  });
+  if (created.status === 200 || created.status === 201) {
+    return created.json;
+  }
+  if (created.status === 409) {
+    const retry = await KnowledgeRetentionUtils.graph(data, graphToken, { method: 'GET', path: lookupPath });
+    if (retry.status === 200) {
+      return retry.json;
+    }
+  }
+  const detail = (created.json && created.json.error && created.json.error.message) || created.text || '';
+  throw new Error(KnowledgeRetentionUtils.failureMessage(created.status, detail));
+}
+
+await ensureSubfolder(SOURCE_FOLDER);
+
+const markdownBytes =
+  typeof TextEncoder === 'function'
+    ? Buffer.from(new TextEncoder().encode(markdownText))
+    : Buffer.from(markdownText, 'utf8');
+const putResponse = await KnowledgeRetentionUtils.graph(data, graphToken, {
+  method: 'PUT',
+  path: `/sites/${siteId}/drive/root:/${encodedFolder}/${encodeURIComponent(SOURCE_FOLDER)}/${encodeURIComponent(markdownFileName)}:/content`,
+  isBinary: true,
+  headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
+  body: markdownBytes,
 });
+if (putResponse.status !== 200 && putResponse.status !== 201) {
+  const detail =
+    (putResponse.json && putResponse.json.error && putResponse.json.error.message) || putResponse.text || '';
+  throw new Error(KnowledgeRetentionUtils.failureMessage(putResponse.status, detail));
+}
 
-const interviewForState = Object.assign({}, interview, body);
-const state = KnowledgeRetentionUtils.computeState(data, interviewForState, { topics: [], questions: [], answers: [] });
+const state = KnowledgeRetentionUtils.computeState(data, interview, emptyChildren);
 return {
-  nextAction: state.nextAction,
-  instruction: state.instruction,
+  saved: true,
+  conflict: false,
+  nextAction: 'GenerateFinalDocument',
+  instruction: `The Markdown is stored. Before continuing, call generate_final_document with no arguments. It builds "${docxFileName}" from that stored Markdown, files it, and returns it. Do not write, format, or upload that document, and do not call upload_document for it.`,
   language: state.language,
   progressLabel: state.progressLabel,
   questionsRemaining: state.questionsRemaining,

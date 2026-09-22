@@ -32,6 +32,8 @@ const REQUIRED_ACTION_SLUGS = [
   'revise_answer',
   'save_topic_summary',
   'generate_topic_document',
+  'save_final_document',
+  'generate_final_document',
   'get_answers',
   'get_discovery',
   'finalize_interview',

@@ -220,12 +220,12 @@ A half-synced helper set is a production incident. If a write fails mid-sync, st
 
 - Completed-interview fallback: where uploads/reads must work after finalize, load with open **or** `60 ≤ status < 80` completed path (same pattern as existing folder/upload recovery).
 - Flip status **last** when possible so a mid-flight failure does not strand the interview past a gate it did not complete.
-- Topic files have no “filed” flag; only the final upload advances 60 → 70 (see HOW). Do not invent a second filing flag without a HOW redesign.
+- Topic files have no “filed” flag; only `generate_final_document` (legacy: `upload_document` with `docType: final`) advances 60 → 70 (see HOW). Do not invent a second filing flag without a HOW redesign.
 - **No SharePoint folder-listing action** unless HOW deliberately redesigns the topic-upload gap.
 
 ### Return contract
 
-Preserve employee-path keys: `nextAction`, `instruction`, orders, `topicQnA`, language, progress, folder URL fields as today’s actions return them. Terminal `nextAction` values authored only in action bodies (`FinalizeAndCollectFeedback`, `SendClosingMessage`, …) stay out of `computeState` unless you deliberately move them and sync + update HOW.
+Preserve employee-path keys: `nextAction`, `instruction`, orders, `topicQnA`, language, progress, folder URL fields as today’s actions return them. Terminal `nextAction` values authored only in action bodies (`FinalizeAndCollectFeedback`, `GenerateFinalDocument`, `SendClosingMessage`, …) stay out of `computeState` unless you deliberately move them and sync + update HOW.
 
 ---
 
