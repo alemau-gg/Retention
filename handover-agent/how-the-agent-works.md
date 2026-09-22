@@ -34,7 +34,7 @@ When structure changes, update this file in the same change as the code/prompt/s
 |---|---|---|
 | Interview stage / next step | Backend `instruction` | Never invent from chat |
 | Topic summary `.docx` | Reporting `summary-format.md` (Markdown draft) → `save_topic_summary` → `generate_topic_document` | Backend renders the standardized Word file; overrides system prompt “BASF template for all docs” |
-| Final handover `.docx` | Reporting `final-document.md` (Markdown draft) → `save_final_document` → `generate_final_document` | Backend renders the Word file; no `assets/template.docx`, no BASF template skill |
+| Final handover `.docx` | Reporting `final-document.md` (Markdown draft) → `save_final_document` → `generate_final_document` | Backend renders the Word file; no BASF template skill |
 | Clarifying follow-ups | System prompt | Cap **3** per question; follow up more often than not, each one probing something the interviewee has not said |
 | Discovery methodology | Interviewing skill | Backend does **not** load it at `created`; soft spot unless the agent loads it unprompted |
 
@@ -117,7 +117,7 @@ Skills are methodology packs the agent loads when told to. They do **not** own p
 | Skill | When loaded | What it does | What it does not do |
 |---|---|---|---|
 | **`knowledge-retention-interviewing`** | Backend: `GenerateTopicsAndQuestions` (not auto-loaded at `created`) | Thin-answer discovery bar; **4–6 topics × 3–6 questions** grounded in discovery (+ Company Context) | No live question rewrite in `AskActiveQuestion`; no summaries |
-| **`knowledge-retention-reporting`** | Topic summary (default); final doc when asked | Topic: `summary-format.md` only → summary Markdown drafted with the `write` tool; the backend renders `Topic-{n}-{slug}.docx`. Final: `final-document.md` → handover Markdown drafted with the `write` tool; the backend renders the `.docx` | No discovery/questions; never blend topic and final passes; no `assets/template.docx` for the final |
+| **`knowledge-retention-reporting`** | Topic summary (default); final doc when asked | Topic: `summary-format.md` only → summary Markdown drafted with the `write` tool; the backend renders `Topic-{n}-{slug}.docx`. Final: `final-document.md` → handover Markdown drafted with the `write` tool; the backend renders the `.docx` | No discovery/questions; never blend topic and final passes |
 | **BASF document template skill** | Not loaded — no longer used for the handover | — | Not summary methodology; never edit it |
 
 Both content skills: no invented knowledge; preserve specifics; visible gaps beat smooth prose; language = interview language. Always use manifest action slugs (`get_answers`, not legacy names).
@@ -455,10 +455,10 @@ The `final-document.md` workflow must re-fetch discovery and answers via tools (
 
 | Artifact | When | How |
 |---|---|---|
-| `Topic-{order}-{slug}.docx` | After each approved topic summary (while interview still open), or on finalize recovery | `save_topic_summary` stores the approved Markdown → `generate_topic_document` (`topicOrder` only) renders it server-side with the backend renderer — never `assets/template.docx` — files it at the interview-folder root, and returns it. `{slug}` is the topic name ASCII-folded, other characters → `-`, max 80 (`Topic-{order}.docx` if empty). `upload_document` (`topic`) is legacy only |
+| `Topic-{order}-{slug}.docx` | After each approved topic summary (while interview still open), or on finalize recovery | `save_topic_summary` stores the approved Markdown → `generate_topic_document` (`topicOrder` only) renders it server-side with the backend renderer, files it at the interview-folder root, and returns it. `{slug}` is the topic name ASCII-folded, other characters → `-`, max 80 (`Topic-{order}.docx` if empty). `upload_document` (`topic`) is legacy only |
 | `Source transcripts/Topic-{order}-{slug}.md` | Same call as the topic `.docx` | Markdown source transcript filed by `generate_topic_document`; not returned to chat |
 | `Source transcripts/InterviewFinalSummary_{n}.md` | After the user approves the full handover text | `final-document.md` phases → Markdown drafted with the `write` tool → `save_final_document` (`handoverFile`); no Word file, no status change |
-| `InterviewFinalSummary_{n}.docx` | Instructed immediately after `finalize_interview`, and re-instructed on every reopen until status is 70 | `generate_final_document` (no arguments) renders the stored Markdown with the same renderer as topic documents, files it at the interview-folder root, returns it as an attachment, and advances the row to `documentGenerated` (70); at 70 it replaces the file. No `assets/template.docx`, no BASF template skill |
+| `InterviewFinalSummary_{n}.docx` | Instructed immediately after `finalize_interview`, and re-instructed on every reopen until status is 70 | `generate_final_document` (no arguments) renders the stored Markdown with the same renderer as topic documents, files it at the interview-folder root, returns it as an attachment, and advances the row to `documentGenerated` (70); at 70 it replaces the file. No BASF template skill |
 | User-confirmed supporting file | Only when the user attaches a useful file and explicitly approves filing it | Original file format and a unique filename → `upload_document` (`supporting`); no state transition and no automatic generation |
 | SharePoint folder `Interviews/{n}` | First time before summary filing | `set_up_interview_folder`; URL shown as markdown link + raw URL |
 
