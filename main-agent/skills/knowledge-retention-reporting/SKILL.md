@@ -36,9 +36,9 @@ Default job when this skill is loaded: **topic summary**. Switch to the final pa
 | Methodology | `references/summary-format.md` only | `references/final-document.md` → `document-structure.md` + `fixed-sections-template.md` |
 | Docx | **You never build one.** `generate_topic_document` renders it from the saved summary | **You never build one.** `save_final_document` stores the approved Markdown; `generate_final_document` (no arguments) renders the `.docx` |
 | Upload | Handled by `generate_topic_document` | Handled by `generate_final_document`. `upload_document` is supporting files only |
-| Forbidden | Building or uploading the topic `.docx` yourself; branded template; final-document refs; cover/TOC/1.1–1.4 | Reusing a topic summary as the handover; inventing facts; skipping Phase 1–4; writing chapters only from stored summaries; building, formatting, or uploading the `.docx`; the BASF document template skill; `upload_document` for the handover |
+| Forbidden | Building or uploading the topic `.docx` yourself; final-document refs; cover/TOC/1.1–1.4 | Reusing a topic summary as the handover; inventing facts; skipping Phase 1–4; writing chapters only from stored summaries; building, formatting, or uploading the `.docx`; the BASF document template skill; `upload_document` for the handover |
 
-For a topic summary, do **not** open: `references/final-document.md`, `references/document-structure.md`, `references/fixed-sections-template.md`, or `assets/template.docx`.
+For a topic summary, do **not** open: `references/final-document.md`, `references/document-structure.md`, or `references/fixed-sections-template.md`.
 
 ## Supporting files
 
@@ -56,7 +56,6 @@ Confirmed supporting files **are** source material for this skill. When writing 
 
 Do not open, copy, or populate:
 
-- `assets/template.docx`
 - `references/final-document.md`
 - `references/document-structure.md`
 - `references/fixed-sections-template.md`

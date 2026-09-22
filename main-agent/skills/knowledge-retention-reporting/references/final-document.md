@@ -9,7 +9,7 @@ For a single-topic / interim summary: close this file; use `../SKILL.md` + `summ
 - `document-structure.md` — section order of the Markdown
 - `fixed-sections-template.md` — wording for the unnumbered introduction (front matter, not Chapter 1)
 
-Do not reuse a topic summary as the final handover. Do not populate `../assets/template.docx` and do not call the BASF document template skill. Draft the Markdown; `generate_final_document` renders the Word file.
+Do not reuse a topic summary as the final handover. Do not call the BASF document template skill. Draft the Markdown; `generate_final_document` renders the Word file.
 
 ## Preconditions (stop if unmet)
 
