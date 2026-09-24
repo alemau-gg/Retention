@@ -1,0 +1,21 @@
+main-agent/integrations/state-machine/actions/save_final_document.js
+  s_09473ab7800b93::t_500b1b0d7181de 973-1006
+repackaged-integrations/state-machine/actions/save_final_document/code.js
+  s_09473ab7800b93::t_af594afb1d0103 973-1006
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "ea3f41671b35e8f93389553fe5dd834957093c23",
+  "prompts": {},
+  "sessions": {
+    "s_09473ab7800b93": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3a874d40-450d-41c0-a22c-bf90a01ab3f1",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
