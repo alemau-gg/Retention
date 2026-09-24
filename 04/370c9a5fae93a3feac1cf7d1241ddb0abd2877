@@ -1,0 +1,138 @@
+handover-agent/integrations/coding-tools/manifest.json
+  s_4cd33377fb3835::t_4f82b966d3e1ee 434
+  s_4cd33377fb3835::t_7707fdcc905f30 396
+  s_4cd33377fb3835::t_8b8d41b5ba6cd2 497
+  s_4cd33377fb3835::t_f9cc0a1be2ea5f 577
+  s_4cd33377fb3835::t_1cba1fa0cdf123 357
+  s_09473ab7800b93::t_08539b0fbd8a45 188,224-353
+  s_4cd33377fb3835::t_901f119ecd251c 173
+  s_4cd33377fb3835::t_18cb8ee8c0d822 445
+  s_4cd33377fb3835::t_3c9c1176a17353 408
+  s_4cd33377fb3835::t_af211c28f8389b 147
+  s_4cd33377fb3835::t_6ee8dc18a9cc11 603
+  s_4cd33377fb3835::t_96637d38ec7b20 419
+  s_4cd33377fb3835::t_75491bcbd5616f 212,381
+  s_4cd33377fb3835::t_2d0827b648a753 512
+  s_4cd33377fb3835::t_74de2d5533a9aa 199,368
+repackaged-integrations/coding-tools/actions/promote_skill_to_staging/action_manifest.json
+  s_09473ab7800b93::t_5710500f761f15 1-65
+handover-agent/integrations/coding-tools/actions/list_skills.js
+  s_4cd33377fb3835::t_818dcd516a14d1 70
+  s_4cd33377fb3835::t_910c65ad1816ff 77
+  s_4cd33377fb3835::t_737b1f7c4fc74f 88
+handover-agent/integrations/coding-tools/actions/get_skill_file.js
+  s_4cd33377fb3835::t_163d31d12bb78b 22
+handover-agent/integrations/coding-tools/actions/promote_to_staging.js
+  s_09473ab7800b93::t_2928cfc8663182 90-111,113-120,210-213,223
+repackaged-integrations/coding-tools/manifest.json
+  s_09473ab7800b93::t_5710500f761f15 27-28
+handover-agent/integrations/coding-tools/actions/revert_to_staging.js
+  s_09473ab7800b93::t_2928cfc8663182 92-113,115-122,212-215,225
+handover-agent/integrations/coding-tools/actions/get_action.js
+  s_4cd33377fb3835::t_46307403be2d9a 66
+repackaged-integrations/coding-tools/actions/get_skill/action_manifest.json
+  s_09473ab7800b93::t_5710500f761f15 4
+repackaged-integrations/coding-tools/actions/promote_skill_to_staging/code.js
+  s_09473ab7800b93::t_5710500f761f15 1-260
+handover-agent/integrations/coding-tools/actions/list_integrations.js
+  s_4cd33377fb3835::t_7a42bb4f2619e5 89
+repackaged-integrations/coding-tools/actions/revert_to_staging/code.js
+  s_09473ab7800b93::t_5710500f761f15 92-113,115-122,212-215,225
+handover-agent/system-prompt.md
+  s_09473ab7800b93::t_1a5c02d84b4538 160
+  s_09473ab7800b93::t_5710500f761f15 223
+  s_4cd33377fb3835::t_2f1893871d2f9e 62-66
+handover-agent/skills/knowledge-retention-contributing/SKILL.md
+  s_4cd33377fb3835::t_80eea392d17e93 66-68
+  s_09473ab7800b93::t_1a5c02d84b4538 42-44
+handover-agent/skills/knowledge-retention-contributing/references/integration-modification.md
+  s_4cd33377fb3835::t_134f12c866840e 9-10
+repackaged-integrations/coding-tools/actions/promote_agent_to_staging/code.js
+  s_09473ab7800b93::t_5710500f761f15 1-179
+repackaged-integrations/coding-tools/actions/sync_helpers/action_manifest.json
+  s_09473ab7800b93::t_5710500f761f15 15
+repackaged-integrations/coding-tools/actions/verify_helpers/action_manifest.json
+  s_09473ab7800b93::t_5710500f761f15 15
+repackaged-integrations/coding-tools/actions/verify_helpers/code.js
+  s_09473ab7800b93::t_5710500f761f15 44
+repackaged-integrations/coding-tools/actions/sync_helpers/code.js
+  s_09473ab7800b93::t_5710500f761f15 43
+repackaged-integrations/coding-tools/actions/get_agent/action_manifest.json
+  s_09473ab7800b93::t_5710500f761f15 15
+handover-agent/integrations/coding-tools/actions/verify_helpers.js
+  s_4cd33377fb3835::t_29a2165a138c82 44
+handover-agent/integrations/coding-tools/actions/get_integration.js
+  s_4cd33377fb3835::t_8a810694957d21 101
+repackaged-integrations/coding-tools/actions/revert_to_staging/action_manifest.json
+  s_09473ab7800b93::t_5710500f761f15 4,15,28
+repackaged-integrations/coding-tools/actions/get_skill_file/code.js
+  s_09473ab7800b93::t_5710500f761f15 22
+repackaged-integrations/coding-tools/actions/get_action/action_manifest.json
+  s_09473ab7800b93::t_5710500f761f15 4,15
+repackaged-integrations/coding-tools/actions/promote_to_staging/action_manifest.json
+  s_09473ab7800b93::t_5710500f761f15 4,15,28
+handover-agent/integrations/coding-tools/actions/promote_skill_to_staging.js
+  s_09473ab7800b93::t_337fef59367416 1-260
+repackaged-integrations/coding-tools/actions/get_integration/action_manifest.json
+  s_09473ab7800b93::t_5710500f761f15 4,15
+repackaged-integrations/coding-tools/actions/get_integration/code.js
+  s_09473ab7800b93::t_5710500f761f15 101
+repackaged-integrations/coding-tools/actions/list_skills/action_manifest.json
+  s_09473ab7800b93::t_5710500f761f15 4
+handover-agent/skills/knowledge-retention-contributing/references/change-process.md
+  s_4cd33377fb3835::t_c47a312fe68f52 138-139
+repackaged-integrations/coding-tools/actions/list_skills/code.js
+  s_09473ab7800b93::t_5710500f761f15 70,77,88
+handover-agent/skills/knowledge-retention-contributing/references/scope-and-regression.md
+  s_09473ab7800b93::t_1a5c02d84b4538 10,16-17
+  s_4cd33377fb3835::t_ecd5abda431cd4 31-33
+handover-agent/integrations/coding-tools/actions/promote_agent_to_staging.js
+  s_09473ab7800b93::t_d651fc1c6cd69b 1-179
+repackaged-integrations/coding-tools/actions/get_action/code.js
+  s_09473ab7800b93::t_5710500f761f15 66
+handover-agent/integrations/coding-tools/actions/sync_helpers.js
+  s_4cd33377fb3835::t_ff9e9de7b30038 43
+repackaged-integrations/coding-tools/actions/list_integrations/code.js
+  s_09473ab7800b93::t_5710500f761f15 89
+repackaged-integrations/coding-tools/actions/get_skill_file/action_manifest.json
+  s_09473ab7800b93::t_5710500f761f15 4
+repackaged-integrations/coding-tools/actions/promote_agent_to_staging/action_manifest.json
+  s_09473ab7800b93::t_5710500f761f15 1-65
+handover-agent/skills/knowledge-retention-contributing/references/environment-contract.md
+  s_4cd33377fb3835::t_f5e765c9094d04 102
+  s_4cd33377fb3835::t_41444172ee8f1a 18,20
+  s_4cd33377fb3835::t_1ee943b511da13 101
+  s_4cd33377fb3835::t_d9c2ed6eafef9d 104-106
+  s_09473ab7800b93::t_1a5c02d84b4538 10,66-72,86,96-99
+  s_4cd33377fb3835::t_b98d7a0ca27075 11
+  s_4cd33377fb3835::t_256d7d25538788 103
+  s_4cd33377fb3835::t_67da6ec3b5aa14 110-113
+repackaged-integrations/coding-tools/actions/list_integrations/action_manifest.json
+  s_09473ab7800b93::t_5710500f761f15 4
+repackaged-integrations/coding-tools/actions/promote_to_staging/code.js
+  s_09473ab7800b93::t_5710500f761f15 90-111,113-120,210-213,223
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "04370c9a5fae93a3feac1cf7d1241ddb0abd2877",
+  "prompts": {},
+  "sessions": {
+    "s_09473ab7800b93": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3a874d40-450d-41c0-a22c-bf90a01ab3f1",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    },
+    "s_4cd33377fb3835": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "7d29ca6c-3edb-4cfa-a313-ddafb4bf5b6f",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
