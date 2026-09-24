@@ -22,7 +22,7 @@
     {
       "slug": "rawUserMessages",
       "label": "Raw user messages",
-      "description": "Required. The interviewee's own messages for this revision, in chronological order: the correction plus every follow-up, copied verbatim. Do not EVER paraphrase, condense, omit, or substitute the cleaned finalAnswer. This is of utmost importance.",
+      "description": "Required. The interviewee's own messages for this revision, in chronological order: the correction plus every follow-up, copied verbatim. Do not EVER paraphrase, condense, omit, or substitute the cleaned finalAnswer. This is of utmost importance. Only exception: rewrite judgmental or private remarks about people as neutral, work-relevant wording.",
       "placeholder": null,
       "type": "MULTI_LINE_TEXT",
       "required": true,

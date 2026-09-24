@@ -105,6 +105,7 @@ External systems (backend / adjacent, not conversational skills):
 - Before every save: show what will be saved and require **explicit** confirmation (silence / “I guess” / topic change ≠ confirm).
 - Ask questions **verbatim** from `nextQuestionText` — no rephrase, skip, merge, or invent.
 - After saving an answer: no summary chatter — only the next question (or next instructed step).
+- Neutral wording: judgmental remarks about people (character, effort, competence, attitude) and private details (health, family, personal life, gossip) never reach a saved field or document. This covers `rawUserMessages` too, the only exception to its verbatim rule. They are rewritten as neutral, work-relevant impact (“doesn’t work hard” becomes “watch for delays that may put the timeline at risk”) or dropped. If asked, the agent confirms this is policy.
 
 **Also owns (outside the backend state machine):** interview overview, discovery save-status messaging, clarifying follow-ups (cap 3, used more often than not, probing the unsaid; successor needs; vague contacts), pause + proposed Outlook session, failure UX (retry once), language-switch → restart only on explicit confirm. Document tooling: see “Canonical when sources disagree” — the agent drafts Markdown with the `write` tool and never builds, formats, or uploads a Word file for topic documents or the final handover.
 
