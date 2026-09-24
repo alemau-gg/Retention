@@ -315,7 +315,7 @@
         {
           "slug": "rawUserMessages",
           "label": "Raw user messages",
-          "description": "Required. The interviewee's own messages for this question, in chronological order: the initial answer plus every follow-up, copied verbatim. Do not EVER paraphrase, condense, omit, or substitute the cleaned finalAnswer. This is of utmost importance.",
+          "description": "Required. The interviewee's own messages for this question, in chronological order: the initial answer plus every follow-up, copied verbatim. Do not EVER paraphrase, condense, omit, or substitute the cleaned finalAnswer. This is of utmost importance. Only exception: rewrite criticism of other people (including accounts of their mistakes and their quoted words) and private details as a neutral process lesson not tied to the person.",
           "placeholder": null,
           "type": "MULTI_LINE_TEXT",
           "required": true,
@@ -591,7 +591,7 @@
         {
           "slug": "rawUserMessages",
           "label": "Raw user messages",
-          "description": "Required. The interviewee's own messages for this revision, in chronological order: the correction plus every follow-up, copied verbatim. Do not EVER paraphrase, condense, omit, or substitute the cleaned finalAnswer. This is of utmost importance.",
+          "description": "Required. The interviewee's own messages for this revision, in chronological order: the correction plus every follow-up, copied verbatim. Do not EVER paraphrase, condense, omit, or substitute the cleaned finalAnswer. This is of utmost importance. Only exception: rewrite criticism of other people (including accounts of their mistakes and their quoted words) and private details as a neutral process lesson not tied to the person.",
           "placeholder": null,
           "type": "MULTI_LINE_TEXT",
           "required": true,

@@ -616,7 +616,7 @@ const KnowledgeRetentionUtils = {
     const M = KnowledgeRetentionUtils.MESSAGES;
     const prefillEnabled = String(data.auth.prefillEnabled).toLowerCase() === 'true';
     const supportingFileInstruction =
-      ' Every file the user attaches is read and then proposed as a supporting document, except a topic-summary draft, a topic document, or the final handover. Require explicit confirmation before upload_document. Only after the interview folder exists (sharePointFolderUrl is present), call upload_document with docType "supporting" and a unique filename. If the folder does not exist yet, explain that documents can be filed after folder setup and keep the attachment available for later. Never generate or upload a supporting file automatically. After a confirmed supporting file is available, treat its contents as interview source material: when mid-question, include relevant facts in finalAnswer only; never put supporting-file facts in rawUserMessages, which must contain only the interviewee messages verbatim. Include relevant facts in every later topic summary and the final handover, naming the source file. Then resume the current step.';
+      ' If the user attaches a file, apply the Supporting files rules from your system prompt, then resume the current step.';
 
     const base = {
       nextAction: null,
@@ -634,7 +634,7 @@ const KnowledgeRetentionUtils = {
     if (!interview) {
       return Object.assign(base, {
         nextAction: 'CollectProfile',
-        instruction: `No interview exists for this user. Before asking anything, give the user a concise overview of the interview: "${M.interviewOverview}" Then always use ask_user_question for exactly one language question, verbatim: "${M.languageSelection}", with the choices ${M.languageChoices.join(', ')}. Do not recommend a language or add another question. After the user picks one, call create_interview with that language. Then explain that ${M.discoveryIntro} and say: "${M.discoverySaveNotice}".${supportingFileInstruction}`,
+        instruction: `No interview exists for this user. First give this overview verbatim: "${M.interviewOverview}" Then use ask_user_question exactly once for the language question, verbatim: "${M.languageSelection}", with the choices ${M.languageChoices.join(', ')}. After the user picks one, call create_interview with that language. Then explain that ${M.discoveryIntro} and say: "${M.discoverySaveNotice}".${supportingFileInstruction}`,
       });
     }
 
@@ -648,14 +648,14 @@ const KnowledgeRetentionUtils = {
     if (status === ST.interview.created) {
       return Object.assign(base, {
         nextAction: 'RunPreInterviewDiscovery',
-        instruction: `Run pre-interview discovery in ${language}. Collect role, organizational unit, responsibilities, tools, focus topics, and optionally KPIs/constraints. Explain that discovery is complete only after the profile is read back, explicitly confirmed, and saved together. Do not claim the profile is saved before save_discovery succeeds. Ask conversationally; do not invent answers.${supportingFileInstruction}`,
+        instruction: `Run pre-interview discovery in ${language}: role, organizational unit, responsibilities, tools, focus topics, and optionally KPIs/constraints. Ask conversationally; do not invent answers. Read the profile back, get explicit confirmation, then call save_discovery.${supportingFileInstruction}`,
       });
     }
 
     if (status === ST.interview.discovery) {
       return Object.assign(base, {
         nextAction: 'GenerateTopicsAndQuestions',
-        instruction: `The discovery profile is complete and saved. Tell the user clearly that discovery is complete and that the confirmed profile is retained for future sessions. Then load the knowledge-retention-interviewing skill. Using the discovery profile and the CKR Company Context folder, generate 4-6 topics with 3-6 questions each in ${language}. Every highlighted discovery focus topic must have at least one dedicated interview topic whose title names that focus; do not fold a named focus into a catch-all role-overview topic. Then call save_topics_and_questions. Do not ask any interview question yet.${supportingFileInstruction}`,
+        instruction: `The discovery profile is complete and saved; tell the user. Load the knowledge-retention-interviewing skill, generate the topics and questions in ${language} from the discovery profile and the CKR Company Context folder, then call save_topics_and_questions. Do not ask any interview question yet.${supportingFileInstruction}`,
       });
     }
 
@@ -671,7 +671,7 @@ const KnowledgeRetentionUtils = {
       if (prefillEnabled && consentStatus === ST.consent.notAsked) {
         return Object.assign(base, {
           nextAction: 'OfferKnowledgePrefillConsent',
-          instruction: `In ${language}, first present the topics-and-questions overview if not already shown, then offer prefill verbatim: "${M.consentOffer}" followed by the consent question verbatim: "${M.consentQuestion}". Only call save_consent with consentGranted true on an explicit yes, false on an explicit no. Never infer.${supportingFileInstruction}`,
+          instruction: `In ${language}, present the topics-and-questions overview if not already shown, then offer prefill verbatim: "${M.consentOffer}" followed by the consent question verbatim: "${M.consentQuestion}". Call save_consent with consentGranted true only on an explicit yes, false only on an explicit no.${supportingFileInstruction}`,
         });
       }
 
@@ -697,7 +697,7 @@ const KnowledgeRetentionUtils = {
             expectedQuestionOrder: Number(question[S.question.order]),
             expectedTopicOrder: topicOrder,
             progressLabel: `Topic ${topicOrder} of ${children_.topics.length} · question ${answeredCount + 1} of ${topicQuestions.length}`,
-            instruction: `Ask the current question for topic "${topic[S.topic.name]}" in ${language}. Present the progressLabel and topic name in bold on its own line, then the question text exactly as provided in nextQuestionText — do not paraphrase or translate the wording you save. At most 3 clarifying follow-ups. Within that cap, follow up much more often than not; each follow-up asks one thing they have not said (assumptions, exceptions, failure cases, who else depends on this, numbers, sequence, what would break if they left); do not repeat them; skip only when the answer already covers those gaps. Then you must confirm and call save_answer. Never a 4th follow-up. Before saving, show a slightly fuller recap of finalAnswer (a short paragraph or a few bullets, not a slogan). Tell them this is only a checkpoint for this question: if it feels tight or restrictive, that is expected; a more detailed summary is written after all questions in this topic. Then get explicit confirmation. Call save_answer with the confirmed answer as finalAnswer, the full chronological transcript of the interviewee's own messages for this question (initial answer plus every follow-up, verbatim, not condensed) as rawUserMessages, expectedQuestionOrder ${Number(question[S.question.order])}, and expectedTopicOrder ${topicOrder}. Do not save on a soft or implicit reply.${supportingFileInstruction}`,
+            instruction: `Ask the current question for topic "${topic[S.topic.name]}" in ${language}: the progressLabel and topic name in bold on their own line, then nextQuestionText verbatim. Probe with follow-ups per your system prompt (max 3). After the checkpoint recap and explicit confirmation, call save_answer with finalAnswer, rawUserMessages, expectedQuestionOrder ${Number(question[S.question.order])}, and expectedTopicOrder ${topicOrder}.${supportingFileInstruction}`,
           });
         }
 
@@ -719,7 +719,7 @@ const KnowledgeRetentionUtils = {
           expectedTopicOrder: topicOrder,
           topicQnA: KnowledgeRetentionUtils.topicQnA(children_.questions, children_.answers, topic[S.topic.id]),
           progressLabel: `Topic ${topicOrder} of ${children_.topics.length} · summary`,
-          instruction: `Tell the user in ${language} that ${summaryLead} Load the knowledge-retention-reporting skill and use its default topic-summary workflow. Open references/summary-format.md only; do not open final-document.md or the final-document supporting references. Build a faithful summary from topicQnA (prefer rawUserMessages when present, else the confirmed answer) and from any confirmed supporting files: read those attachments and include every relevant concrete fact, naming the source file. The summary must be exhaustive: one mini-header per answered question. Prefer a short paragraph, then bullets when there are several facts, then a translated For-example from the interviewee (never invented), with line breaks between blocks; leave that shape if a quote, table, or one tight paragraph fits better. Then a short how-this-fits-together paragraph. First draft already this dense and scannable; do not wait for the user to ask for more examples. At least as long as the combined rawUserMessages (or confirmed answers if raw is empty) plus supporting-file facts, no upper word cap. If shorter or missing examples, expand before presenting. Translate every section heading into ${language}. Invent nothing, and use only the sections allowed by summary-format.md. Whenever the Markdown draft is presented, before save, tell them in the interview language that you handle conversion and formatting into Word, and ask them to focus on the contents and adjust those where needed. After the user approves, call save_topic_summary with expectedTopicOrder ${topicOrder} and the exact approved summaryFile, then follow the instruction it returns. Do not write, format, or upload the topic document yourself: generate_topic_document builds "${topicFileName}" from the saved summary server-side, files it in the interview folder, and returns it. Never hand it summary text, a file name, or a folder path.${supportingFileInstruction}`,
+          instruction: `Tell the user in ${language} that ${summaryLead} Load the knowledge-retention-reporting skill and follow its topic-summary workflow with references/summary-format.md only, not final-document.md or its references. Build the summary from topicQnA and confirmed supporting files. After explicit approval, call save_topic_summary with expectedTopicOrder ${topicOrder} and the exact approved summaryFile, then follow the instruction it returns. Do not write or upload the topic document yourself; generate_topic_document builds "${topicFileName}".${supportingFileInstruction}`,
         });
       }
 
@@ -740,8 +740,8 @@ const KnowledgeRetentionUtils = {
         return value === null || value === undefined || String(value).trim() === '';
       });
 
-      const feedbackStep = `ask the three feedback questions one at a time in ${language} and call save_feedback, then close with the completed question count and the folder link, reminding them they can share that folder from SharePoint with their manager or anyone else they consider relevant`;
-      const closingStep = `restate the closing message with the completed question count and the folder link, remind them they can share that folder from SharePoint with their manager or anyone else they consider relevant, and end`;
+      const feedbackStep = `ask the three feedback questions one at a time in ${language} and call save_feedback, then close with the completed question count, the folder link, and a reminder that they can share the folder from SharePoint with their manager or anyone else relevant`;
+      const closingStep = `restate the closing message with the completed question count, the folder link, and a reminder that they can share the folder from SharePoint with their manager or anyone else relevant, and end`;
 
       // The interview row records whether the final document was filed:
       // finalize_interview writes finalized (60). generate_final_document, and a
@@ -751,7 +751,7 @@ const KnowledgeRetentionUtils = {
       if (status < ST.interview.documentGenerated) {
         return Object.assign(base, {
           nextAction: 'BuildFinalDocument',
-          instruction: `This interview is finalized but its final handover document has not been filed yet. Load the knowledge-retention-reporting skill and open references/final-document.md. Draft the handover as Markdown from get_discovery and get_answers (start from rawUserMessages; if raw is empty or shorter than the confirmed answer, use the longer of the two) and confirmed supporting-file contents. Topic summaries are only a theme checklist and must not shrink the source. The handover must exceed the detail of the topic documents, not shorten them into an executive recap. Each chapter must keep every concrete fact from the longer of rawUserMessages and the confirmed answer, plus relevant supporting-file facts, and must add cross-topic dependencies and successor steps that no single topic summary contains. The executive summary is additional front matter and must not replace or compress the chapters. If a chapter is thinner than the source answers or the topic summaries it covers, expand it before asking for approval. Confirm chapter titles as a map; write chapters scannable like topic summaries (bullets and breaks when useful; leave the shape if it does not fit); show full chapter text before asking approval; after each draft, reread the source answers and add any missing concrete fact or mark it as an open gap. Whenever the Markdown draft is presented, tell the user in ${language} that conversion and formatting into Word is handled after approval, and ask them to focus on the contents. After explicit approval of the full text, call save_final_document with that exact file, then generate_final_document with no arguments. The resulting file is InterviewFinalSummary_${interview[S.interview.number]}.docx. Do not build, format, or upload a Word file. Do not use the BASF document template skill. Do not call upload_document for the handover. After generate_final_document succeeds, ${feedbackMissing ? feedbackStep : closingStep}.${supportingFileInstruction}`,
+          instruction: `This interview is finalized but its final handover document has not been filed yet. Load the knowledge-retention-reporting skill and open references/final-document.md. After explicit approval of the full Markdown, call save_final_document with that exact file as handoverFile, then generate_final_document with no arguments; it builds InterviewFinalSummary_${interview[S.interview.number]}.docx. Do not build or upload a Word file yourself, and do not call upload_document for the handover. After generate_final_document succeeds, ${feedbackMissing ? feedbackStep : closingStep}.${supportingFileInstruction}`,
         });
       }
 
@@ -759,7 +759,7 @@ const KnowledgeRetentionUtils = {
         nextAction: 'InterviewComplete',
         instruction: feedbackMissing
           ? `This interview is complete and its final handover document is filed; only feedback is missing. Now ${feedbackStep}.${supportingFileInstruction}`
-          : `This interview is already complete: the final handover document is filed and feedback is recorded. Just ${closingStep}.${supportingFileInstruction}`,
+          : `This interview is complete: the final handover document is filed and feedback is recorded. Just ${closingStep}.${supportingFileInstruction}`,
       });
     }
 
