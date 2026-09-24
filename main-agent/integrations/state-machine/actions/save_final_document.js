@@ -970,10 +970,40 @@ async function ensureSubfolder(name) {
 
 await ensureSubfolder(SOURCE_FOLDER);
 
-const markdownBytes =
-  typeof TextEncoder === 'function'
-    ? Buffer.from(new TextEncoder().encode(markdownText))
-    : Buffer.from(markdownText, 'utf8');
+// The sandbox Buffer.from only accepts arrays, Uint8Array, and ArrayBuffer, not strings.
+function utf8Bytes(text) {
+  const source = String(text);
+  const out = [];
+  for (let i = 0; i < source.length; i++) {
+    const code = source.charCodeAt(i);
+    if (code < 0x80) {
+      out.push(code);
+    } else if (code < 0x800) {
+      out.push(0xc0 | (code >> 6), 0x80 | (code & 0x3f));
+    } else if (code >= 0xd800 && code <= 0xdbff) {
+      const low = source.charCodeAt(i + 1);
+      if (low >= 0xdc00 && low <= 0xdfff) {
+        const point = 0x10000 + ((code - 0xd800) << 10) + (low - 0xdc00);
+        out.push(
+          0xf0 | (point >> 18),
+          0x80 | ((point >> 12) & 0x3f),
+          0x80 | ((point >> 6) & 0x3f),
+          0x80 | (point & 0x3f),
+        );
+        i++;
+      } else {
+        out.push(0xef, 0xbf, 0xbd);
+      }
+    } else if (code >= 0xdc00 && code <= 0xdfff) {
+      out.push(0xef, 0xbf, 0xbd);
+    } else {
+      out.push(0xe0 | (code >> 12), 0x80 | ((code >> 6) & 0x3f), 0x80 | (code & 0x3f));
+    }
+  }
+  return out;
+}
+
+const markdownBytes = Buffer.from(utf8Bytes(markdownText));
 const putResponse = await KnowledgeRetentionUtils.graph(data, graphToken, {
   method: 'PUT',
   path: `/sites/${siteId}/drive/root:/${encodedFolder}/${encodeURIComponent(SOURCE_FOLDER)}/${encodeURIComponent(markdownFileName)}:/content`,
