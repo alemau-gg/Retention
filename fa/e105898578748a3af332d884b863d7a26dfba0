@@ -1,0 +1,19 @@
+main-agent/system-prompt.md
+  s_09473ab7800b93::t_6b6dfd14b290f0 26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "fae105898578748a3af332d884b863d7a26dfba0",
+  "prompts": {},
+  "sessions": {
+    "s_09473ab7800b93": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3a874d40-450d-41c0-a22c-bf90a01ab3f1",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
