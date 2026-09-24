@@ -1,0 +1,65 @@
+{
+  "slug": "promote_skill_to_staging",
+  "name": "Promote skill to Staging",
+  "description": "Copies a Dev skill into its Staging counterpart: description, instructions, and every stored file, replacing Staging's files. Keeps the Staging name and slug, and maps the Dev integration to the Staging one. Reads all Dev files before writing, so an unreadable file stops the transfer without changes.",
+  "activeLabel": "Promoting skill to Staging",
+  "doneLabel": "Promoted skill to Staging",
+  "failedLabel": "Failed to promote skill to Staging",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": true,
+  "inputFields": [
+    {
+      "slug": "devSkillId",
+      "label": "Dev skill ID",
+      "description": "UUID of the Dev skill to copy from.",
+      "placeholder": null,
+      "type": "TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 36,
+      "jsonSchema": null
+    },
+    {
+      "slug": "stagingSkillId",
+      "label": "Staging skill ID",
+      "description": "UUID of the Staging skill to overwrite. Never use a Prod ID.",
+      "placeholder": null,
+      "type": "TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 36,
+      "jsonSchema": null
+    },
+    {
+      "slug": "devIntegrationId",
+      "label": "Dev integration ID",
+      "description": "UUID of the Dev Knowledge Retention integration. Actions from it are mapped to the Staging action with the same slug. Never use a Prod ID.",
+      "placeholder": null,
+      "type": "TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 36,
+      "jsonSchema": null
+    },
+    {
+      "slug": "stagingIntegrationId",
+      "label": "Staging integration ID",
+      "description": "UUID of the Staging Knowledge Retention integration. Never use a Prod ID.",
+      "placeholder": null,
+      "type": "TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 36,
+      "jsonSchema": null
+    }
+  ]
+}

@@ -1,6 +1,4 @@
 const integrationId = data.input.integrationId;
-const configuredDevId = data.auth.devIntegrationId;
-const configuredStagingId = data.auth.stagingIntegrationId;
 const baseUrl = (data.auth.baseUrl || 'https://api.langdock.com').replace(/\/+$/, '');
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const MAX_ACTIONS = 250;
@@ -12,16 +10,6 @@ const MAX_ERROR_LENGTH = 2000;
 function requireUuid(value, label) {
   if (typeof value !== 'string' || !UUID_RE.test(value)) {
     throw new Error(`${label} must be a UUID`);
-  }
-}
-
-function requireTrustedIntegration(value) {
-  requireUuid(value, 'Integration ID');
-  if (!UUID_RE.test(configuredDevId || '') && !UUID_RE.test(configuredStagingId || '')) {
-    throw new Error('No trusted Dev or Staging integration ID is configured; refusing an unallowlisted integration lookup');
-  }
-  if (value !== configuredDevId && value !== configuredStagingId) {
-    throw new Error('Integration ID is not the configured Dev or Staging integration');
   }
 }
 
@@ -110,7 +98,7 @@ function triggerDetail(trigger) {
   };
 }
 
-requireTrustedIntegration(integrationId);
+requireUuid(integrationId, 'Integration ID');
 
 const response = await ld.request({
   url: `${baseUrl}/integrations/v1/${encodeURIComponent(integrationId)}`,

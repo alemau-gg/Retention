@@ -1,5 +1,4 @@
 const agentId = data.input.agentId;
-const trustedAgentId = data.auth.trustedAgentId;
 const baseUrl = (data.auth.baseUrl || 'https://api.langdock.com').replace(/\/+$/, '');
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const MAX_INSTRUCTION_LENGTH = 100000;
@@ -11,13 +10,6 @@ const MAX_ERROR_LENGTH = 2000;
 if (typeof agentId !== 'string' || !UUID_RE.test(agentId)) {
   throw new Error('Agent ID must be a UUID');
 }
-if (!UUID_RE.test(trustedAgentId || '')) {
-  throw new Error('No trusted handover agent ID is configured; refusing an unallowlisted agent lookup');
-}
-if (agentId !== trustedAgentId) {
-  throw new Error('get_agent only permits the configured trusted handover agent ID');
-}
-
 function boundedText(value, maxLength = MAX_TEXT_LENGTH) {
   if (value == null) return null;
   if (typeof value !== 'string') return null;

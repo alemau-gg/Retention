@@ -1,7 +1,7 @@
 {
   "slug": "get_skill_file",
   "name": "Get skill file",
-  "description": "Reads one configured Knowledge Retention skill's UTF-8 file by a validated relative path. Contents are limited to Langdock's documented 512 KB file bound and require trustedSkillIds connection configuration.",
+  "description": "Reads one Knowledge Retention skill's UTF-8 file by a validated relative path. Contents are limited to Langdock's documented 512 KB file bound.",
   "activeLabel": "Reading skill file",
   "doneLabel": "Read skill file",
   "failedLabel": "Failed to read skill file",

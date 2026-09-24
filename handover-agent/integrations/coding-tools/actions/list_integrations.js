@@ -86,5 +86,5 @@ return {
   integrationCount: integrations.length,
   truncated: integrations.length > MAX_INTEGRATIONS,
   limit: MAX_INTEGRATIONS,
-  note: 'This catalog contains only private API, MCP, and A2A integrations shared with the configured API key.',
+  note: 'This catalog contains only private API, MCP, and A2A integrations shared with the API key.',
 };

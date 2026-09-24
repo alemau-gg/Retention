@@ -1,9 +1,5 @@
 const skillId = data.input.skillId;
 const path = data.input.path;
-const trustedSkillIds = String(data.auth.trustedSkillIds || '')
-  .split(',')
-  .map((id) => id.trim())
-  .filter(Boolean);
 const baseUrl = (data.auth.baseUrl || 'https://api.langdock.com').replace(/\/+$/, '');
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const MAX_PATH_LENGTH = 255;
@@ -23,18 +19,7 @@ function safeError(value) {
 
 if (typeof skillId !== 'string' || !UUID_RE.test(skillId)) {
   throw new Error('Skill ID must be a UUID');
-}
-if (
-  trustedSkillIds.length === 0 ||
-  trustedSkillIds.length > 100 ||
-  trustedSkillIds.some((id) => !UUID_RE.test(id))
-) {
-  throw new Error('No valid trusted Knowledge Retention skill ID allowlist is configured');
-}
-if (!trustedSkillIds.includes(skillId)) {
-  throw new Error('get_skill_file only permits configured trusted Knowledge Retention skill IDs');
-}
-if (typeof path !== 'string' || path.length < 1 || path.length > MAX_PATH_LENGTH) {
+}if (typeof path !== 'string' || path.length < 1 || path.length > MAX_PATH_LENGTH) {
   throw new Error(`Skill file path must be 1-${MAX_PATH_LENGTH} characters`);
 }
 if (

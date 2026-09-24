@@ -1,5 +1,4 @@
 const integrationId = data.input.integrationId;
-const trustedDevIntegrationId = data.auth.devIntegrationId;
 const verifyHelpersBaseUrl = (data.auth.baseUrl || 'https://api.langdock.com').replace(/\/+$/, '');
 const helperStart = 'const KnowledgeRetentionUtils = {';
 const helperEnd = '\n};\n';
@@ -11,13 +10,6 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-
 if (typeof integrationId !== 'string' || !UUID_RE.test(integrationId)) {
   throw new Error('Integration ID must be a UUID');
 }
-if (!UUID_RE.test(trustedDevIntegrationId || '')) {
-  throw new Error('No trusted Dev integration ID is configured; refusing an unallowlisted helper verification');
-}
-if (integrationId !== trustedDevIntegrationId) {
-  throw new Error('verify_helpers only permits the configured Dev integration ID');
-}
-
 function verifyHelpersFormatError(response) {
   const json = response.json;
   if (!json) return response.text || response.error || 'Unknown error';
@@ -49,7 +41,7 @@ if (response.status !== 200) {
 
 const integration = response.json && response.json.integration;
 if (!integration || integration.id !== integrationId) {
-  throw new Error('Integration response did not match the trusted Dev integration');
+  throw new Error('Integration response did not match the requested Dev integration');
 }
 const actions = integration.actions;
 const blockers = [];

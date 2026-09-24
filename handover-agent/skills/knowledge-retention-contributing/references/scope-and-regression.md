@@ -7,12 +7,14 @@ Use this reference when deciding whether a request is allowed, which layer owns 
 ### Integrations
 
 Only the Knowledge Retention Backend business integration and the in-scope
-coding-tools control-plane actions are in scope. The five mutators are:
+coding-tools control-plane actions are in scope. The seven mutators are:
 
 - `update_action`
 - `sync_helpers`
 - `verify_helpers`
 - `promote_to_staging`
+- `promote_agent_to_staging`
+- `promote_skill_to_staging`
 - `revert_to_staging`
 
 The read-only coding-tools actions are:
@@ -26,9 +28,9 @@ The read-only coding-tools actions are:
 - `get_skill_file`
 
 Read actions use fixed, documented GET endpoints and never accept a caller
-controlled HTTP method, path, or upstream URL. Integration detail and action
-lookups are restricted to the trusted Dev/Staging IDs configured in the
-connection; action lookup accepts exactly one ID or safe slug. There is no
+controlled HTTP method, path, or upstream URL. Access is controlled by which
+agents, integrations, and skills are shared with the API key; action lookup
+accepts exactly one ID or safe slug. There is no
 documented workspace-wide `list_agents` endpoint; `get_agent` by ID is the
 complete supported agent lookup.
 

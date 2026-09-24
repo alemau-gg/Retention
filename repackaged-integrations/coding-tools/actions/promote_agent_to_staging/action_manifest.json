@@ -1,0 +1,65 @@
+{
+  "slug": "promote_agent_to_staging",
+  "name": "Promote agent to Staging",
+  "description": "Copies the published Dev agent into the Staging agent and publishes it: instruction, description, emoji, model, creativity, conversation starters, capabilities, and actions. Dev integration actions are remapped to the Staging action with the same slug. Keeps the Staging name, knowledge folders, and attachments. Run promote_to_staging first. Stops without changes if a Staging action is missing.",
+  "activeLabel": "Promoting agent to Staging",
+  "doneLabel": "Promoted agent to Staging",
+  "failedLabel": "Failed to promote agent to Staging",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": true,
+  "inputFields": [
+    {
+      "slug": "devAgentId",
+      "label": "Dev agent ID",
+      "description": "UUID of the Dev agent to copy from. Its published version is copied.",
+      "placeholder": null,
+      "type": "TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 36,
+      "jsonSchema": null
+    },
+    {
+      "slug": "stagingAgentId",
+      "label": "Staging agent ID",
+      "description": "UUID of the Staging agent to overwrite. Never use a Prod ID.",
+      "placeholder": null,
+      "type": "TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 36,
+      "jsonSchema": null
+    },
+    {
+      "slug": "devIntegrationId",
+      "label": "Dev integration ID",
+      "description": "UUID of the Dev Knowledge Retention integration. Actions from it are mapped to the Staging action with the same slug. Never use a Prod ID.",
+      "placeholder": null,
+      "type": "TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 36,
+      "jsonSchema": null
+    },
+    {
+      "slug": "stagingIntegrationId",
+      "label": "Staging integration ID",
+      "description": "UUID of the Staging Knowledge Retention integration. Never use a Prod ID.",
+      "placeholder": null,
+      "type": "TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 36,
+      "jsonSchema": null
+    }
+  ]
+}

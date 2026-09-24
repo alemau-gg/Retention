@@ -7,17 +7,17 @@ This reference defines where the BASF Knowledge Retention use case may be read, 
 | Environment | Purpose | Agent permissions |
 |---|---|---|
 | **Prod** | Human-managed live workspace | No access by process. Never request, accept, infer, read, write, promote to, or revert from a Prod ID. |
-| **Staging** | Stable-testing baseline and rollback source | Read only for comparison and revert. It may change only through confirmed `promote_to_staging`. Never use `update_action`, `sync_helpers`, or `verify_helpers` against it. |
-| **Dev** | Active development and exploratory testing | The only environment that may receive ordinary edits, helper synchronization, and verification. Its ID must be configured as the trusted Dev integration ID. |
+| **Staging** | Stable-testing baseline and rollback source | Read only for comparison and revert. It may change only through confirmed `promote_to_staging`, `promote_agent_to_staging`, and `promote_skill_to_staging`. Never use `update_action`, `sync_helpers`, or `verify_helpers` against it. |
+| **Dev** | Active development and exploratory testing | The only environment that may receive ordinary edits, helper synchronization, and verification. |
 
 The same API key may technically reach multiple integration IDs. Environment safety is therefore a hard process rule, not an assumed API permission boundary.
 
 Before doing anything else:
 
 1. Confirm the request concerns the KR use case.
-2. Identify the trusted Dev and Staging integration IDs.
+2. Identify the Dev and Staging integration IDs with `list_integrations` (by name) or ask the administrator.
 3. Stop if an ID is missing, ambiguous, or may be Prod.
-4. Never discover or guess an ID by name.
+4. Never guess an ID; confirm it with the administrator when names are unclear.
 
 ## Mandatory gates
 
@@ -63,7 +63,13 @@ The agent does not execute actions. After Dev verification, give the human the e
 
 ### Gate 7: Promotion
 
-Only after the user-acceptance gate passes may the agent propose and call `promote_to_staging`. The action's own confirmation prompt is a second mandatory safeguard. Promotion mirrors creates, updates, and deletions and returns a pre-promotion Staging snapshot.
+Only after the user-acceptance gate passes may the agent propose and call the promotion actions, in this order:
+
+1. `promote_to_staging` for the integration. It mirrors creates, updates, and deletions and returns a pre-promotion Staging snapshot.
+2. `promote_agent_to_staging` for each changed agent (Dev agent ID, Staging agent ID, and both integration IDs). It needs the Staging actions from step 1.
+3. `promote_skill_to_staging` for each changed Knowledge Retention skill.
+
+Each action's own confirmation prompt is a second mandatory safeguard. Every promotion ends with a fresh read of Staging. Differences are returned as `warnings`, not errors, because the API normalizes some fields. Report each warning to the user and check the named item in Staging.
 
 ### Gate 8: Staging handoff
 
@@ -77,7 +83,7 @@ The action returns a pre-revert Dev snapshot. It is not a generic undo for an un
 
 ## Coding-tools actions
 
-The Langdock control-plane integration contains five confirmed mutators plus
+The Langdock control-plane integration contains seven confirmed mutators plus
 read-only catalog/detail actions. Do not add `_shared.js`, `require`, `import`,
 npm packages, or actions with caller-controlled HTTP methods, paths, or
 upstream URLs.
@@ -87,21 +93,21 @@ upstream URLs.
 | `update_action` | `integrationId`, `actionId`, and optional `name`, `description`, `code`, `inputFields`, `requiresConfirmation` | Fetches the complete current action, preserves omitted fields, updates it, fetches the stored result again, and returns `previousAction` plus `rollbackPayload`. | Writes Dev only. Requires confirmation. `inputFields` replaces the complete list. Does not create or delete actions. |
 | `sync_helpers` | `integrationId` | Fetches the live integration, uses `get_runtime_state` as the canonical `KnowledgeRetentionUtils` source, dynamically discovers non-admin actions, and returns proposed helper replacements. | Read-only. Use against Dev only. Review `updates` and `blockers`; returned patches are not applied automatically. |
 | `verify_helpers` | `integrationId` | Freshly fetches the integration and checks helper completeness, action coverage, `ACTION_SLUG` values, forbidden module syntax, and drift from `get_runtime_state`. | Read-only. Use against Dev only. `ok: true` is required before completion. |
-| `promote_to_staging` | `devIntegrationId`, `stagingIntegrationId` | Compares actions by slug, creates missing actions, updates changed actions, deletes actions absent from Dev, and fetches Staging again to verify the mirror. | Writes Staging. Requires confirmation and the user-acceptance gate. Never pass a Prod ID. Returns `prePromotionStaging`. |
-| `revert_to_staging` | `devIntegrationId`, `stagingIntegrationId` | Compares Staging and Dev by slug, creates missing actions, updates changed actions, deletes actions absent from Staging, and fetches Dev again to verify the mirror. | Writes Dev. Requires confirmation. Staging is the source of truth. Returns `preRevertDev`. |
+| `promote_to_staging` | `devIntegrationId`, `stagingIntegrationId` | Compares actions by slug on behavior-relevant fields, creates missing actions, updates changed actions, deletes actions absent from Dev, and fetches Staging again. | Writes Staging. Requires confirmation and the user-acceptance gate. Never pass a Prod ID. Returns `prePromotionStaging` and `warnings`. |
+| `promote_agent_to_staging` | `devAgentId`, `stagingAgentId`, `devIntegrationId`, `stagingIntegrationId` | Copies the published Dev agent's instruction, description, emoji, model, creativity, conversation starters, capabilities, and actions into the Staging agent, remapping Dev integration actions to the Staging action with the same slug, then publishes Staging. Keeps the Staging name, knowledge folders, and attachments. | Writes Staging. Requires confirmation and the user-acceptance gate. Run after `promote_to_staging`; stops without changes if a Staging action is missing. Copies the published Dev version, not an unpublished draft. Form input fields are not copied. Returns `preTransferStaging` and `warnings`. |
+| `promote_skill_to_staging` | `devSkillId`, `stagingSkillId`, `devIntegrationId`, `stagingIntegrationId` | Reads the Dev skill and every stored file, then imports them into the Staging skill (replacing its files), keeping the Staging name and slug and mapping the Dev integration to Staging. | Writes Staging. Requires confirmation and the user-acceptance gate. Stops without changes if any Dev file cannot be read as text. Returns `preTransferStaging` and `warnings`. |
+| `revert_to_staging` | `devIntegrationId`, `stagingIntegrationId` | Compares Staging and Dev by slug on behavior-relevant fields, creates missing actions, updates changed actions, deletes actions absent from Staging, and fetches Dev again. | Writes Dev. Requires confirmation. Staging is the source of truth. Returns `preRevertDev` and `warnings`. |
 | `list_integrations` | None | Lists shared private API, MCP, and A2A integrations with bounded metadata; it never returns credentials or action code. | Read-only. No confirmation. |
-| `get_integration` | `integrationId` | Reads bounded metadata plus nested action definitions and complete stored action code for the configured Dev or Staging integration. | Read-only. Requires a configured integration allowlist; no confirmation. |
-| `get_action` | `integrationId`, `actionId` or `actionSlug` | Reads one action by UUID or safe slug from a configured Dev or Staging integration, including its complete stored code within Langdock's documented action-code limit. | Read-only. Requires the integration allowlist and exactly one selector; no confirmation. |
-| `get_agent` | `agentId` | Reads the configured handover agent by UUID using the documented Agent API endpoint. | Read-only. No workspace-wide `list_agents` endpoint is assumed or invented; no confirmation. Fails closed without `trustedAgentId`. |
-| `list_skills` | Optional `limit`, `cursor`, `query`, `slug` | Lists configured Knowledge Retention skills with bounded metadata and documented pagination cursor. | Read-only. No confirmation. Fails closed without `trustedSkillIds`. |
-| `get_skill` | `skillId` | Reads one configured Knowledge Retention skill's bounded instructions and stored-file metadata, without file contents. | Read-only. UUID and skill allowlist required; no confirmation. |
-| `get_skill_file` | `skillId`, `path` | Reads one UTF-8 file only when the skill is allowlisted and the path is relative, traversal-free, extension-allowlisted, and within 512 KB. | Read-only. UUID, skill allowlist, and strict path validation; no confirmation. |
+| `get_integration` | `integrationId` | Reads bounded metadata plus nested action definitions and complete stored action code for a Dev or Staging integration. | Read-only. No confirmation. |
+| `get_action` | `integrationId`, `actionId` or `actionSlug` | Reads one action by UUID or safe slug from a Dev or Staging integration, including its complete stored code within Langdock's documented action-code limit. | Read-only. Requires exactly one selector; no confirmation. |
+| `get_agent` | `agentId` | Reads an agent shared with the API key by UUID using the documented Agent API endpoint. | Read-only. No workspace-wide `list_agents` endpoint is assumed or invented; no confirmation. |
+| `list_skills` | Optional `limit`, `cursor`, `query`, `slug` | Lists skills shared with the API key with bounded metadata and documented pagination cursor. | Read-only. No confirmation. |
+| `get_skill` | `skillId` | Reads one Knowledge Retention skill's bounded instructions and stored-file metadata, without file contents. | Read-only. UUID required; no confirmation. |
+| `get_skill_file` | `skillId`, `path` | Reads one UTF-8 file only when the path is relative, traversal-free, has a supported extension, and is within 512 KB. | Read-only. UUID and strict path validation; no confirmation. |
 
 All actions call approved Langdock API paths internally with `ld.request`.
 Read actions have fixed GET methods and paths; callers cannot supply an HTTP
-method, path, or upstream URL. The manifest's optional
-`devIntegrationId`/`stagingIntegrationId` fields are trusted connection
-configuration, not caller input. Any environment-sensitive action fails
-closed until those IDs are configured and exact input IDs match them. Never
-guess or infer those IDs from names. The catalog is informational; use only
-allowlisted IDs for detail or mutation actions.
+method, path, or upstream URL. Access is controlled by which agents,
+integrations, and skills are shared with the API key. Identify the Dev and
+Staging IDs with `list_integrations` (by name) or ask the administrator; never
+guess them, and never pass a Prod ID to any action.

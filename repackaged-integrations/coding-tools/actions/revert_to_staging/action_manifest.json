@@ -1,7 +1,7 @@
 {
   "slug": "revert_to_staging",
   "name": "Revert to Staging",
-  "description": "Mirrors the configured stable Staging Knowledge Retention integration back into configured Dev after the user confirms that Dev should be reset.",
+  "description": "Mirrors the stable Staging Knowledge Retention integration back into Dev after the user confirms that Dev should be reset.",
   "activeLabel": "Reverting Dev to Staging",
   "doneLabel": "Reverted Dev to Staging",
   "failedLabel": "Failed to revert Dev to Staging",
@@ -12,7 +12,7 @@
     {
       "slug": "devIntegrationId",
       "label": "Dev integration ID",
-      "description": "UUID of the configured Dev Knowledge Retention integration. Must match the trusted Dev connection setting; never use a Prod ID.",
+      "description": "UUID of the Dev Knowledge Retention integration. Never use a Prod ID.",
       "placeholder": null,
       "type": "TEXT",
       "required": true,
@@ -25,7 +25,7 @@
     {
       "slug": "stagingIntegrationId",
       "label": "Staging integration ID",
-      "description": "UUID of the configured Staging Knowledge Retention integration. Must match the trusted Staging connection setting; never use a Prod ID.",
+      "description": "UUID of the Staging Knowledge Retention integration. Never use a Prod ID.",
       "placeholder": null,
       "type": "TEXT",
       "required": true,

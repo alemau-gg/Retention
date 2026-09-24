@@ -1,7 +1,7 @@
 {
   "slug": "list_integrations",
   "name": "List integrations",
-  "description": "Lists private API, MCP, and A2A integrations shared with the configured API key without exposing credentials or action code.",
+  "description": "Lists private API, MCP, and A2A integrations shared with the API key without exposing credentials or action code.",
   "activeLabel": "Listing integrations",
   "doneLabel": "Listed integrations",
   "failedLabel": "Failed to list integrations",

@@ -1,6 +1,5 @@
 const integrationId = data.input.integrationId;
 const actionId = data.input.actionId;
-const trustedDevIntegrationId = data.auth.devIntegrationId;
 const updateActionBaseUrl = (data.auth.baseUrl || 'https://api.langdock.com').replace(/\/+$/, '');
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const MAX_CODE_LENGTH = 150000;
@@ -11,13 +10,6 @@ if (typeof integrationId !== 'string' || !UUID_RE.test(integrationId)) {
 if (typeof actionId !== 'string' || !UUID_RE.test(actionId)) {
   throw new Error('Action ID must be a UUID');
 }
-if (!UUID_RE.test(trustedDevIntegrationId || '')) {
-  throw new Error('No trusted Dev integration ID is configured; refusing an unallowlisted update');
-}
-if (integrationId !== trustedDevIntegrationId) {
-  throw new Error('update_action only permits the configured Dev integration ID');
-}
-
 function updateActionFormatError(response) {
   const json = response.json;
   if (!json) return response.text || response.error || 'Unknown error';

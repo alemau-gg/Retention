@@ -12,7 +12,7 @@
     {
       "slug": "agentId",
       "label": "Agent ID",
-      "description": "UUID of the agent to inspect. Use a trusted ID supplied by the administrator; this read action does not enumerate agents.",
+      "description": "UUID of the agent to inspect. Use an ID supplied by the administrator; this read action does not enumerate agents.",
       "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
       "type": "TEXT",
       "required": true,

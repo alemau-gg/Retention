@@ -1,7 +1,7 @@
 {
   "slug": "list_skills",
   "name": "List skills",
-  "description": "Lists configured Knowledge Retention skills with bounded metadata. Use query or slug to narrow the catalog; instructions and file contents are returned by detail actions. Requires trustedSkillIds connection configuration.",
+  "description": "Lists skills shared with the API key with bounded metadata. Use query or slug to narrow the catalog; instructions and file contents are returned by detail actions.",
   "activeLabel": "Listing skills",
   "doneLabel": "Listed skills",
   "failedLabel": "Failed to list skills",

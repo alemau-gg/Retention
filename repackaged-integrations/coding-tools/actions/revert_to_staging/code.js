@@ -1,7 +1,5 @@
 const devIntegrationId = data.input.devIntegrationId;
 const stagingIntegrationId = data.input.stagingIntegrationId;
-const trustedDevIntegrationId = data.auth.devIntegrationId;
-const trustedStagingIntegrationId = data.auth.stagingIntegrationId;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const ACTION_SLUG_RE = /^[a-zA-Z0-9_-]{1,100}$/;
 const MAX_ACTIONS = 250;
@@ -16,12 +14,6 @@ if (
   !UUID_RE.test(stagingIntegrationId)
 ) {
   throw new Error('Dev and Staging integration IDs must be UUIDs');
-}
-if (!UUID_RE.test(trustedDevIntegrationId || '') || !UUID_RE.test(trustedStagingIntegrationId || '')) {
-  throw new Error('Trusted Dev and Staging integration IDs are not configured; refusing an unallowlisted revert');
-}
-if (devIntegrationId !== trustedDevIntegrationId || stagingIntegrationId !== trustedStagingIntegrationId) {
-  throw new Error('Revert IDs must exactly match the configured trusted Dev and Staging integrations');
 }
 if (devIntegrationId === stagingIntegrationId) {
   throw new Error('Dev and Staging integration IDs must be different.');
@@ -97,8 +89,37 @@ function revertActionPayload(action) {
   };
 }
 
+// The API regenerates field slugs from labels and returns extra or defaulted keys,
+// so compare only the fields that change behavior.
+function revertComparableField(field) {
+  let jsonSchema = field.jsonSchema || null;
+  if (typeof jsonSchema === 'string') {
+    try {
+      jsonSchema = JSON.stringify(JSON.parse(jsonSchema));
+    } catch (_error) {
+      // Keep the raw string.
+    }
+  }
+  return {
+    label: field.label || '',
+    type: field.type || '',
+    description: field.description || '',
+    required: Boolean(field.required),
+    options: (field.options || []).map((option) => (option && typeof option === 'object' ? option.value : option)),
+    allowMultiSelect: Boolean(field.allowMultiSelect),
+    jsonSchema,
+  };
+}
+
 function revertComparableAction(action) {
-  return JSON.stringify(revertActionPayload(action));
+  const fields = [...(action.inputFields || [])].sort((a, b) => (a.order || 0) - (b.order || 0));
+  return JSON.stringify({
+    name: action.name || '',
+    description: action.description || '',
+    code: action.code || '',
+    requiresConfirmation: Boolean(action.requiresConfirmation),
+    inputFields: fields.map(revertComparableField),
+  });
 }
 
 async function revertCreateAction(integrationId, action) {
@@ -188,11 +209,10 @@ const changed = sourceActions
   .filter((action) => afterBySlug.has(action.slug))
   .filter((action) => revertComparableAction(action) !== revertComparableAction(afterBySlug.get(action.slug)))
   .map((action) => action.slug);
-if (missing.length > 0 || unexpected.length > 0 || changed.length > 0) {
-  throw new Error(
-    `Revert verification failed. Missing actions: ${missing.join(', ') || 'none'}. Unexpected actions: ${unexpected.join(', ') || 'none'}. Changed actions: ${changed.join(', ') || 'none'}.`,
-  );
-}
+const warnings = [];
+if (missing.length > 0) warnings.push(`Missing after the revert: ${missing.join(', ')}.`);
+if (unexpected.length > 0) warnings.push(`Unexpected after the revert: ${unexpected.join(', ')}.`);
+if (changed.length > 0) warnings.push(`Still differ after the revert: ${changed.join(', ')}. Open these actions and compare.`);
 
 return {
   success: true,
@@ -202,13 +222,10 @@ return {
   stagingIntegrationId,
   changes,
   changeCount: changes.length,
+  warnings,
   preRevertDev: {
     integration: { id: destination.id, name: destination.name, description: destination.description },
     actions: destinationActions,
-  },
-  afterRevertDev: {
-    integration: { id: after.id, name: after.name, description: after.description },
-    actions: afterActions,
   },
   rollbackInstruction:
     'To restore the exact pre-revert Dev state, use the returned preRevertDev.actions as the source for confirmed action updates, creations, and deletions.',

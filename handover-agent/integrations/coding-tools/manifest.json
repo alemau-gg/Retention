@@ -23,42 +23,6 @@
       "type": "TEXT",
       "required": false,
       "maxLength": null
-    },
-    {
-      "slug": "devIntegrationId",
-      "label": "Trusted Dev integration ID",
-      "description": "Optional UUID allowlisted as the only Dev integration target. Configure this before using coding-tool actions; environment-sensitive actions fail closed when it is absent.",
-      "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-      "type": "TEXT",
-      "required": false,
-      "maxLength": 36
-    },
-    {
-      "slug": "stagingIntegrationId",
-      "label": "Trusted Staging integration ID",
-      "description": "Optional UUID allowlisted as the only Staging integration target. Configure this before promotion, revert, or a trusted integration-detail lookup; environment-sensitive actions fail closed when it is absent.",
-      "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-      "type": "TEXT",
-      "required": false,
-      "maxLength": 36
-    },
-    {
-      "slug": "trustedAgentId",
-      "label": "Trusted handover agent ID",
-      "description": "Optional UUID allowlisted for the handover agent detail lookup. Configure this before using get_agent; the action fails closed when it is absent or a different agent ID is supplied.",
-      "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-      "type": "TEXT",
-      "required": false,
-      "maxLength": 36
-    },
-    {
-      "slug": "trustedSkillIds",
-      "label": "Trusted Knowledge Retention skill IDs",
-      "description": "Optional comma-separated UUID allowlist for Knowledge Retention skills, for example id1,id2. Configure this before using skill catalog/detail actions; they fail closed when it is absent or a different skill ID is supplied.",
-      "placeholder": "uuid1,uuid2",
-      "type": "MULTI_LINE_TEXT",
-      "required": false,
-      "maxLength": 2000
     }
   ],
   "actions": [
@@ -180,7 +144,7 @@
         {
           "slug": "integrationId",
           "label": "Integration ID",
-          "description": "UUID of the configured Dev integration whose actions should be checked. Do not use a Staging or Prod ID.",
+          "description": "UUID of the Dev integration whose actions should be checked. Do not use a Staging or Prod ID.",
           "placeholder": null,
           "type": "TEXT",
           "required": true,
@@ -206,7 +170,7 @@
         {
           "slug": "integrationId",
           "label": "Integration ID",
-          "description": "UUID of the configured Dev integration to verify. Do not use a Staging or Prod ID.",
+          "description": "UUID of the Dev integration to verify. Do not use a Staging or Prod ID.",
           "placeholder": null,
           "type": "TEXT",
           "required": true,
@@ -221,7 +185,7 @@
     {
       "slug": "promote_to_staging",
       "name": "Promote to Staging",
-      "description": "Mirrors the configured Dev Knowledge Retention integration into configured Staging after the user confirms that Dev testing is satisfactory.",
+      "description": "Mirrors the Dev Knowledge Retention integration into Staging after the user confirms that Dev testing is satisfactory. Run this before promote_agent_to_staging and promote_skill_to_staging.",
       "activeLabel": "Promoting to Staging",
       "doneLabel": "Promoted to Staging",
       "failedLabel": "Failed to promote to Staging",
@@ -232,7 +196,7 @@
         {
           "slug": "devIntegrationId",
           "label": "Dev integration ID",
-          "description": "UUID of the configured Dev Knowledge Retention integration. Must match the trusted Dev connection setting; never use a Prod ID.",
+          "description": "UUID of the Dev Knowledge Retention integration. Never use a Prod ID.",
           "placeholder": null,
           "type": "TEXT",
           "required": true,
@@ -245,7 +209,7 @@
         {
           "slug": "stagingIntegrationId",
           "label": "Staging integration ID",
-          "description": "UUID of the configured Staging Knowledge Retention integration. Must match the trusted Staging connection setting; never use a Prod ID.",
+          "description": "UUID of the Staging Knowledge Retention integration. Never use a Prod ID.",
           "placeholder": null,
           "type": "TEXT",
           "required": true,
@@ -258,9 +222,139 @@
       ]
     },
     {
+      "slug": "promote_agent_to_staging",
+      "name": "Promote agent to Staging",
+      "description": "Copies the published Dev agent into the Staging agent and publishes it: instruction, description, emoji, model, creativity, conversation starters, capabilities, and actions. Dev integration actions are remapped to the Staging action with the same slug. Keeps the Staging name, knowledge folders, and attachments. Run promote_to_staging first. Stops without changes if a Staging action is missing.",
+      "activeLabel": "Promoting agent to Staging",
+      "doneLabel": "Promoted agent to Staging",
+      "failedLabel": "Failed to promote agent to Staging",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": true,
+      "inputFields": [
+        {
+          "slug": "devAgentId",
+          "label": "Dev agent ID",
+          "description": "UUID of the Dev agent to copy from. Its published version is copied.",
+          "placeholder": null,
+          "type": "TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 36,
+          "jsonSchema": null
+        },
+        {
+          "slug": "stagingAgentId",
+          "label": "Staging agent ID",
+          "description": "UUID of the Staging agent to overwrite. Never use a Prod ID.",
+          "placeholder": null,
+          "type": "TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 36,
+          "jsonSchema": null
+        },
+        {
+          "slug": "devIntegrationId",
+          "label": "Dev integration ID",
+          "description": "UUID of the Dev Knowledge Retention integration. Actions from it are mapped to the Staging action with the same slug. Never use a Prod ID.",
+          "placeholder": null,
+          "type": "TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 36,
+          "jsonSchema": null
+        },
+        {
+          "slug": "stagingIntegrationId",
+          "label": "Staging integration ID",
+          "description": "UUID of the Staging Knowledge Retention integration. Never use a Prod ID.",
+          "placeholder": null,
+          "type": "TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 36,
+          "jsonSchema": null
+        }
+      ]
+    },
+    {
+      "slug": "promote_skill_to_staging",
+      "name": "Promote skill to Staging",
+      "description": "Copies a Dev skill into its Staging counterpart: description, instructions, and every stored file, replacing Staging's files. Keeps the Staging name and slug, and maps the Dev integration to the Staging one. Reads all Dev files before writing, so an unreadable file stops the transfer without changes.",
+      "activeLabel": "Promoting skill to Staging",
+      "doneLabel": "Promoted skill to Staging",
+      "failedLabel": "Failed to promote skill to Staging",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": true,
+      "inputFields": [
+        {
+          "slug": "devSkillId",
+          "label": "Dev skill ID",
+          "description": "UUID of the Dev skill to copy from.",
+          "placeholder": null,
+          "type": "TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 36,
+          "jsonSchema": null
+        },
+        {
+          "slug": "stagingSkillId",
+          "label": "Staging skill ID",
+          "description": "UUID of the Staging skill to overwrite. Never use a Prod ID.",
+          "placeholder": null,
+          "type": "TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 36,
+          "jsonSchema": null
+        },
+        {
+          "slug": "devIntegrationId",
+          "label": "Dev integration ID",
+          "description": "UUID of the Dev Knowledge Retention integration. Actions from it are mapped to the Staging action with the same slug. Never use a Prod ID.",
+          "placeholder": null,
+          "type": "TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 36,
+          "jsonSchema": null
+        },
+        {
+          "slug": "stagingIntegrationId",
+          "label": "Staging integration ID",
+          "description": "UUID of the Staging Knowledge Retention integration. Never use a Prod ID.",
+          "placeholder": null,
+          "type": "TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": 36,
+          "jsonSchema": null
+        }
+      ]
+    },
+    {
       "slug": "revert_to_staging",
       "name": "Revert to Staging",
-      "description": "Mirrors the configured stable Staging Knowledge Retention integration back into configured Dev after the user confirms that Dev should be reset.",
+      "description": "Mirrors the stable Staging Knowledge Retention integration back into Dev after the user confirms that Dev should be reset.",
       "activeLabel": "Reverting Dev to Staging",
       "doneLabel": "Reverted Dev to Staging",
       "failedLabel": "Failed to revert Dev to Staging",
@@ -271,7 +365,7 @@
         {
           "slug": "devIntegrationId",
           "label": "Dev integration ID",
-          "description": "UUID of the configured Dev Knowledge Retention integration. Must match the trusted Dev connection setting; never use a Prod ID.",
+          "description": "UUID of the Dev Knowledge Retention integration. Never use a Prod ID.",
           "placeholder": null,
           "type": "TEXT",
           "required": true,
@@ -284,7 +378,7 @@
         {
           "slug": "stagingIntegrationId",
           "label": "Staging integration ID",
-          "description": "UUID of the configured Staging Knowledge Retention integration. Must match the trusted Staging connection setting; never use a Prod ID.",
+          "description": "UUID of the Staging Knowledge Retention integration. Never use a Prod ID.",
           "placeholder": null,
           "type": "TEXT",
           "required": true,
@@ -299,7 +393,7 @@
     {
       "slug": "list_integrations",
       "name": "List integrations",
-      "description": "Lists private API, MCP, and A2A integrations shared with the configured API key without exposing credentials or action code.",
+      "description": "Lists private API, MCP, and A2A integrations shared with the API key without exposing credentials or action code.",
       "activeLabel": "Listing integrations",
       "doneLabel": "Listed integrations",
       "failedLabel": "Failed to list integrations",
@@ -311,7 +405,7 @@
     {
       "slug": "get_integration",
       "name": "Get integration details",
-      "description": "Reads allowlisted Dev or Staging integration metadata, nested action definitions, and complete stored action code without credentials.",
+      "description": "Reads Dev or Staging integration metadata, nested action definitions, and complete stored action code without credentials.",
       "activeLabel": "Reading integration details",
       "doneLabel": "Read integration details",
       "failedLabel": "Failed to read integration details",
@@ -322,7 +416,7 @@
         {
           "slug": "integrationId",
           "label": "Integration ID",
-          "description": "UUID of the configured Dev or Staging integration to inspect. Use an ID from the integration catalog and skip this action if it is not allowlisted in the connection.",
+          "description": "UUID of the Dev or Staging integration to inspect. Use an ID from the integration catalog.",
           "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
           "type": "TEXT",
           "required": true,
@@ -337,7 +431,7 @@
     {
       "slug": "get_action",
       "name": "Get action details",
-      "description": "Reads one action by ID or safe slug from an allowlisted Dev or Staging integration, including its complete stored JavaScript code and input definitions.",
+      "description": "Reads one action by ID or safe slug from a Dev or Staging integration, including its complete stored JavaScript code and input definitions.",
       "activeLabel": "Reading action details",
       "doneLabel": "Read action details",
       "failedLabel": "Failed to read action details",
@@ -348,7 +442,7 @@
         {
           "slug": "integrationId",
           "label": "Integration ID",
-          "description": "UUID of the configured Dev or Staging integration containing the action. Use an ID from the integration catalog.",
+          "description": "UUID of the Dev or Staging integration containing the action. Use an ID from the integration catalog.",
           "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
           "type": "TEXT",
           "required": true,
@@ -400,7 +494,7 @@
         {
           "slug": "agentId",
           "label": "Agent ID",
-          "description": "UUID of the agent to inspect. Use a trusted ID supplied by the administrator; this read action does not enumerate agents.",
+          "description": "UUID of the agent to inspect. Use an ID supplied by the administrator; this read action does not enumerate agents.",
           "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
           "type": "TEXT",
           "required": true,
@@ -415,7 +509,7 @@
     {
       "slug": "list_skills",
       "name": "List skills",
-      "description": "Lists configured Knowledge Retention skills with bounded metadata. Use query or slug to narrow the catalog; instructions and file contents are returned by detail actions. Requires trustedSkillIds connection configuration.",
+      "description": "Lists skills shared with the API key with bounded metadata. Use query or slug to narrow the catalog; instructions and file contents are returned by detail actions.",
       "activeLabel": "Listing skills",
       "doneLabel": "Listed skills",
       "failedLabel": "Failed to list skills",
@@ -480,7 +574,7 @@
     {
       "slug": "get_skill",
       "name": "Get skill details",
-      "description": "Reads one configured Knowledge Retention skill's bounded instructions and stored-file metadata without file contents. Requires trustedSkillIds connection configuration.",
+      "description": "Reads one Knowledge Retention skill's bounded instructions and stored-file metadata without file contents.",
       "activeLabel": "Reading skill details",
       "doneLabel": "Read skill details",
       "failedLabel": "Failed to read skill details",
@@ -506,7 +600,7 @@
     {
       "slug": "get_skill_file",
       "name": "Get skill file",
-      "description": "Reads one configured Knowledge Retention skill's UTF-8 file by a validated relative path. Contents are limited to Langdock's documented 512 KB file bound and require trustedSkillIds connection configuration.",
+      "description": "Reads one Knowledge Retention skill's UTF-8 file by a validated relative path. Contents are limited to Langdock's documented 512 KB file bound.",
       "activeLabel": "Reading skill file",
       "doneLabel": "Read skill file",
       "failedLabel": "Failed to read skill file",
