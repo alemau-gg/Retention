@@ -1,0 +1,21 @@
+handover-agent/integrations/coding-tools/manifest.json
+  s_09473ab7800b93::t_2de7a8194c824d 95,102
+repackaged-integrations/coding-tools/actions/update_action/action_manifest.json
+  s_09473ab7800b93::t_70302e681c3006 67,74
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "8b0ba110bb5673ef53a9e3b8b60fc8df588cb811",
+  "prompts": {},
+  "sessions": {
+    "s_09473ab7800b93": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3a874d40-450d-41c0-a22c-bf90a01ab3f1",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
