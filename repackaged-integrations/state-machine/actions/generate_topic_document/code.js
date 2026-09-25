@@ -556,6 +556,32 @@ const KnowledgeRetentionUtils = {
       .sort((a, b) => Number(a[S.question.order]) - Number(b[S.question.order]));
   },
 
+  // Topic and question counts come from the connection so each environment can set its own.
+  // Blank or invalid values fall back to the defaults; values are clamped to the bounds
+  // allowed by the save_topics_and_questions JSON schema.
+  questionLimits(data) {
+    const read = (value, fallback, lowest, highest) => {
+      const parsed = parseInt(String(value === undefined || value === null ? '' : value).trim(), 10);
+      if (!Number.isInteger(parsed)) return fallback;
+      return Math.min(Math.max(parsed, lowest), highest);
+    };
+    const auth = data.auth || {};
+    let minTopics = read(auth.minTopics, 4, 1, 10);
+    let maxTopics = read(auth.maxTopics, 6, 1, 10);
+    let minQuestions = read(auth.minQuestionsPerTopic, 3, 1, 15);
+    let maxQuestions = read(auth.maxQuestionsPerTopic, 6, 1, 15);
+    if (minTopics > maxTopics) [minTopics, maxTopics] = [maxTopics, minTopics];
+    if (minQuestions > maxQuestions) [minQuestions, maxQuestions] = [maxQuestions, minQuestions];
+    const range = (low, high) => (low === high ? `${low}` : `${low}–${high}`);
+    return {
+      minTopics,
+      maxTopics,
+      minQuestions,
+      maxQuestions,
+      text: `${range(minTopics, maxTopics)} topics with ${range(minQuestions, maxQuestions)} questions each`,
+    };
+  },
+
   isAnswered(question, answers) {
     const S = KnowledgeRetentionUtils.SCHEMA;
     const ST = KnowledgeRetentionUtils.STATUS;
@@ -655,7 +681,7 @@ const KnowledgeRetentionUtils = {
     if (status === ST.interview.discovery) {
       return Object.assign(base, {
         nextAction: 'GenerateTopicsAndQuestions',
-        instruction: `The discovery profile is complete and saved; tell the user. Load the knowledge-retention-interviewing skill, generate the topics and questions in ${language} from the discovery profile and the CKR Company Context folder, then call save_topics_and_questions. Do not ask any interview question yet.${supportingFileInstruction}`,
+        instruction: `The discovery profile is complete and saved; tell the user. Load the knowledge-retention-interviewing skill, generate ${KnowledgeRetentionUtils.questionLimits(data).text} (a backend limit) in ${language} from the discovery profile and the CKR Company Context folder, then call save_topics_and_questions. Do not ask any interview question yet.${supportingFileInstruction}`,
       });
     }
 

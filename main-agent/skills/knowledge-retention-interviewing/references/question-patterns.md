@@ -11,7 +11,7 @@ Name (a) a specific thing from discovery, (b) a concrete situation, (c) lived ex
 
 ## Knowledge slots
 
-Fill across the 4–6 topics (one topic may cover more than one slot). Prefer the strong shape.
+Fill across the topics (one topic may cover more than one slot). Prefer the strong shape.
 
 | Slot | Ask for | Strong shape |
 |---|---|---|

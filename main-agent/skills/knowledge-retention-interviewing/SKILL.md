@@ -16,7 +16,7 @@ Methodology only. Progress, saves, and `nextQuestionText` come from the backend 
 | Load | `nextAction` / moment | Use this skill for |
 |---|---|---|
 | Yes | `RunPreInterviewDiscovery` | Thin-answer bar + required discovery fields |
-| Yes | `GenerateTopicsAndQuestions` | 4–6 topics × 3–6 questions; overview; then `save_topics_and_questions` |
+| Yes | `GenerateTopicsAndQuestions` | Topic and question counts from the backend instruction; overview; then `save_topics_and_questions` |
 | No | `AskActiveQuestion` | Ask `nextQuestionText` verbatim. Probing follow-ups (max 3, used much more often than not) are the system prompt, not this skill |
 | No | `GenerateOrReviewTopicSummary`, `BuildFinalDocument`, `FinalizeAndCollectFeedback` | Load `knowledge-retention-reporting` instead |
 
@@ -63,13 +63,13 @@ Collect one question at a time:
 
 ## Generating topics and questions (`GenerateTopicsAndQuestions`)
 
-**Done when:** 4–6 topics each with 3–6 questions, coverage checks pass, user saw the overview, then `save_topics_and_questions`. Do not ask interview questions before that save succeeds. After it succeeds, follow the returned backend instruction: when `nextAction` is `AskActiveQuestion`, ask `nextQuestionText` verbatim directly without a readiness confirmation or wait. If the backend returns a consent action, follow that consent instruction; backend consent remains authoritative.
+**Done when:** the number of topics and questions per topic given in the backend instruction, coverage checks pass, user saw the overview, then `save_topics_and_questions`. Do not ask interview questions before that save succeeds. After it succeeds, follow the returned backend instruction: when `nextAction` is `AskActiveQuestion`, ask `nextQuestionText` verbatim directly without a readiness confirmation or wait. If the backend returns a consent action, follow that consent instruction; backend consent remains authoritative.
 
 **Inputs:** discovery profile; when present, CKR Company Context folder (ground topics there; do not invent org processes from training data).
 
-1. **4–6 topics**, most critical first.
+1. **Topic count from the backend instruction** (it is set per environment; default 4–6), most critical first. `save_topics_and_questions` rejects any other count.
 2. **Dedicated focus topics (hard):** every highlighted discovery focus topic gets at least one interview topic whose title and scope name that focus. Do not fold a named focus into a catch-all “role overview” topic. Closely related focuses may share a topic only when the topic title still names those focuses.
-3. **3–6 questions per topic**, concrete → reflective (what/how X works → what you'd tell a successor about X).
+3. **Questions per topic from the backend instruction** (default 3–6), concrete → reflective (what/how X works → what you'd tell a successor about X).
 4. Every question names something from **this person's** discovery. A question that fits any employee is bad.
 5. Answerable in **2–5 spoken sentences**. Split compounds. No “describe everything about X”.
 6. Stories and specifics, not opinions: “Walk me through the last time X went wrong” beats “What are the challenges with X?”
