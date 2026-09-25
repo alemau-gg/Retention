@@ -42,7 +42,7 @@
       "options": null,
       "allowMultiSelect": null,
       "allowMultiFile": false,
-      "maxLength": 10000,
+      "maxLength": 20000,
       "jsonSchema": null
     },
     {
@@ -55,7 +55,7 @@
       "options": null,
       "allowMultiSelect": null,
       "allowMultiFile": false,
-      "maxLength": 10000,
+      "maxLength": 20000,
       "jsonSchema": null
     }
   ]

@@ -128,14 +128,14 @@
         {
           "slug": "code",
           "label": "Code",
-          "description": "New JavaScript code, up to 10000 characters. Available globals: data.input (user inputs), data.auth (credentials), env (workspace env vars), ld.request (HTTP).",
+          "description": "New JavaScript code, up to 20000 characters. Available globals: data.input (user inputs), data.auth (credentials), env (workspace env vars), ld.request (HTTP).",
           "placeholder": null,
           "type": "MULTI_LINE_TEXT",
           "required": false,
           "options": null,
           "allowMultiSelect": null,
           "allowMultiFile": false,
-          "maxLength": 10000,
+          "maxLength": 20000,
           "jsonSchema": null
         },
         {
