@@ -1,0 +1,29 @@
+handover-agent/integrations/coding-tools/manifest.json
+  s_09473ab7800b93::t_38a4946d28c65b 131,138
+main-agent/integrations/state-machine/manifest.json
+  s_09473ab7800b93::t_c8417c356f95a2 312,325,552,588,601
+repackaged-integrations/coding-tools/actions/update_action/action_manifest.json
+  s_09473ab7800b93::t_dfbcf4d3b1f909 67,74
+repackaged-integrations/state-machine/actions/revise_answer/action_manifest.json
+  s_09473ab7800b93::t_5dfc7cecb8b5ae 19,32
+repackaged-integrations/state-machine/actions/save_answer/action_manifest.json
+  s_09473ab7800b93::t_014315d6b43ce1 45,58
+repackaged-integrations/state-machine/actions/save_feedback/action_manifest.json
+  s_09473ab7800b93::t_b109a94d829963 32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "0d9d43917ac1e32f3b63fc07d0dcf9a751b532db",
+  "prompts": {},
+  "sessions": {
+    "s_09473ab7800b93": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3a874d40-450d-41c0-a22c-bf90a01ab3f1",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
