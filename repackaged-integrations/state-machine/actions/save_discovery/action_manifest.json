@@ -29,7 +29,7 @@
       "options": null,
       "allowMultiSelect": null,
       "allowMultiFile": false,
-      "maxLength": 8000,
+      "maxLength": 20000,
       "jsonSchema": null
     },
     {
@@ -42,7 +42,7 @@
       "options": null,
       "allowMultiSelect": null,
       "allowMultiFile": false,
-      "maxLength": 8000,
+      "maxLength": 20000,
       "jsonSchema": null
     },
     {
@@ -68,7 +68,7 @@
       "options": null,
       "allowMultiSelect": null,
       "allowMultiFile": false,
-      "maxLength": 8000,
+      "maxLength": 20000,
       "jsonSchema": null
     },
     {
@@ -81,7 +81,7 @@
       "options": null,
       "allowMultiSelect": null,
       "allowMultiFile": false,
-      "maxLength": 8000,
+      "maxLength": 20000,
       "jsonSchema": null
     }
   ]
