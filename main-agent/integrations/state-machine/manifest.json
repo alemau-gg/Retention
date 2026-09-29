@@ -189,7 +189,7 @@
           "options": null,
           "allowMultiSelect": null,
           "allowMultiFile": false,
-          "maxLength": 8000,
+          "maxLength": 20000,
           "jsonSchema": null
         },
         {
@@ -202,7 +202,7 @@
           "options": null,
           "allowMultiSelect": null,
           "allowMultiFile": false,
-          "maxLength": 8000,
+          "maxLength": 20000,
           "jsonSchema": null
         },
         {
@@ -228,7 +228,7 @@
           "options": null,
           "allowMultiSelect": null,
           "allowMultiFile": false,
-          "maxLength": 8000,
+          "maxLength": 20000,
           "jsonSchema": null
         },
         {
@@ -241,7 +241,7 @@
           "options": null,
           "allowMultiSelect": null,
           "allowMultiFile": false,
-          "maxLength": 8000,
+          "maxLength": 20000,
           "jsonSchema": null
         }
       ]
@@ -345,20 +345,20 @@
           "options": null,
           "allowMultiSelect": null,
           "allowMultiFile": false,
-          "maxLength": 10000,
+          "maxLength": 20000,
           "jsonSchema": null
         },
         {
           "slug": "rawUserMessages",
           "label": "Raw user messages",
-          "description": "Required. The interviewee's own messages for this question, in chronological order: the initial answer plus every follow-up, copied verbatim. Do not EVER paraphrase, condense, omit, or substitute the cleaned finalAnswer. This is of utmost importance. Only exception: rewrite criticism of other people (including accounts of their mistakes and their quoted words) and private details as a neutral process lesson not tied to the person.",
+          "description": "Required. The interviewee's own messages for this question, in chronological order: the initial answer plus every follow-up. THE ONE EXCEPTION, AND IT SUPERSEDES THE VERBATIM RULE: remove every negative remark about another person before copying. This is extremely important because this field is stored and visible to others. Negative remarks are judgments of someone's effort, competence, or attitude (for example useless, lazy, incompetent, unreliable), accounts of their mistakes, their words quoted as evidence of a shortcoming, and private details. Replace only that passage with a neutral process lesson not tied to the person: \"Martin is useless, he never updates the log\" becomes \"The log is often not updated; check it before relying on it.\" If there is no process lesson, drop the passage. Praise stays. Apart from this one exception, copy everything verbatim. Do not EVER paraphrase, condense, omit, or substitute the cleaned finalAnswer. This is of utmost importance.",
           "placeholder": null,
           "type": "MULTI_LINE_TEXT",
           "required": true,
           "options": null,
           "allowMultiSelect": null,
           "allowMultiFile": false,
-          "maxLength": 10000,
+          "maxLength": 20000,
           "jsonSchema": null
         }
       ]
@@ -585,7 +585,7 @@
           "options": null,
           "allowMultiSelect": null,
           "allowMultiFile": false,
-          "maxLength": 16000,
+          "maxLength": 20000,
           "jsonSchema": null
         },
         {
@@ -621,20 +621,20 @@
           "options": null,
           "allowMultiSelect": null,
           "allowMultiFile": false,
-          "maxLength": 16000,
+          "maxLength": 20000,
           "jsonSchema": null
         },
         {
           "slug": "rawUserMessages",
           "label": "Raw user messages",
-          "description": "Required. The interviewee's own messages for this revision, in chronological order: the correction plus every follow-up, copied verbatim. Do not EVER paraphrase, condense, omit, or substitute the cleaned finalAnswer. This is of utmost importance. Only exception: rewrite criticism of other people (including accounts of their mistakes and their quoted words) and private details as a neutral process lesson not tied to the person.",
+          "description": "Required. The interviewee's own messages for this revision, in chronological order: the correction plus every follow-up. THE ONE EXCEPTION, AND IT SUPERSEDES THE VERBATIM RULE: remove every negative remark about another person before copying. This is extremely important because this field is stored and visible to others. Negative remarks are judgments of someone's effort, competence, or attitude (for example useless, lazy, incompetent, unreliable), accounts of their mistakes, their words quoted as evidence of a shortcoming, and private details. Replace only that passage with a neutral process lesson not tied to the person: \"Martin is useless, he never updates the log\" becomes \"The log is often not updated; check it before relying on it.\" If there is no process lesson, drop the passage. Praise stays. Apart from this one exception, copy everything verbatim. Do not EVER paraphrase, condense, omit, or substitute the cleaned finalAnswer. This is of utmost importance.",
           "placeholder": null,
           "type": "MULTI_LINE_TEXT",
           "required": true,
           "options": null,
           "allowMultiSelect": null,
           "allowMultiFile": false,
-          "maxLength": 16000,
+          "maxLength": 20000,
           "jsonSchema": null
         },
         {

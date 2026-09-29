@@ -29,7 +29,7 @@
       "options": null,
       "allowMultiSelect": null,
       "allowMultiFile": false,
-      "maxLength": 16000,
+      "maxLength": 20000,
       "jsonSchema": null
     },
     {
