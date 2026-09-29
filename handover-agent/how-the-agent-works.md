@@ -87,6 +87,7 @@ External systems (backend / adjacent, not conversational skills):
 | **Outlook Calendar** | Pause scheduling proposal only — not in the state machine |
 | **CKR Company Context folder** | Optional grounding for topic generation |
 | **WorkIQ / prefill** | Optional; gated by `prefillEnabled` |
+| **Interview size** | Connection fields `minTopics`, `maxTopics`, `minQuestionsPerTopic`, `maxQuestionsPerTopic` (blank = 4, 6, 3, 6; clamped to 1–10 topics and 1–15 questions). The generate instruction states the counts and `save_topics_and_questions` enforces them before writing. |
 
 ---
 
@@ -117,7 +118,7 @@ Skills are methodology packs the agent loads when told to. They do **not** own p
 
 | Skill | When loaded | What it does | What it does not do |
 |---|---|---|---|
-| **`knowledge-retention-interviewing`** | Backend: `GenerateTopicsAndQuestions` (not auto-loaded at `created`) | Thin-answer discovery bar; **4–6 topics × 3–6 questions** grounded in discovery (+ Company Context) | No live question rewrite in `AskActiveQuestion`; no summaries |
+| **`knowledge-retention-interviewing`** | Backend: `GenerateTopicsAndQuestions` (not auto-loaded at `created`) | Thin-answer discovery bar; **topic and question counts from the connection (default 4–6 topics × 3–6 questions)** grounded in discovery (+ Company Context) | No live question rewrite in `AskActiveQuestion`; no summaries |
 | **`knowledge-retention-reporting`** | Topic summary (default); final doc when asked | Topic: `summary-format.md` only → summary Markdown drafted with the `write` tool; the backend renders `Topic-{n}-{slug}.docx`. Final: `final-document.md` → handover Markdown drafted with the `write` tool; the backend renders the `.docx` | No discovery/questions; never blend topic and final passes |
 | **BASF document template skill** | Not loaded — no longer used for the handover | — | Not summary methodology; never edit it |
 
@@ -323,7 +324,7 @@ flowchart TD
    The agent explains that discovery is short, and that this is the only phase where the profile is saved as one complete unit rather than quickly after each confirmation. Conversational collection (one question at a time): role, business unit, responsibilities, tools/systems, focus topics; KPIs/constraints optional but probed once. Thin answers get one probe. Profile is read back; only after explicit confirm → `save_discovery`. The agent then tells the user that discovery is complete and the profile is retained for future sessions.
 
 4. **Topic generation (`GenerateTopicsAndQuestions`)**  
-   Agent loads **interviewing** skill. Produces 4–6 topics (most critical first), 3–6 questions each, grounded in discovery (+ Company Context). Coverage should include risk/failure, stakeholder, and systems/tools unless N/A. Presents the full overview; waits for “ready” before any interview question. Then `save_topics_and_questions`.
+   Agent loads **interviewing** skill. Produces the topic count and questions per topic set on the connection (default 4–6 topics, 3–6 questions each; `save_topics_and_questions` rejects other counts), most critical first, grounded in discovery (+ Company Context). Coverage should include risk/failure, stakeholder, and systems/tools unless N/A. Presents the full overview; waits for “ready” before any interview question. Then `save_topics_and_questions`.
 
 5. **Prefill consent (optional)**  
    If `prefillEnabled`: present the topics overview (if not already shown), then offer verbatim consent text; explicit yes/no only → `save_consent`. If disabled: step is skipped server-side; the agent still shows the overview and waits for “ready” before any interview question (system prompt).

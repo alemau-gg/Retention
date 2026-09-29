@@ -59,6 +59,42 @@
       "type": "TEXT",
       "required": true,
       "maxLength": 100
+    },
+    {
+      "slug": "minTopics",
+      "label": "Minimum topics",
+      "description": "Fewest topics generated per interview (1–10). Leave blank for 4.",
+      "placeholder": "4",
+      "type": "TEXT",
+      "required": false,
+      "maxLength": 2
+    },
+    {
+      "slug": "maxTopics",
+      "label": "Maximum topics",
+      "description": "Most topics generated per interview (1–10). Leave blank for 6.",
+      "placeholder": "6",
+      "type": "TEXT",
+      "required": false,
+      "maxLength": 2
+    },
+    {
+      "slug": "minQuestionsPerTopic",
+      "label": "Minimum questions per topic",
+      "description": "Fewest questions generated per topic (1–15). Leave blank for 3.",
+      "placeholder": "3",
+      "type": "TEXT",
+      "required": false,
+      "maxLength": 2
+    },
+    {
+      "slug": "maxQuestionsPerTopic",
+      "label": "Maximum questions per topic",
+      "description": "Most questions generated per topic (1–15). Leave blank for 6.",
+      "placeholder": "6",
+      "type": "TEXT",
+      "required": false,
+      "maxLength": 2
     }
   ]
 }
