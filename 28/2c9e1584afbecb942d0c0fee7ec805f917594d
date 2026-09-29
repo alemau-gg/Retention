@@ -1,0 +1,21 @@
+repackaged-integrations/README.md
+  s_09473ab7800b93::t_a0582617b21512 5-7,15
+.gitignore
+  s_09473ab7800b93::t_b02768b99b5e90 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "282c9e1584afbecb942d0c0fee7ec805f917594d",
+  "prompts": {},
+  "sessions": {
+    "s_09473ab7800b93": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3a874d40-450d-41c0-a22c-bf90a01ab3f1",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
