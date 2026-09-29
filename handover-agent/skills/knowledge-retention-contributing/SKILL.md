@@ -39,7 +39,9 @@ Read these before acting, then follow the routing table:
 - **Dev first:** ordinary edits, helper synchronization, and verification target
   Dev only.
 - **Staging is controlled:** Staging changes only through confirmed
-  `promote_to_staging`; `revert_to_staging` uses Staging as the source for Dev.
+  `promote_to_staging`, `promote_agent_to_staging`, and
+  `promote_skill_to_staging`; `revert_to_staging` uses Staging as the source
+  for Dev.
 - **Fresh read:** fetch and fully read the current live source before mapping
   and again immediately before each edit.
 - **No unconfirmed changes:** propose the exact change, risks, version,
@@ -61,8 +63,9 @@ Read these before acting, then follow the routing table:
   Report a separate follow-up instead of editing it.
 - **Scope is narrow:** only the KR Backend, KR skills/prompt, and the
   coding-tools integration are in scope. Its read-only catalog/detail actions
-  may inspect integrations, actions, the configured agent by ID, and skills;
-  its mutators remain limited to the configured Dev/Staging KR IDs. Refuse
+  may inspect integrations, actions, the handover agent by ID, and skills
+  shared with the API key; its mutators may target only the KR Dev/Staging
+  integrations. Refuse
   other integrations and non-KR skills.
 
 ## Completion standard

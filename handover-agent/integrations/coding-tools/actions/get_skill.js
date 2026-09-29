@@ -1,8 +1,4 @@
 const skillId = data.input.skillId;
-const trustedSkillIds = String(data.auth.trustedSkillIds || '')
-  .split(',')
-  .map((id) => id.trim())
-  .filter(Boolean);
 const baseUrl = (data.auth.baseUrl || 'https://api.langdock.com').replace(/\/+$/, '');
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const MAX_INSTRUCTIONS = 50000;
@@ -19,17 +15,6 @@ function safeError(value) {
 if (typeof skillId !== 'string' || !UUID_RE.test(skillId)) {
   throw new Error('Skill ID must be a UUID');
 }
-if (
-  trustedSkillIds.length === 0 ||
-  trustedSkillIds.length > 100 ||
-  trustedSkillIds.some((id) => !UUID_RE.test(id))
-) {
-  throw new Error('No valid trusted Knowledge Retention skill ID allowlist is configured');
-}
-if (!trustedSkillIds.includes(skillId)) {
-  throw new Error('get_skill only permits configured trusted Knowledge Retention skill IDs');
-}
-
 function formatError(response) {
   const json = response.json;
   if (!json) return safeError(response.text || response.error || 'Langdock returned an error');

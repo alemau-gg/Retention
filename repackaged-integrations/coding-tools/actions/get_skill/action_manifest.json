@@ -1,7 +1,7 @@
 {
   "slug": "get_skill",
   "name": "Get skill details",
-  "description": "Reads one configured Knowledge Retention skill's bounded instructions and stored-file metadata without file contents. Requires trustedSkillIds connection configuration.",
+  "description": "Reads one Knowledge Retention skill's bounded instructions and stored-file metadata without file contents.",
   "activeLabel": "Reading skill details",
   "doneLabel": "Read skill details",
   "failedLabel": "Failed to read skill details",

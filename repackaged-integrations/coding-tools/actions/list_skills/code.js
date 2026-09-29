@@ -1,8 +1,4 @@
 const baseUrl = (data.auth.baseUrl || 'https://api.langdock.com').replace(/\/+$/, '');
-const trustedSkillIds = String(data.auth.trustedSkillIds || '')
-  .split(',')
-  .map((id) => id.trim())
-  .filter(Boolean);
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 250;
 const MAX_QUERY_LENGTH = 100;
@@ -15,14 +11,6 @@ function safeError(value) {
     /((?:api[_-]?key|authorization|client[_-]?secret|access[_-]?token|refresh[_-]?token|password|secret)\s*[:=]\s*)(["']?)[^,\s"']+/gi,
     '$1$2[redacted]',
   ).slice(0, MAX_ERROR_LENGTH);
-}
-
-if (
-  trustedSkillIds.length === 0 ||
-  trustedSkillIds.length > 100 ||
-  trustedSkillIds.some((id) => !UUID_RE.test(id))
-) {
-  throw new Error('No valid trusted Knowledge Retention skill ID allowlist is configured');
 }
 
 function formatError(response) {
@@ -79,15 +67,14 @@ const skills = response.json && response.json.skills;
 if (!Array.isArray(skills)) {
   throw new Error('Skill catalog response did not include a skills array');
 }
-const allowed = new Set(trustedSkillIds);
-const filteredSkills = skills.filter((skill) => skill && typeof skill === 'object' && allowed.has(skill.id));
+const validSkills = skills.filter((skill) => skill && typeof skill === 'object');
 const nextCursor = response.json.nextCursor ?? null;
 if (nextCursor !== null && (typeof nextCursor !== 'string' || !UUID_RE.test(nextCursor))) {
   throw new Error('Skill catalog response contained an invalid pagination cursor');
 }
 
 return {
-  skills: filteredSkills.slice(0, requestedLimit).map((skill) => ({
+  skills: validSkills.slice(0, requestedLimit).map((skill) => ({
     id: skill.id,
     name: typeof skill.name === 'string' ? skill.name.slice(0, 64) : null,
     slug: typeof skill.slug === 'string' ? skill.slug.slice(0, 100) : null,
@@ -98,6 +85,5 @@ return {
   })),
   nextCursor,
   limit: requestedLimit,
-  allowlistedOnly: true,
-  note: 'Only configured Knowledge Retention skill IDs are returned. Instructions and file contents are available through the corresponding detail actions.',
+  note: 'Only skills shared with the API key are returned. Instructions and file contents are available through the corresponding detail actions.',
 };

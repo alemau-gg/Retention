@@ -12,7 +12,7 @@
     {
       "slug": "integrationId",
       "label": "Integration ID",
-      "description": "UUID of the configured Dev integration whose actions should be checked. Do not use a Staging or Prod ID.",
+      "description": "UUID of the Dev integration whose actions should be checked. Do not use a Staging or Prod ID.",
       "placeholder": null,
       "type": "TEXT",
       "required": true,

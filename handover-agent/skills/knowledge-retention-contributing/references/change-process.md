@@ -135,8 +135,8 @@ If setup documentation appears stale, report a separate follow-up. Do not edit H
 The coding-tools read actions are non-mutating and require no confirmation,
 but they still use only documented Langdock endpoint paths, never return the
 API key, and never accept an HTTP method, path, or upstream URL from the
-caller. Integration detail/action reads are limited to the trusted Dev and
-Staging IDs configured in the connection. Agent lookup is by ID because the
+caller. Access is controlled by which agents, integrations, and skills are
+shared with the API key. Agent lookup is by ID because the
 documented Agent API has no workspace-wide list endpoint. Skill file reads
 must reject absolute paths, drive prefixes, control characters, backslashes,
 dot segments, unsupported extensions, and files over 512 KB.

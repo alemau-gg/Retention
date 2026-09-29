@@ -1,7 +1,7 @@
 {
   "slug": "promote_to_staging",
   "name": "Promote to Staging",
-  "description": "Mirrors the configured Dev Knowledge Retention integration into configured Staging after the user confirms that Dev testing is satisfactory.",
+  "description": "Mirrors the Dev Knowledge Retention integration into Staging after the user confirms that Dev testing is satisfactory. Run this before promote_agent_to_staging and promote_skill_to_staging.",
   "activeLabel": "Promoting to Staging",
   "doneLabel": "Promoted to Staging",
   "failedLabel": "Failed to promote to Staging",
@@ -12,7 +12,7 @@
     {
       "slug": "devIntegrationId",
       "label": "Dev integration ID",
-      "description": "UUID of the configured Dev Knowledge Retention integration. Must match the trusted Dev connection setting; never use a Prod ID.",
+      "description": "UUID of the Dev Knowledge Retention integration. Never use a Prod ID.",
       "placeholder": null,
       "type": "TEXT",
       "required": true,
@@ -25,7 +25,7 @@
     {
       "slug": "stagingIntegrationId",
       "label": "Staging integration ID",
-      "description": "UUID of the configured Staging Knowledge Retention integration. Must match the trusted Staging connection setting; never use a Prod ID.",
+      "description": "UUID of the Staging Knowledge Retention integration. Never use a Prod ID.",
       "placeholder": null,
       "type": "TEXT",
       "required": true,

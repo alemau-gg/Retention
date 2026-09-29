@@ -6,8 +6,8 @@ Langdock conventions for **changing** the live **Knowledge Retention Backend** â
 
 **Operations:** read and update live Dev actions/manifest through Langdock API
 tools. The coding-tools integration also provides fixed-GET read actions for
-catalog/detail inspection of integrations, actions, the configured agent, and
-skills. After helper edits, call the Dev-only `sync_helpers` and
+catalog/detail inspection of integrations, actions, the handover agent, and
+skills shared with the API key. After helper edits, call the Dev-only `sync_helpers` and
 `verify_helpers` custom actions on fresh live sources, then write confirmed
 updates back.
 
