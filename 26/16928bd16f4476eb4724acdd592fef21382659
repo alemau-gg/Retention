@@ -1,0 +1,351 @@
+repackaged-integrations/latest/state-machine/actions/save_final_document/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-1060
+repackaged-integrations/latest/state-machine/actions/save_answer/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-1029
+repackaged-integrations/latest/state-machine/actions/read_supporting_document/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-23
+repackaged-integrations/latest/coding-tools/actions/get_skill_file/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-107
+repackaged-integrations/latest/state-machine/actions/set_up_interview_folder/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-9
+repackaged-integrations/latest/coding-tools/actions/update_action/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-104
+repackaged-integrations/latest/state-machine/actions/save_feedback/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-49
+repackaged-integrations/latest/state-machine/actions/generate_final_document/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-12
+repackaged-integrations/latest/coding-tools/actions/list_integrations/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-90
+repackaged-integrations/latest/coding-tools/actions/list_skills/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-65
+repackaged-integrations/latest/state-machine/actions/create_interview/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-949
+repackaged-integrations/latest/state-machine/actions/admin_describe_schema/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-227
+repackaged-integrations/latest/state-machine/actions/admin_query_records/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-323
+repackaged-integrations/latest/state-machine/actions/save_discovery/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-88
+repackaged-integrations/latest/coding-tools/actions/sync_helpers/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-123
+repackaged-integrations/latest/state-machine/actions/save_consent/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-23
+repackaged-integrations/latest/coding-tools/actions/promote_skill_to_staging/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-65
+repackaged-integrations/latest/sharepoint-search/actions/search_files_in_site/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-362
+repackaged-integrations/latest/state-machine/actions/save_discovery/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-946
+repackaged-integrations/latest/state-machine/actions/save_final_document/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-26
+repackaged-integrations/latest/state-machine/actions/save_topic_summary/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-36
+repackaged-integrations/latest/state-machine/actions/set_up_interview_folder/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-1120
+repackaged-integrations/latest/sharepoint-search/manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-45
+repackaged-integrations/latest/coding-tools/actions/list_integrations/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-12
+repackaged-integrations/latest/coding-tools/actions/list_skills/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-89
+repackaged-integrations/latest/coding-tools/manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-28
+repackaged-integrations/latest/coding-tools/actions/revert_to_staging/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-39
+repackaged-integrations/latest/sharepoint-search/oauth/refreshToken.js
+  s_09473ab7800b93::t_b8eeb295957478 1-20
+repackaged-integrations/latest/state-machine/actions/get_answers/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-36
+repackaged-integrations/latest/state-machine/actions/read_supporting_document/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-1068
+repackaged-integrations/latest/state-machine/actions/revise_answer/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-75
+repackaged-integrations/latest/coding-tools/actions/get_agent/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-126
+repackaged-integrations/latest/state-machine/actions/save_answer/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-62
+repackaged-integrations/latest/coding-tools/actions/get_action/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-131
+repackaged-integrations/latest/state-machine/actions/save_topic_summary/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-1000
+repackaged-integrations/latest/state-machine/actions/save_topics_and_questions/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-23
+repackaged-integrations/latest/state-machine/actions/abandon_interview/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-941
+repackaged-integrations/latest/state-machine/actions/save_topics_and_questions/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-1180
+repackaged-integrations/latest/state-machine/actions/upload_document/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-62
+repackaged-integrations/latest/state-machine/actions/create_interview/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-48
+repackaged-integrations/latest/state-machine/actions/admin_query_records/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-110
+repackaged-integrations/latest/state-machine/manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-100
+repackaged-integrations/latest/state-machine/actions/finalize_interview/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-1031
+repackaged-integrations/latest/sharepoint-search/actions/search_files_in_site/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-41
+repackaged-integrations/latest/sharepoint-search/oauth/accessToken.js
+  s_09473ab7800b93::t_b8eeb295957478 1-21
+repackaged-integrations/latest/state-machine/actions/revise_answer/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-1106
+repackaged-integrations/latest/state-machine/actions/abandon_interview/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-9
+repackaged-integrations/latest/coding-tools/actions/get_skill_file/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-39
+repackaged-integrations/latest/coding-tools/actions/get_action/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-52
+repackaged-integrations/latest/coding-tools/actions/get_agent/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-26
+repackaged-integrations/latest/coding-tools/actions/promote_skill_to_staging/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-260
+repackaged-integrations/latest/sharepoint-search/authTest.js
+  s_09473ab7800b93::t_b8eeb295957478 1-13
+repackaged-integrations/latest/state-machine/actions/get_runtime_state/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-12
+repackaged-integrations/latest/coding-tools/actions/promote_agent_to_staging/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-179
+repackaged-integrations/latest/coding-tools/actions/sync_helpers/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-26
+repackaged-integrations/latest/state-machine/actions/admin_describe_schema/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-23
+repackaged-integrations/latest/state-machine/actions/get_runtime_state/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-979
+repackaged-integrations/latest/state-machine/actions/save_feedback/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-917
+repackaged-integrations/v1/coding-tools/manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-28
+repackaged-integrations/README.md
+  s_09473ab7800b93::t_401496ebaa2569 5,7-12,20
+repackaged-integrations/latest/coding-tools/actions/get_integration/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-137
+repackaged-integrations/latest/state-machine/actions/get_discovery/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-9
+repackaged-integrations/latest/coding-tools/actions/get_skill/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-26
+repackaged-integrations/latest/coding-tools/actions/update_action/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-138
+repackaged-integrations/latest/sharepoint-search/oauth/authorization.js
+  s_09473ab7800b93::t_b8eeb295957478 1-4
+repackaged-integrations/latest/state-machine/actions/upload_document/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-1067
+repackaged-integrations/latest/state-machine/actions/get_answers/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-953
+repackaged-integrations/latest/coding-tools/actions/promote_to_staging/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-230
+repackaged-integrations/latest/state-machine/actions/generate_topic_document/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-23
+repackaged-integrations/latest/state-machine/actions/finalize_interview/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-9
+repackaged-integrations/latest/state-machine/actions/generate_topic_document/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-2026
+repackaged-integrations/latest/coding-tools/authTest.js
+  s_09473ab7800b93::t_b8eeb295957478 1-16
+repackaged-integrations/latest/coding-tools/actions/verify_helpers/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-129
+repackaged-integrations/latest/coding-tools/actions/promote_to_staging/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-39
+repackaged-integrations/latest/coding-tools/actions/get_integration/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-26
+repackaged-integrations/latest/coding-tools/actions/verify_helpers/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-26
+repackaged-integrations/latest/coding-tools/actions/get_skill/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-84
+repackaged-integrations/latest/state-machine/actions/generate_final_document/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-1963
+repackaged-integrations/latest/state-machine/authTest.js
+  s_09473ab7800b93::t_b8eeb295957478 1-74
+repackaged-integrations/latest/state-machine/actions/save_consent/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-917
+repackaged-integrations/latest/coding-tools/actions/promote_agent_to_staging/latest/action_manifest.json
+  s_09473ab7800b93::t_b8eeb295957478 1-65
+repackaged-integrations/latest/state-machine/actions/get_discovery/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-913
+repackaged-integrations/latest/coding-tools/actions/revert_to_staging/latest/code.js
+  s_09473ab7800b93::t_b8eeb295957478 1-232
+repackaged-integrations/v1/coding-tools/actions/get_action/v1/action_manifest.json
+  s_09473ab7800b93::t_7989d19263d805 1-52
+repackaged-integrations/v1/coding-tools/actions/get_action/v1/code.js
+  s_09473ab7800b93::t_81a8d88a06b577 1-131
+repackaged-integrations/v1/coding-tools/actions/get_agent/v1/action_manifest.json
+  s_09473ab7800b93::t_7fc0f7a13d9b7e 1-26
+repackaged-integrations/v1/coding-tools/actions/get_agent/v1/code.js
+  s_09473ab7800b93::t_d0454d4cbff2ae 1-126
+repackaged-integrations/v1/coding-tools/actions/get_integration/v1/action_manifest.json
+  s_09473ab7800b93::t_418d40c3fcaad4 1-26
+repackaged-integrations/v1/coding-tools/actions/get_integration/v1/code.js
+  s_09473ab7800b93::t_b26b39df26663c 1-137
+repackaged-integrations/v1/coding-tools/actions/get_skill/v1/action_manifest.json
+  s_09473ab7800b93::t_126290891c4161 1-26
+repackaged-integrations/v1/coding-tools/actions/get_skill/v1/code.js
+  s_09473ab7800b93::t_b6be9ae621d4ec 1-84
+repackaged-integrations/v1/coding-tools/actions/get_skill_file/v1/action_manifest.json
+  s_09473ab7800b93::t_bad27509fe4c1e 1-39
+repackaged-integrations/v1/coding-tools/actions/get_skill_file/v1/code.js
+  s_09473ab7800b93::t_d9e10e4c373a49 1-107
+repackaged-integrations/v1/coding-tools/actions/list_integrations/v1/action_manifest.json
+  s_09473ab7800b93::t_59b5a34436b34e 1-12
+repackaged-integrations/v1/coding-tools/actions/list_integrations/v1/code.js
+  s_09473ab7800b93::t_d6b77471119b17 1-90
+repackaged-integrations/v1/coding-tools/actions/list_skills/v1/action_manifest.json
+  s_09473ab7800b93::t_4e616f3a683d75 1-65
+repackaged-integrations/v1/coding-tools/actions/list_skills/v1/code.js
+  s_09473ab7800b93::t_9c5ecb541a0546 1-89
+repackaged-integrations/v1/coding-tools/actions/promote_agent_to_staging/v1/action_manifest.json
+  s_09473ab7800b93::t_70f8cd6efee823 1-65
+repackaged-integrations/v1/coding-tools/actions/promote_agent_to_staging/v1/code.js
+  s_09473ab7800b93::t_cce3e8800d882c 1-179
+repackaged-integrations/v1/coding-tools/actions/promote_skill_to_staging/v1/action_manifest.json
+  s_09473ab7800b93::t_c8727356105d73 1-65
+repackaged-integrations/v1/coding-tools/actions/promote_skill_to_staging/v1/code.js
+  s_09473ab7800b93::t_6cfdd4db958fac 1-260
+repackaged-integrations/v1/coding-tools/actions/promote_to_staging/v1/action_manifest.json
+  s_09473ab7800b93::t_b15029c1598d08 1-39
+repackaged-integrations/v1/coding-tools/actions/promote_to_staging/v1/code.js
+  s_09473ab7800b93::t_7700de8e4c7138 1-230
+repackaged-integrations/v1/coding-tools/actions/revert_to_staging/v1/action_manifest.json
+  s_09473ab7800b93::t_4393b68270ca2d 1-39
+repackaged-integrations/v1/coding-tools/actions/revert_to_staging/v1/code.js
+  s_09473ab7800b93::t_e67d0f5028add0 1-232
+repackaged-integrations/v1/coding-tools/actions/sync_helpers/v1/action_manifest.json
+  s_09473ab7800b93::t_76bb9a4c0318da 1-26
+repackaged-integrations/v1/coding-tools/actions/sync_helpers/v1/code.js
+  s_09473ab7800b93::t_20f6815548628d 1-123
+repackaged-integrations/v1/coding-tools/actions/update_action/v1/action_manifest.json
+  s_09473ab7800b93::t_039e81a2cb7f04 1-104
+repackaged-integrations/v1/coding-tools/actions/update_action/v1/code.js
+  s_09473ab7800b93::t_4c5c2e7689d84c 1-138
+repackaged-integrations/v1/coding-tools/actions/verify_helpers/v1/action_manifest.json
+  s_09473ab7800b93::t_76c2c40d3986ed 1-26
+repackaged-integrations/v1/coding-tools/actions/verify_helpers/v1/code.js
+  s_09473ab7800b93::t_7ee8973551fb3d 1-129
+repackaged-integrations/v1/coding-tools/authTest.js
+  s_09473ab7800b93::t_40034b72afdaf2 1-16
+repackaged-integrations/v1/sharepoint-search/actions/search_files_in_site/v1/action_manifest.json
+  s_09473ab7800b93::t_80d4778919502b 1-41
+repackaged-integrations/v1/sharepoint-search/actions/search_files_in_site/v1/code.js
+  s_09473ab7800b93::t_e1d3213a461c74 1-362
+repackaged-integrations/v1/sharepoint-search/authTest.js
+  s_09473ab7800b93::t_df6538f8513ee4 1-13
+repackaged-integrations/v1/sharepoint-search/manifest.json
+  s_09473ab7800b93::t_57356a086acf8c 1-45
+repackaged-integrations/v1/sharepoint-search/oauth/accessToken.js
+  s_09473ab7800b93::t_c99fedfbae9ece 1-21
+repackaged-integrations/v1/sharepoint-search/oauth/authorization.js
+  s_09473ab7800b93::t_8bfe339bc2564d 1-4
+repackaged-integrations/v1/sharepoint-search/oauth/refreshToken.js
+  s_09473ab7800b93::t_0f61d7e2a10a1b 1-20
+repackaged-integrations/v1/state-machine/actions/abandon_interview/v1/action_manifest.json
+  s_09473ab7800b93::t_17c7d21d022783 1-9
+repackaged-integrations/v1/state-machine/actions/abandon_interview/v1/code.js
+  s_09473ab7800b93::t_fe73d1e9b477df 1-941
+repackaged-integrations/v1/state-machine/actions/admin_describe_schema/v1/action_manifest.json
+  s_09473ab7800b93::t_afb9cd01b0d094 1-23
+repackaged-integrations/v1/state-machine/actions/admin_describe_schema/v1/code.js
+  s_09473ab7800b93::t_5c8e603d53c801 1-227
+repackaged-integrations/v1/state-machine/actions/admin_query_records/v1/action_manifest.json
+  s_09473ab7800b93::t_eae83e581cfc1b 1-110
+repackaged-integrations/v1/state-machine/actions/admin_query_records/v1/code.js
+  s_09473ab7800b93::t_0c54d113e28290 1-323
+repackaged-integrations/v1/state-machine/actions/create_interview/v1/action_manifest.json
+  s_09473ab7800b93::t_3d0bdf1dd75773 1-48
+repackaged-integrations/v1/state-machine/actions/create_interview/v1/code.js
+  s_09473ab7800b93::t_5ffa19e1981b72 1-949
+repackaged-integrations/v1/state-machine/actions/finalize_interview/v1/action_manifest.json
+  s_09473ab7800b93::t_c75fb097f3884d 1-9
+repackaged-integrations/v1/state-machine/actions/finalize_interview/v1/code.js
+  s_09473ab7800b93::t_dcde6d17c906ad 1-1031
+repackaged-integrations/v1/state-machine/actions/generate_final_document/v1/action_manifest.json
+  s_09473ab7800b93::t_888687b04adeec 1-12
+repackaged-integrations/v1/state-machine/actions/generate_final_document/v1/code.js
+  s_09473ab7800b93::t_b7365e88d94462 1-1963
+repackaged-integrations/v1/state-machine/actions/generate_topic_document/v1/action_manifest.json
+  s_09473ab7800b93::t_53d0838bde4546 1-23
+repackaged-integrations/v1/state-machine/actions/generate_topic_document/v1/code.js
+  s_09473ab7800b93::t_ad0d2e46689c3b 1-2026
+repackaged-integrations/v1/state-machine/actions/get_answers/v1/action_manifest.json
+  s_09473ab7800b93::t_a858261ddfda4b 1-36
+repackaged-integrations/v1/state-machine/actions/get_answers/v1/code.js
+  s_09473ab7800b93::t_c2cf74345f6412 1-953
+repackaged-integrations/v1/state-machine/actions/get_discovery/v1/action_manifest.json
+  s_09473ab7800b93::t_d6b253f3d27ebb 1-9
+repackaged-integrations/v1/state-machine/actions/get_discovery/v1/code.js
+  s_09473ab7800b93::t_62e9b8b0e5327d 1-913
+repackaged-integrations/v1/state-machine/actions/get_runtime_state/v1/action_manifest.json
+  s_09473ab7800b93::t_95f8e2104ce5a9 1-12
+repackaged-integrations/v1/state-machine/actions/get_runtime_state/v1/code.js
+  s_09473ab7800b93::t_60039e5fcbf816 1-979
+repackaged-integrations/v1/state-machine/actions/read_supporting_document/v1/action_manifest.json
+  s_09473ab7800b93::t_46c82ebfcad444 1-23
+repackaged-integrations/v1/state-machine/actions/read_supporting_document/v1/code.js
+  s_09473ab7800b93::t_e25da2d1665dea 1-1068
+repackaged-integrations/v1/state-machine/actions/revise_answer/v1/action_manifest.json
+  s_09473ab7800b93::t_d5ee9aa9d19e44 1-75
+repackaged-integrations/v1/state-machine/actions/revise_answer/v1/code.js
+  s_09473ab7800b93::t_4a0b939ea26fff 1-1106
+repackaged-integrations/v1/state-machine/actions/save_answer/v1/action_manifest.json
+  s_09473ab7800b93::t_498743564040a4 1-62
+repackaged-integrations/v1/state-machine/actions/save_answer/v1/code.js
+  s_09473ab7800b93::t_dedd3636bf6085 1-1029
+repackaged-integrations/v1/state-machine/actions/save_consent/v1/action_manifest.json
+  s_09473ab7800b93::t_2d95ef8cdd9002 1-23
+repackaged-integrations/v1/state-machine/actions/save_consent/v1/code.js
+  s_09473ab7800b93::t_c79cc45f619042 1-917
+repackaged-integrations/v1/state-machine/actions/save_discovery/v1/action_manifest.json
+  s_09473ab7800b93::t_c7dd5742395b70 1-88
+repackaged-integrations/v1/state-machine/actions/save_discovery/v1/code.js
+  s_09473ab7800b93::t_e23e7e0b9ac0b0 1-946
+repackaged-integrations/v1/state-machine/actions/save_feedback/v1/action_manifest.json
+  s_09473ab7800b93::t_e38e5288c40f8f 1-49
+repackaged-integrations/v1/state-machine/actions/save_feedback/v1/code.js
+  s_09473ab7800b93::t_4b3d34305ef2bd 1-917
+repackaged-integrations/v1/state-machine/actions/save_final_document/v1/action_manifest.json
+  s_09473ab7800b93::t_a3520944ab5d7a 1-26
+repackaged-integrations/v1/state-machine/actions/save_final_document/v1/code.js
+  s_09473ab7800b93::t_ad0d23218686e9 1-1060
+repackaged-integrations/v1/state-machine/actions/save_topic_summary/v1/action_manifest.json
+  s_09473ab7800b93::t_485433fd5b1411 1-36
+repackaged-integrations/v1/state-machine/actions/save_topic_summary/v1/code.js
+  s_09473ab7800b93::t_bda3901c334af4 1-1000
+repackaged-integrations/v1/state-machine/actions/save_topics_and_questions/v1/action_manifest.json
+  s_09473ab7800b93::t_abfe4794f20d34 1-23
+repackaged-integrations/v1/state-machine/actions/save_topics_and_questions/v1/code.js
+  s_09473ab7800b93::t_03a94db775bba4 1-1180
+repackaged-integrations/v1/state-machine/actions/set_up_interview_folder/v1/action_manifest.json
+  s_09473ab7800b93::t_ba2695a23707a0 1-9
+repackaged-integrations/v1/state-machine/actions/set_up_interview_folder/v1/code.js
+  s_09473ab7800b93::t_b85c7d2f97cd2e 1-1120
+repackaged-integrations/v1/state-machine/actions/upload_document/v1/action_manifest.json
+  s_09473ab7800b93::t_5df12b0be42c58 1-62
+repackaged-integrations/v1/state-machine/actions/upload_document/v1/code.js
+  s_09473ab7800b93::t_98e9dd238d2c27 1-1067
+repackaged-integrations/v1/state-machine/authTest.js
+  s_5599f216950ff2::t_b46f9c097dbcd1 1-74
+repackaged-integrations/v1/state-machine/manifest.json
+  s_09473ab7800b93::t_5b84c45d6f4248 1-100
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "2616928bd16f4476eb4724acdd592fef21382659",
+  "prompts": {},
+  "sessions": {
+    "s_09473ab7800b93": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3a874d40-450d-41c0-a22c-bf90a01ab3f1",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    },
+    "s_5599f216950ff2": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5536761c-e04c-42d3-8405-f3556061314b",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
