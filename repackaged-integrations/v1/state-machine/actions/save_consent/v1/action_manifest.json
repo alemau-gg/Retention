@@ -1,0 +1,23 @@
+{
+  "slug": "save_consent",
+  "name": "Save consent",
+  "description": "Records the interviewee's explicit decision on knowledge prefill for the caller's open interview.",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": false,
+  "inputFields": [
+    {
+      "slug": "consentGranted",
+      "label": "Consent granted",
+      "description": "True only if the interviewee explicitly confirmed prefill. False if they declined. Never infer from a soft or implicit reply.",
+      "placeholder": null,
+      "type": "BOOLEAN",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": null,
+      "jsonSchema": null
+    }
+  ]
+}

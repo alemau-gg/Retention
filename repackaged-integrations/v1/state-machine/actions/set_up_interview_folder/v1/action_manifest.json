@@ -1,0 +1,9 @@
+{
+  "slug": "set_up_interview_folder",
+  "name": "Set up interview folder",
+  "description": "Creates the SharePoint folder for the caller's interview on the central CKR site and grants edit access to the employee and their manager. Idempotent.",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": false,
+  "inputFields": []
+}

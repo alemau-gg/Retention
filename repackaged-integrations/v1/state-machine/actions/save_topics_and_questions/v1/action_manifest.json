@@ -1,0 +1,23 @@
+{
+  "slug": "save_topics_and_questions",
+  "name": "Save topics and questions",
+  "description": "Persists the generated interview topics and their questions for the caller's open interview, then advances it to the interview stage. Idempotent on retry.",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": false,
+  "inputFields": [
+    {
+      "slug": "topics",
+      "label": "Topics",
+      "description": "The ordered list of interview topics, each with its ordered questions. Generate the number of topics and questions per topic given in the backend instruction (set on the connection; default 4-6 topics with 3-6 questions each).",
+      "placeholder": null,
+      "type": "OBJECT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": null,
+      "jsonSchema": "{\"type\":\"array\",\"minItems\":1,\"maxItems\":10,\"items\":{\"type\":\"object\",\"properties\":{\"order\":{\"type\":\"integer\",\"description\":\"1-based topic order, most critical first\"},\"name\":{\"type\":\"string\",\"description\":\"Topic name shown in bold to the interviewee\"},\"description\":{\"type\":\"string\",\"description\":\"Optional one-line summary of what the topic covers\"},\"questions\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":15,\"items\":{\"type\":\"object\",\"properties\":{\"order\":{\"type\":\"integer\",\"description\":\"1-based question order within the topic\"},\"questionText\":{\"type\":\"string\",\"description\":\"Verbatim question text, in the interview language, asked exactly as written\"},\"mandatory\":{\"type\":\"boolean\",\"description\":\"Whether the question must be answered (default true)\"}},\"required\":[\"order\",\"questionText\"]}}},\"required\":[\"order\",\"name\",\"questions\"]}}"
+    }
+  ]
+}

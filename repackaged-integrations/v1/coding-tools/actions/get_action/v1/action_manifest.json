@@ -1,0 +1,52 @@
+{
+  "slug": "get_action",
+  "name": "Get action details",
+  "description": "Reads one action by ID or safe slug from a Dev or Staging integration, including its complete stored JavaScript code and input definitions.",
+  "activeLabel": "Reading action details",
+  "doneLabel": "Read action details",
+  "failedLabel": "Failed to read action details",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": false,
+  "inputFields": [
+    {
+      "slug": "integrationId",
+      "label": "Integration ID",
+      "description": "UUID of the Dev or Staging integration containing the action. Use an ID from the integration catalog.",
+      "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "type": "TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 36,
+      "jsonSchema": null
+    },
+    {
+      "slug": "actionId",
+      "label": "Action ID",
+      "description": "Optional UUID of the action to inspect. Provide this or action slug, but not both.",
+      "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "type": "TEXT",
+      "required": false,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 36,
+      "jsonSchema": null
+    },
+    {
+      "slug": "actionSlug",
+      "label": "Action slug",
+      "description": "Optional lowercase action slug using letters, numbers, and underscores. Provide this or action ID, but not both.",
+      "placeholder": "get_runtime_state",
+      "type": "TEXT",
+      "required": false,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 100,
+      "jsonSchema": null
+    }
+  ]
+}

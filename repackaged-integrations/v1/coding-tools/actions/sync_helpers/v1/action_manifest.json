@@ -1,0 +1,26 @@
+{
+  "slug": "sync_helpers",
+  "name": "Sync helpers",
+  "description": "Fetches a live integration and proposes synchronized KnowledgeRetentionUtils helper code without writing any action.",
+  "activeLabel": "Checking helper sync",
+  "doneLabel": "Prepared helper sync",
+  "failedLabel": "Failed to prepare helper sync",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": false,
+  "inputFields": [
+    {
+      "slug": "integrationId",
+      "label": "Integration ID",
+      "description": "UUID of the Dev integration whose actions should be checked. Do not use a Staging or Prod ID.",
+      "placeholder": null,
+      "type": "TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": null,
+      "jsonSchema": null
+    }
+  ]
+}

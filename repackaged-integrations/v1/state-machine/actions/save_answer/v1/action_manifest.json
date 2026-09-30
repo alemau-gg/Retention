@@ -1,0 +1,62 @@
+{
+  "slug": "save_answer",
+  "name": "Save answer",
+  "description": "Saves the interviewee's confirmed answer to the current question and returns the next state. Rejects the write with a conflict if the expected question order, or the expected topic order when supplied, no longer matches the backend.",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": false,
+  "inputFields": [
+    {
+      "slug": "expectedQuestionOrder",
+      "label": "Expected question order",
+      "description": "The order number of the question the answer is for, taken verbatim from the last state. Used for optimistic concurrency; a mismatch returns a conflict and no write.",
+      "placeholder": null,
+      "type": "NUMBER",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": null,
+      "jsonSchema": null
+    },
+    {
+      "slug": "expectedTopicOrder",
+      "label": "Expected topic order",
+      "description": "The order number of the topic the question belongs to, taken verbatim from the last state. Question order restarts at 1 in every topic, so this stops a stale answer from landing on a same-numbered question in a later topic; a mismatch returns a conflict and no write.",
+      "placeholder": null,
+      "type": "NUMBER",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": null,
+      "jsonSchema": null
+    },
+    {
+      "slug": "finalAnswer",
+      "label": "Final answer",
+      "description": "The interviewee's confirmed, final answer to the current question. It should capture the essence of the answer, and reassure the user a more extensive summary will be generated later. Do not over-summarize. Save only after explicit confirmation.",
+      "placeholder": null,
+      "type": "MULTI_LINE_TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 20000,
+      "jsonSchema": null
+    },
+    {
+      "slug": "rawUserMessages",
+      "label": "Raw user messages",
+      "description": "Required. The interviewee's own messages for this question, in chronological order: the initial answer plus every follow-up. THE ONE EXCEPTION, AND IT SUPERSEDES THE VERBATIM RULE: remove every negative remark about another person before copying. This is extremely important because this field is stored and visible to others. Negative remarks are judgments of someone's effort, competence, or attitude (for example useless, lazy, incompetent, unreliable), accounts of their mistakes, their words quoted as evidence of a shortcoming, and private details. Replace only that passage with a neutral process lesson not tied to the person: \"Martin is useless, he never updates the log\" becomes \"The log is often not updated; check it before relying on it.\" If there is no process lesson, drop the passage. Praise stays. Apart from this one exception, copy everything verbatim. Do not EVER paraphrase, condense, omit, or substitute the cleaned finalAnswer. This is of utmost importance.",
+      "placeholder": null,
+      "type": "MULTI_LINE_TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 20000,
+      "jsonSchema": null
+    }
+  ]
+}

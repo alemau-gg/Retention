@@ -1,0 +1,28 @@
+{
+  "id": "f3a1b2c4-d5e6-4f78-9a0b-c1d2e3f4a5b6",
+  "name": "Langdock",
+  "color": "#6366F1",
+  "description": "Inspect, update, verify, and promote BASF Knowledge Retention development actions",
+  "authType": "API_KEY",
+  "integrationType": "API",
+  "authFields": [
+    {
+      "slug": "apiKey",
+      "label": "API key",
+      "description": "Need an API key? Create one in Workspace Settings > Products > API and enable the Integrations API scope. See [Langdock API key best practices](https://docs.langdock.com/en/admin/ai-adoption-and-rollout/best-practices/api-key-best-practices).",
+      "placeholder": null,
+      "type": "PASSWORD",
+      "required": true,
+      "maxLength": null
+    },
+    {
+      "slug": "baseUrl",
+      "label": "Base URL",
+      "description": "Optional Langdock API base URL. Leave blank for https://api.langdock.com or use https://<deployment-url>/api/public for a dedicated deployment.",
+      "placeholder": "https://api.langdock.com",
+      "type": "TEXT",
+      "required": false,
+      "maxLength": null
+    }
+  ]
+}

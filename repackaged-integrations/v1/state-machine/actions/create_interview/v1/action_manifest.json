@@ -1,0 +1,48 @@
+{
+  "slug": "create_interview",
+  "name": "Create interview",
+  "description": "Starts a new knowledge-retention interview for the caller in the chosen language. Refuses server-side if the caller already has an open interview.",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": false,
+  "inputFields": [
+    {
+      "slug": "language",
+      "label": "Interview language",
+      "description": "Language the interview is conducted in. The backend stores it and every later instruction is rendered in this language.",
+      "placeholder": null,
+      "type": "SELECT",
+      "required": true,
+      "options": [
+        {
+          "label": "English",
+          "value": "en"
+        },
+        {
+          "label": "German",
+          "value": "de"
+        },
+        {
+          "label": "Chinese",
+          "value": "zh"
+        },
+        {
+          "label": "French",
+          "value": "fr"
+        },
+        {
+          "label": "Spanish",
+          "value": "es"
+        },
+        {
+          "label": "Portuguese",
+          "value": "pt"
+        }
+      ],
+      "allowMultiSelect": false,
+      "allowMultiFile": false,
+      "maxLength": null,
+      "jsonSchema": null
+    }
+  ]
+}
