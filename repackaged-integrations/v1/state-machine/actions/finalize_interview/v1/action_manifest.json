@@ -1,0 +1,9 @@
+{
+  "slug": "finalize_interview",
+  "name": "Finalize interview",
+  "description": "Completes the caller's interview once every topic is summarized and every canonical Topic-n-{slug}.docx is present in the interview SharePoint folder (a previously uploaded Topic-n {topic name}.docx or deterministic -FINAL fallback also counts). If a topic file is missing, nothing is finalized; the missing file names and stored summaries are returned so each missing document can be generated with generate_topic_document before retrying.",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": true,
+  "inputFields": []
+}

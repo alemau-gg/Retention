@@ -1,0 +1,100 @@
+{
+  "id": "eaf02a4e-7d25-41e1-b66d-4ba9b8d95ec6",
+  "name": "Knowledge Retention Backend V5.0",
+  "color": "#004A96",
+  "description": "Backend state machine for guided knowledge-retention interviews over Dataverse and SharePoint",
+  "authType": "API_KEY",
+  "integrationType": "API",
+  "authFields": [
+    {
+      "slug": "clientId",
+      "label": "Client ID",
+      "description": "Application (client) ID of the Azure app registration used for app-only access to Dataverse and Microsoft Graph.",
+      "placeholder": "00000000-0000-0000-0000-000000000000",
+      "type": "TEXT",
+      "required": true,
+      "maxLength": 100
+    },
+    {
+      "slug": "clientSecret",
+      "label": "Client secret",
+      "description": "Client secret of the Azure app registration. Rotate before the configured expiry; expiry surfaces to interviewees as a contact-your-administrator error.",
+      "placeholder": "",
+      "type": "PASSWORD",
+      "required": true,
+      "maxLength": 4096
+    },
+    {
+      "slug": "dataverseUrl",
+      "label": "Dataverse environment URL",
+      "description": "Base URL of the Dataverse environment, with no trailing slash (e.g. https://org12345.crm4.dynamics.com).",
+      "placeholder": "https://org12345.crm4.dynamics.com",
+      "type": "TEXT",
+      "required": true,
+      "maxLength": 2048
+    },
+    {
+      "slug": "prefillEnabled",
+      "label": "Knowledge prefill enabled",
+      "description": "Set to true only once the delegated WorkIQ prefill (v1.1) is provisioned. While false, the consent step is skipped server-side, matching the original WorkIQEnabled=false behavior.",
+      "placeholder": "false",
+      "type": "TEXT",
+      "required": true,
+      "maxLength": 8
+    },
+    {
+      "slug": "sharepointSiteId",
+      "label": "SharePoint site ID",
+      "description": "Microsoft Graph site ID of the central CKR team site that stores interview folders. Format: host,siteCollectionId,webId.",
+      "placeholder": "contoso.sharepoint.com,00000000-...,00000000-...",
+      "type": "TEXT",
+      "required": true,
+      "maxLength": 512
+    },
+    {
+      "slug": "tenantId",
+      "label": "Tenant ID",
+      "description": "Microsoft Entra tenant ID (GUID) of the BASF tenant that hosts the Dataverse environment and the CKR SharePoint site.",
+      "placeholder": "00000000-0000-0000-0000-000000000000",
+      "type": "TEXT",
+      "required": true,
+      "maxLength": 100
+    },
+    {
+      "slug": "minTopics",
+      "label": "Minimum topics",
+      "description": "Fewest topics generated per interview (1–10). Leave blank for 4.",
+      "placeholder": "4",
+      "type": "TEXT",
+      "required": false,
+      "maxLength": 2
+    },
+    {
+      "slug": "maxTopics",
+      "label": "Maximum topics",
+      "description": "Most topics generated per interview (1–10). Leave blank for 6.",
+      "placeholder": "6",
+      "type": "TEXT",
+      "required": false,
+      "maxLength": 2
+    },
+    {
+      "slug": "minQuestionsPerTopic",
+      "label": "Minimum questions per topic",
+      "description": "Fewest questions generated per topic (1–15). Leave blank for 3.",
+      "placeholder": "3",
+      "type": "TEXT",
+      "required": false,
+      "maxLength": 2
+    },
+    {
+      "slug": "maxQuestionsPerTopic",
+      "label": "Maximum questions per topic",
+      "description": "Most questions generated per topic (1–15). Leave blank for 6.",
+      "placeholder": "6",
+      "type": "TEXT",
+      "required": false,
+      "maxLength": 2
+    }
+  ]
+}

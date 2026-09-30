@@ -1,0 +1,9 @@
+{
+  "slug": "abandon_interview",
+  "name": "Abandon interview",
+  "description": "Cancels the caller's current in-progress interview. Use only when the interviewee explicitly wants to discard it; requires confirmation and cannot be undone. After success, do not start a new interview until they ask.",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": true,
+  "inputFields": []
+}
