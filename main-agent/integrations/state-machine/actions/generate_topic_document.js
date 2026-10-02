@@ -822,9 +822,19 @@ const KnowledgeRetentionUtils = {
     return slug ? `Topic-${n}-${slug}.docx` : `Topic-${n}.docx`;
   },
 
-  interviewFolderPath(interview) {
-    const number = interview[KnowledgeRetentionUtils.SCHEMA.interview.number];
-    return `Interviews/${number}`;
+  // The optional folderNameTag connection field (e.g. [DEV]) marks test interview
+  // folders by name. Changing it mid-interview splits that interview's files.
+  interviewFolderName(data, interview) {
+    const number = String(interview[KnowledgeRetentionUtils.SCHEMA.interview.number]);
+    const tag = String((data.auth && data.auth.folderNameTag) || '')
+      .replace(/["*:<>?/\\|\u0000-\u001f]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    return tag ? `${tag} ${number}` : number;
+  },
+
+  interviewFolderPath(data, interview) {
+    return `Interviews/${KnowledgeRetentionUtils.interviewFolderName(data, interview)}`;
   },
 
   async graph(data, token, { method, path, body, headers, isBinary }) {
@@ -1795,7 +1805,7 @@ const encodePath = (path) =>
     .split('/')
     .map((segment) => encodeURIComponent(segment))
     .join('/');
-const encodedFolder = encodePath(KnowledgeRetentionUtils.interviewFolderPath(interview));
+const encodedFolder = encodePath(KnowledgeRetentionUtils.interviewFolderPath(data, interview));
 
 // Same create-or-accept-existing shape as set_up_interview_folder, so a rerun
 // never fails on a subfolder that is already there.
