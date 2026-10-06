@@ -22,6 +22,7 @@ When structure changes, update this file in the same change as the code/prompt/s
 | `system-prompt.md` | System prompt for the administrator-facing handover agent |
 | `knowledge-retention-contributing` | Edit playbook skill (`references/integration-modification.md`, `scripts/` for sync/verify) |
 | `knowledge-retention-interviewing` | Discovery bar + topic/question generation |
+| `knowledge-retention-discovery-prefill` | Discovery draft from the employee's recent work, only when the prefilled discovery instruction says to load it |
 | `knowledge-retention-reporting` | Topic summaries + final handover, both drafted as Markdown (the backend renders the `.docx`) |
 | Interview system prompt | Employee-facing agent in Langdock |
 | Knowledge Retention Backend | Live integration in Langdock — fetch via Langdock API tools before any code change |
@@ -36,7 +37,7 @@ When structure changes, update this file in the same change as the code/prompt/s
 | Topic summary `.docx` | Reporting `summary-format.md` (Markdown draft) → `save_topic_summary` → `generate_topic_document` | Backend renders the standardized Word file; overrides system prompt “BASF template for all docs” |
 | Final handover `.docx` | Reporting `final-document.md` (Markdown draft) → `save_final_document` → `generate_final_document` | Backend renders the Word file; no BASF template skill |
 | Clarifying follow-ups | System prompt | Cap **3** per question; follow up more often than not, each one probing something the interviewee has not said |
-| Discovery methodology | Interviewing skill | Backend does **not** load it at `created`; soft spot unless the agent loads it unprompted |
+| Discovery methodology | `knowledge-retention-discovery-prefill` when the backend instruction says to load it; otherwise the interviewing skill | Prefill drafts the profile only. Search results never feed interview answers, summaries, or the handover. The backend does **not** auto-load the interviewing skill at `created` |
 
 ---
 
@@ -73,6 +74,7 @@ Three layers. Conversation face → methodology skills → backend as source of 
                            ▼
 ┌─────────────────────────────────────────────────────────────┐
 │  SKILLS                                                     │
+│  discovery-prefill → discovery draft, only when instructed  │
 │  interviewing → discovery quality + topic/question gen      │
 │  reporting    → topic summaries + final handover Markdown   │
 └─────────────────────────────────────────────────────────────┘
@@ -86,7 +88,7 @@ External systems (backend / adjacent, not conversational skills):
 | **SharePoint (CKR site)** | Folder + `.docx` uploads; invite verified, non-fatal; user can always share further |
 | **Outlook Calendar** | Pause scheduling proposal only — not in the state machine |
 | **CKR Company Context folder** | Optional grounding for topic generation |
-| **WorkIQ / prefill** | Optional; gated by `prefillEnabled` |
+| **Discovery prefill** | Optional; gated by `prefillEnabled`. Discovery profile only. Runs only when the prefilled discovery instruction says to load `knowledge-retention-discovery-prefill`. Search results never feed interview answers, topic summaries, or the handover |
 | **Interview size** | Connection fields `minTopics`, `maxTopics`, `minQuestionsPerTopic`, `maxQuestionsPerTopic` (blank = 4, 6, 3, 6; clamped to 1–10 topics and 1–15 questions). The generate instruction states the counts and `save_topics_and_questions` enforces them before writing. |
 | **Test folders** | Optional connection field `tagTestFolders`: `true` prefixes interview folder names with `[DEV]`, giving `Interviews/[DEV] 42`. `false` or blank in production keeps `Interviews/42`. Set it before testing; changing it mid-interview splits that interview's files. |
 
@@ -119,11 +121,12 @@ Skills are methodology packs the agent loads when told to. They do **not** own p
 
 | Skill | When loaded | What it does | What it does not do |
 |---|---|---|---|
-| **`knowledge-retention-interviewing`** | Backend: `GenerateTopicsAndQuestions` (not auto-loaded at `created`) | Thin-answer discovery bar; **topic and question counts from the connection (default 4–6 topics × 3–6 questions)** grounded in discovery (+ Company Context) | No live question rewrite in `AskActiveQuestion`; no summaries |
+| **`knowledge-retention-discovery-prefill`** | Only when the prefilled `RunPreInterviewDiscovery` instruction says to load it | Two-pass draft of the discovery profile from the employee's recent work; user confirms before `save_discovery` | Not loaded for standard discovery. No interview answers, topic summaries, or handover. Unload after `save_discovery` |
+| **`knowledge-retention-interviewing`** | Backend: `GenerateTopicsAndQuestions` (not auto-loaded at `created`). Also the thin-answer bar during discovery | Thin-answer discovery bar; **topic and question counts from the connection (default 4–6 topics × 3–6 questions)** grounded in discovery (+ Company Context) | Does not search. No live question rewrite in `AskActiveQuestion`; no summaries |
 | **`knowledge-retention-reporting`** | Topic summary (default); final doc when asked | Topic: `summary-format.md` only → summary Markdown drafted with the `write` tool; the backend renders `Topic-{n}-{slug}.docx`. Final: `final-document.md` → handover Markdown drafted with the `write` tool; the backend renders the `.docx` | No discovery/questions; never blend topic and final passes |
 | **BASF document template skill** | Not loaded — no longer used for the handover | — | Not summary methodology; never edit it |
 
-Both content skills: no invented knowledge; preserve specifics; visible gaps beat smooth prose; language = interview language. Always use manifest action slugs (`get_answers`, not legacy names).
+Content skills: no invented knowledge; preserve specifics; visible gaps beat smooth prose; language = interview language. Discovery prefill unloads after `save_discovery` and does not feed later stages. Always use manifest action slugs (`get_answers`, not legacy names).
 
 ---
 
@@ -137,11 +140,11 @@ Both content skills: no invented knowledge; preserve specifics; visible gaps bea
 
 | Action | Advances / does |
 |---|---|
-| `get_runtime_state` | Computes next step for the open interview, or for a closed one that still owes its final document or feedback; no Dataverse state change (apart from the one-time stable-id write-back above). Returns `nextAction`, `instruction`, `language`, `progressLabel`, `questionsRemaining`, `nextQuestionText`, `expectedQuestionOrder`, `expectedTopicOrder`, `sharePointFolderUrl`, `topicQnA`. `questionsRemaining` = unanswered saved questions across all topics, including the open one; `null` before topics exist. On status 60 it checks for the stored handover Markdown (§6) |
+| `get_runtime_state` | Computes next step for the open interview, or for a closed one that still owes its final document or feedback; no Dataverse state change (apart from the one-time stable-id write-back above). Returns `nextAction`, `instruction`, `language`, `progressLabel`, `questionsRemaining`, `nextQuestionText`, `expectedQuestionOrder`, `expectedTopicOrder`, `sharePointFolderUrl`, `topicQnA`. `questionsRemaining` = unanswered saved questions across all topics, including the open one; `null` before topics exist. On status 60 it checks for the stored handover Markdown (§6). When status is `created`, prefill is on, and consent is `accepted`, the response also includes `directoryProfile` and `directoryLookupFailure` so a resumed discovery can search again |
 | `create_interview` | Creates interview in chosen language (`created`) |
 | `save_discovery` | Writes the complete confirmed profile together and sets status `discovery`; before this succeeds, discovery fields are not retained for resume. Refuses with `conflict: true` once status is `>= generated` |
 | `save_topics_and_questions` | Topics/questions → status `generated` (idempotent no-op if already `>= generated`). Validates that topic and per-topic question orders are positive integers with no duplicates **before** cleaning up any partial rows from a failed prior attempt |
-| `save_consent` | Prefill yes/no (only when prefill enabled) |
+| `save_consent` | Prefill yes/no, only when prefill is enabled, and only at status `created`. On yes, the response includes `directoryProfile` and `directoryLookupFailure`. Any later status returns `conflict: true` and writes nothing |
 | `save_answer` | Confirmed answer; concurrency via required `expectedQuestionOrder` and `expectedTopicOrder` |
 | `set_up_interview_folder` | Creates SharePoint folder + grants; idempotent; reports `accessGranted` from the actual invite response and `managerGranted` only when a manager was found *and* the invite succeeded. A failed invite is non-fatal (uploads are app-only) and turns the instruction into “share it yourself”. Reloads the interview with the open-or-completed fallback, so the finalize-without-folder recovery path works |
 | `save_topic_summary` | Stores the exact user-approved Markdown `summaryFile` in Dataverse; topic → summarized; concurrency via `expectedTopicOrder`. Creates no Word file; returns action-authored `GenerateTopicDocument` |
@@ -183,9 +186,9 @@ Progress is not one enum. Dataverse keeps **five independent status columns** th
 
 | Code | Key | Meaning |
 |---|---|---|
-| 10 | `created` | Language chosen; discovery not yet saved |
+| 10 | `created` | Language chosen; discovery not yet saved. When prefill is on and consent is `notAsked`, consent is offered here, before discovery |
 | 20 | `discovery` | Discovery saved; topics/questions not yet saved |
-| 30 | `generated` | Topics exist; all Q&A, consent, folder setup, and topic summaries happen here |
+| 30 | `generated` | Topics exist; Q&A, folder setup, and topic summaries happen here. Consent is not collected at this status |
 | 60 | `finalized` | All topics summarized and confirmed; the final handover document is still owed |
 | 70 | `documentGenerated` | `InterviewFinalSummary_{n}.docx` was filed by `generate_final_document` (or, legacy only, `upload_document` with `docType: final`) |
 | 80 | `cancelled` | Abandoned via `abandon_interview` |
@@ -240,6 +243,17 @@ Answers are versioned rows on `ckr_answers`, never overwritten. Latest is `ckr_i
 
 When `prefillEnabled` is false, this gate is skipped server-side regardless of value.
 
+The offer is at status `created`, before discovery, not after topics. The agent offers this text verbatim, then waits for an explicit confirm or decline:
+
+"To save you time, I can look through your recent work in Microsoft 365 (documents, meetings, Teams, Planner and sent emails from the last six months) and draft your role profile for you. You review, correct and add to it; nothing is saved until you confirm. This is used only to prepare the profile, not your interview answers."
+
+`save_consent` writes only at `created`. On an explicit yes it returns:
+
+- `directoryProfile`: `{ jobTitle, department }`, or `null`. Suggestions only, including when the object is present. The prefilled discovery instruction states each value or "not available".
+- `directoryLookupFailure`: included on that yes response. A failed lookup never blocks discovery. The agent continues with the prefilled draft (signature and the other sources) or with standard discovery if nothing usable is found.
+
+`get_runtime_state` returns the same two fields when it resumes a `created` interview whose consent is already `accepted`. `save_consent` at any later status returns `conflict: true` and writes nothing.
+
 ### 3.2 Runtime `nextAction`
 
 #### Computed by `computeState` (survives a new session via `get_runtime_state`)
@@ -247,9 +261,9 @@ When `prefillEnabled` is false, this gate is skipped server-side regardless of v
 | `nextAction` | When |
 |---|---|
 | `CollectProfile` | No **open** interview (`status < 60`) and nothing outstanding on a closed one — includes “never started”, “only a cancelled interview exists”, and “the previous interview reached 70 with feedback stored” |
-| `RunPreInterviewDiscovery` | Interview `created` |
+| `OfferKnowledgePrefillConsent` | Interview `created` (10) + prefill on + consent `notAsked`, **before** `RunPreInterviewDiscovery`. Not at `generated`. Instruction: offer the consent text verbatim and wait for an explicit confirm or decline |
+| `RunPreInterviewDiscovery` | Interview `created`, once consent is not the open gate (prefill off, consent `declined`, or consent `accepted`). Two instructions: **standard** discovery, or **prefilled** discovery when consent was accepted (load `knowledge-retention-discovery-prefill`; `directoryProfile` is on the response). A lookup failure still uses this action and does not block it |
 | `GenerateTopicsAndQuestions` | Interview `discovery` |
-| `OfferKnowledgePrefillConsent` | `generated` + prefill on + consent `notAsked`. Instruction: show topics overview if not already shown, then offer consent verbatim |
 | `AskActiveQuestion` | `generated` + active topic has an unanswered question and topic status `< readyForSummary` |
 | `SetupInterviewFolder` | Topic ready for summary, but no SharePoint folder yet |
 | `GenerateOrReviewTopicSummary` | Topic `readyForSummary` (including `needsReview`) and folder exists |
@@ -284,16 +298,17 @@ flowchart TD
   B --> C{Open interview?}
   C -->|No| D[CollectProfile: pick language]
   D --> E[create_interview]
-  E --> F[RunPreInterviewDiscovery]
-  C -->|Yes created| F
-  F --> G[save_discovery]
-  G --> H[GenerateTopicsAndQuestions]
-  H --> I[save_topics_and_questions]
-  I --> J{prefillEnabled and consent not asked?}
-  J -->|Yes| K[OfferKnowledgePrefillConsent]
-  K --> L[save_consent]
-  J -->|No| M[User confirms ready - agent-enforced only]
-  L --> M
+  E --> F{prefill on and consent notAsked?}
+  F -->|Yes| G[OfferKnowledgePrefillConsent at created]
+  G --> H[save_consent]
+  H --> I[RunPreInterviewDiscovery]
+  F -->|No| I
+  C -->|Yes created, consent still due| G
+  C -->|Yes created, consent not due| I
+  I --> J[save_discovery]
+  J --> K[GenerateTopicsAndQuestions]
+  K --> L[save_topics_and_questions]
+  L --> M[Overview, then AskActiveQuestion verbatim]
   M --> N[AskActiveQuestion loop]
   N --> O{Topic questions done?}
   O -->|No| N
@@ -311,7 +326,7 @@ flowchart TD
   X --> Y[Closing message + SharePoint link + share reminder]
 ```
 
-“User confirms ready” after topic overview is **agent-enforced** when prefill is off (system prompt, right after `save_topics_and_questions`). When prefill is on, the backend’s `OfferKnowledgePrefillConsent` instruction already requires the overview before the consent offer.
+Consent is offered at status `created`, before discovery, and only when prefill is on and consent is `notAsked`. After the topic overview there is no consent step and no readiness wait. `save_topics_and_questions` leads to `AskActiveQuestion`; the agent shows the overview and asks `nextQuestionText` verbatim.
 
 ### Step-by-step
 
@@ -321,14 +336,14 @@ flowchart TD
 2. **Overview and language (`CollectProfile`)**  
    Before asking anything, the agent explains the interview purpose and stages. It then always uses `ask_user_question` for the single language question, without recommending an option. User picks one of: English, German, Chinese, French, Spanish, Portuguese. Fixed for the life of the interview.
 
-3. **Discovery (`RunPreInterviewDiscovery`)**  
-   The agent explains that discovery is short, and that this is the only phase where the profile is saved as one complete unit rather than quickly after each confirmation. Conversational collection (one question at a time): role, business unit, responsibilities, tools/systems, focus topics; KPIs/constraints optional but probed once. Thin answers get one probe. Profile is read back; only after explicit confirm → `save_discovery`. The agent then tells the user that discovery is complete and the profile is retained for future sessions.
+3. **Discovery prefill consent (optional, status `created`)**  
+   If `prefillEnabled` and consent is `notAsked`: `OfferKnowledgePrefillConsent` before any discovery question. The agent offers the consent text verbatim and accepts only an explicit yes or no → `save_consent`. Yes stays at `created` and continues into prefilled discovery. The yes response includes `directoryProfile` (`{ jobTitle, department }` or `null`, suggestions only) and `directoryLookupFailure` when the lookup failed. A lookup failure does not block discovery. No stays at `created` and continues into standard discovery, with no search. If prefill is off, this step is skipped server-side. `save_consent` at any later status returns `conflict: true` and writes nothing.
 
-4. **Topic generation (`GenerateTopicsAndQuestions`)**  
-   Agent loads **interviewing** skill. Produces the topic count and questions per topic set on the connection (default 4–6 topics, 3–6 questions each; `save_topics_and_questions` rejects other counts), most critical first, grounded in discovery (+ Company Context). Coverage should include risk/failure, stakeholder, and systems/tools unless N/A. Presents the full overview; waits for “ready” before any interview question. Then `save_topics_and_questions`.
+4. **Discovery (`RunPreInterviewDiscovery`)**  
+   The agent explains that discovery is short, and that this is the only phase where the profile is saved as one complete unit rather than quickly after each confirmation. **Prefilled** (consent accepted): the instruction says to load `knowledge-retention-discovery-prefill`. The agent drafts the profile from the employee's recent work, invites them to add anything missed (skipping that is fine), asks focus topics explicitly, and still applies the interviewing skill's thin-answer bar before save. **Standard** (prefill off or consent declined): question-by-question discovery, no search. Either way the profile is read back; only after explicit confirm → `save_discovery`. Nothing is saved before that. The agent then tells the user that discovery is complete and the profile is retained for future sessions. Search results are not used again.
 
-5. **Prefill consent (optional)**  
-   If `prefillEnabled`: present the topics overview (if not already shown), then offer verbatim consent text; explicit yes/no only → `save_consent`. If disabled: step is skipped server-side; the agent still shows the overview and waits for “ready” before any interview question (system prompt).
+5. **Topic generation (`GenerateTopicsAndQuestions`)**  
+   Agent loads **interviewing** skill. Produces the topic count and questions per topic set on the connection (default 4–6 topics, 3–6 questions each; `save_topics_and_questions` rejects other counts), most critical first, grounded in discovery (+ Company Context). Coverage should include risk/failure, stakeholder, and systems/tools unless N/A. Presents the full overview, then `save_topics_and_questions`. The returned instruction is `AskActiveQuestion`; the agent asks `nextQuestionText` verbatim with no readiness wait. Consent is not offered here.
 
 6. **Interview Q&A (`AskActiveQuestion`)**  
    For each topic in order: show **topic name** (bold), then ask `nextQuestionText` verbatim. Clarify → confirm → `save_answer` with both `expectedQuestionOrder` and `expectedTopicOrder`. One question per message; never preview the next question.
@@ -359,10 +374,10 @@ Every actually attached file is read and then proposed as a supporting document,
 
 | From | Trigger | To / nextAction |
 |---|---|---|
-| No open interview | User chooses language + `create_interview` | `created` → `RunPreInterviewDiscovery` |
+| No open interview | User chooses language + `create_interview` | `created`. Prefill on and consent `notAsked` → `OfferKnowledgePrefillConsent`. Otherwise → `RunPreInterviewDiscovery` (standard) |
+| `created` + prefill on + consent `notAsked` | `save_consent` | Stay `created`. Yes → prefilled `RunPreInterviewDiscovery`, with `directoryProfile` and `directoryLookupFailure`. No → standard `RunPreInterviewDiscovery`, no search. Any later status → `conflict: true`, nothing written |
 | `created` | `save_discovery` | `discovery` → `GenerateTopicsAndQuestions` |
-| `discovery` | `save_topics_and_questions` | `generated` → consent **or** first `AskActiveQuestion` |
-| `generated` + consent not asked + prefill on | `save_consent` | Stay `generated` → Q&A |
+| `discovery` | `save_topics_and_questions` | `generated` → first `AskActiveQuestion` |
 | Topic has open questions and status `< readyForSummary` | `save_answer` | Next question, or topic → `readyForSummary` |
 | Topic ready, no folder | — | `SetupInterviewFolder` |
 | Topic ready, folder exists | — | `GenerateOrReviewTopicSummary` |
@@ -383,7 +398,7 @@ Within `generated`, the active topic is the first not yet `summarized` (by order
 ## 6. Edge cases and side paths
 
 ### Resume mid-flight (open interview)
-User reopens days later. Agent calls `get_runtime_state` and continues at the computed `nextAction` (mid-discovery, mid-question, mid-summary review, etc.). Chat history is not authoritative.
+User reopens days later. Agent calls `get_runtime_state` and continues at the computed `nextAction` (consent, mid-discovery, mid-question, mid-summary review, etc.). Chat history is not authoritative. A resume at `created` with consent `accepted` returns `directoryProfile` and `directoryLookupFailure` and the prefilled discovery instruction. Discovery is not saved yet, so the agent searches again. A lookup failure still does not block discovery.
 
 ### Resume after finalize
 A finalized interview has two independent gates left: the final handover document, and feedback. `get_runtime_state` resurfaces the closed row while either is open, so a session that dropped anywhere after `finalize_interview` picks up exactly what is missing:
@@ -433,7 +448,7 @@ Works on **any** answered question in any topic, not just the active one — rev
 Before finalize: show stored answer via `get_answers` (supports `topicOrder`) → confirm → `revise_answer`. The target is resolved from `targetQuestionOrder`, narrowed by the optional `topicOrder`. Question order restarts at 1 in every topic, so once two topics have an answered question of the same order the order alone is ambiguous: the action writes nothing, returns `conflict: true` listing the candidate topics by order and name, and the agent re-calls with `topicOrder` set. If the topic’s summary was already confirmed → `needsReview` + reopen to `readyForSummary`, which can interrupt a later topic.
 
 ### Prefill disabled vs enabled
-`prefillEnabled=false`: consent step never appears. `true`: consent is a hard gate before Q&A; soft assent is not enough.
+`prefillEnabled=false`: consent never appears, discovery is standard, and nothing is searched. `true` and consent `notAsked`: `OfferKnowledgePrefillConsent` at status `created`, before discovery. Explicit yes or no only; soft assent is not enough. Yes loads `knowledge-retention-discovery-prefill` for the discovery draft only. No runs standard discovery with no search. `directoryLookupFailure` on a yes, or on a later `get_runtime_state` at `created` with consent accepted, never blocks discovery. `save_consent` after `created` returns `conflict: true` and writes nothing. Search results never reach interview answers, topic summaries, or the handover.
 
 ### One open interview per person
 Cannot start a second while one is open. Asking about someone else’s interview is refused.
@@ -484,7 +499,8 @@ Structural SoT: **this document**. Edit playbook: **contributing skill**. Live i
 ## 9. Mental model
 
 - **Agent:** Conductor; obeys backend instructions; never guesses stage from chat.
-- **Interviewing skill:** Discover the role; invent the right topics/questions for *this* person.
+- **Discovery prefill skill:** Optional draft of the discovery profile from the employee's recent work. Loaded only from the prefilled discovery instruction. Unloads after `save_discovery`.
+- **Interviewing skill:** Discovery quality bar, and the right topics/questions for *this* person. Does not search.
 - **Reporting skill:** Confirmed Q&A → successor-ready topic notes and final handover Markdown (the backend renders the Word files); no invented facts.
 - **Backend:** Stage, next question, concurrency, consent, SharePoint filing, completion — helpers duplicated per action file.
 

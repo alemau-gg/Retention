@@ -15,7 +15,7 @@ Methodology only. Progress, saves, and `nextQuestionText` come from the backend 
 
 | Load | `nextAction` / moment | Use this skill for |
 |---|---|---|
-| Yes | `RunPreInterviewDiscovery` | Thin-answer bar + required discovery fields |
+| Yes | `RunPreInterviewDiscovery` | Thin-answer bar + required discovery fields. If the instruction says to load `knowledge-retention-discovery-prefill`, that skill drafts; do not search from here |
 | Yes | `GenerateTopicsAndQuestions` | Topic and question counts from the backend instruction; overview; then `save_topics_and_questions` |
 | No | `AskActiveQuestion` | Ask `nextQuestionText` verbatim. Probing follow-ups (max 3, used much more often than not) are the system prompt, not this skill |
 | No | `GenerateOrReviewTopicSummary`, `BuildFinalDocument`, `FinalizeAndCollectFeedback` | Load `knowledge-retention-reporting` instead |
@@ -50,6 +50,8 @@ Live follow-ups are the system prompt (this skill is not loaded on `AskActiveQue
 
 **Done when:** every required field is concrete, you read the profile back, user explicitly confirmed, then `save_discovery`.
 
+When the backend instruction says to load `knowledge-retention-discovery-prefill`, follow that skill for the draft. Do not run the search yourself from this skill. This skill's thin-answer bar and field list still apply before save.
+
 Collect one question at a time:
 
 - role title and business unit
@@ -63,7 +65,7 @@ Collect one question at a time:
 
 ## Generating topics and questions (`GenerateTopicsAndQuestions`)
 
-**Done when:** the number of topics and questions per topic given in the backend instruction, coverage checks pass, user saw the overview, then `save_topics_and_questions`. Do not ask interview questions before that save succeeds. After it succeeds, follow the returned backend instruction: when `nextAction` is `AskActiveQuestion`, ask `nextQuestionText` verbatim directly without a readiness confirmation or wait. If the backend returns a consent action, follow that consent instruction; backend consent remains authoritative.
+**Done when:** the number of topics and questions per topic given in the backend instruction, coverage checks pass, user saw the overview, then `save_topics_and_questions`. Do not ask interview questions before that save succeeds. After it succeeds, follow the returned instruction. When `nextAction` is `AskActiveQuestion`, ask `nextQuestionText` verbatim directly without a readiness confirmation or wait.
 
 **Inputs:** discovery profile; when present, CKR Company Context folder (ground topics there; do not invent org processes from training data).
 

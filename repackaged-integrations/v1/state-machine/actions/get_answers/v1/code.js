@@ -131,7 +131,7 @@ const KnowledgeRetentionUtils = {
     existingInterview:
       'I found an existing interview. You need to complete the open interview before you can start a new one.',
     consentOffer:
-      'I can search your SharePoint documents, Teams conversations, and emails to help pre-fill answers during the interview. This can help reduce manual input and allow you to review or enhance existing information instead.',
+      'To save you time, I can look through your recent work in Microsoft 365 (documents, meetings, Teams, Planner and sent emails from the last six months) and draft your role profile for you. You review, correct and add to it; nothing is saved until you confirm. This is used only to prepare the profile, not your interview answers.',
     consentQuestion:
       'Would you like to enable this functionality for the current interview? Please explicitly confirm or decline.',
     postGeneration:
@@ -634,8 +634,11 @@ const KnowledgeRetentionUtils = {
   // computeState — the heart of the protocol. Returns the full flat state plus
   // a backend-authored instruction telling the assistant exactly what to do
   // next. Callers return its fields as explicit top-level keys (no spread).
+  // directoryProfile is optional. undefined means this response did not refresh
+  // the directory. null means a lookup was attempted and failed. An object is
+  // { jobTitle, department } with each field a string or null.
   // ===========================================================================
-  computeState(data, interview, children) {
+  computeState(data, interview, children, directoryProfile) {
     const S = KnowledgeRetentionUtils.SCHEMA;
     const ST = KnowledgeRetentionUtils.STATUS;
     const M = KnowledgeRetentionUtils.MESSAGES;
@@ -659,7 +662,7 @@ const KnowledgeRetentionUtils = {
     if (!interview) {
       return Object.assign(base, {
         nextAction: 'CollectProfile',
-        instruction: `No interview exists for this user. First give this overview verbatim: "${M.interviewOverview}" Then use ask_user_question exactly once for the language question, verbatim: "${M.languageSelection}", with the choices ${M.languageChoices.join(', ')}. After the user picks one, call create_interview with that language. Then explain that ${M.discoveryIntro} and say: "${M.discoverySaveNotice}".${supportingFileInstruction}`,
+        instruction: `No interview exists for this user. First give this overview verbatim: "${M.interviewOverview}" Then use ask_user_question exactly once for the language question, verbatim: "${M.languageSelection}", with the choices ${M.languageChoices.join(', ')}. After the user picks one, call create_interview with that language, then follow the instruction that action returns.${supportingFileInstruction}`,
       });
     }
 
@@ -671,9 +674,46 @@ const KnowledgeRetentionUtils = {
     base.sharePointFolderUrl = folderUrl;
 
     if (status === ST.interview.created) {
+      const consentStatus = Number(interview[S.interview.consentStatus] || ST.consent.notAsked);
+
+      if (prefillEnabled && consentStatus === ST.consent.notAsked) {
+        return Object.assign(base, {
+          nextAction: 'OfferKnowledgePrefillConsent',
+          instruction: `In ${language}, offer prefill verbatim: "${M.consentOffer}" followed by the consent question verbatim: "${M.consentQuestion}". Call save_consent with consentGranted true only on an explicit yes, false only on an explicit no. Do not start discovery until save_consent returns.${supportingFileInstruction}`,
+        });
+      }
+
+      if (prefillEnabled && consentStatus === ST.consent.accepted) {
+        let directorySentence;
+        if (directoryProfile === undefined) {
+          directorySentence =
+            'Directory profile was not refreshed on this response. Keep the directory values from the last response that included them; if you have none, treat both as not available.';
+        } else if (directoryProfile !== null && typeof directoryProfile === 'object') {
+          const jobTitle =
+            directoryProfile.jobTitle === null ||
+            directoryProfile.jobTitle === undefined ||
+            String(directoryProfile.jobTitle).trim() === ''
+              ? 'not available'
+              : String(directoryProfile.jobTitle).trim();
+          const department =
+            directoryProfile.department === null ||
+            directoryProfile.department === undefined ||
+            String(directoryProfile.department).trim() === ''
+              ? 'not available'
+              : String(directoryProfile.department).trim();
+          directorySentence = `Directory profile: jobTitle = ${jobTitle}, department = ${department}.`;
+        } else {
+          directorySentence = 'Directory profile: jobTitle = not available, department = not available.';
+        }
+        return Object.assign(base, {
+          nextAction: 'RunPreInterviewDiscovery',
+          instruction: `In ${language}, explain that ${M.discoveryIntro} and say: "${M.discoverySaveNotice}". Load the knowledge-retention-discovery-prefill skill and follow it. ${directorySentence} Treat every found value, including these, as a suggestion the user must confirm or correct. Invite the user to add anything the draft missed; skipping that is fine. Ask the user for their focus topics; do not decide them yourself. Do not use any search results after discovery. Read back the full profile, get explicit confirmation, then call save_discovery.${supportingFileInstruction}`,
+        });
+      }
+
       return Object.assign(base, {
         nextAction: 'RunPreInterviewDiscovery',
-        instruction: `Run pre-interview discovery in ${language}: role, organizational unit, responsibilities, tools, focus topics, and optionally KPIs/constraints. Ask conversationally; do not invent answers. Read the profile back, get explicit confirmation, then call save_discovery.${supportingFileInstruction}`,
+        instruction: `In ${language}, explain that ${M.discoveryIntro} and say: "${M.discoverySaveNotice}". Then run pre-interview discovery: role, organizational unit, responsibilities, tools, focus topics, and optionally KPIs/constraints. Ask conversationally; do not invent answers. Read the profile back, get explicit confirmation, then call save_discovery.${supportingFileInstruction}`,
       });
     }
 
@@ -690,16 +730,6 @@ const KnowledgeRetentionUtils = {
     ).length;
 
     if (status === ST.interview.generated) {
-      const consentStatus = Number(interview[S.interview.consentStatus] || ST.consent.notAsked);
-
-      // Consent step — skipped server-side while prefill is disabled.
-      if (prefillEnabled && consentStatus === ST.consent.notAsked) {
-        return Object.assign(base, {
-          nextAction: 'OfferKnowledgePrefillConsent',
-          instruction: `In ${language}, present the topics-and-questions overview if not already shown, then offer prefill verbatim: "${M.consentOffer}" followed by the consent question verbatim: "${M.consentQuestion}". Call save_consent with consentGranted true only on an explicit yes, false only on an explicit no.${supportingFileInstruction}`,
-        });
-      }
-
       const topic = KnowledgeRetentionUtils.activeTopic(children_.topics);
 
       if (topic) {

@@ -36,7 +36,7 @@
     {
       "slug": "prefillEnabled",
       "label": "Knowledge prefill enabled",
-      "description": "Set to true only once the delegated WorkIQ prefill (v1.1) is provisioned. While false, the consent step is skipped server-side, matching the original WorkIQEnabled=false behavior.",
+      "description": "Set to true to offer a discovery-only profile draft from the interviewee's recent Microsoft 365 work. While false or blank, consent is skipped and discovery runs question by question. This does not pre-fill interview answers. Set it before an interview starts.",
       "placeholder": "false",
       "type": "TEXT",
       "required": true,
