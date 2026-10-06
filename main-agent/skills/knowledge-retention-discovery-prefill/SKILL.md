@@ -28,7 +28,7 @@ Consent is already done. Do not offer it again.
 
 ## Hard rules
 
-- Describe their work, not their data. Name source types only: "your meetings", "your documents", "your Teams activity", "your email", "your notes", "your Planner tasks", "your communities". Never say chats.
+- Describe their work, not their data. Name source types only: "your documents", "your Teams activity", "your email". Never say chats. Do not search OneDrive, calendar, OneNote, Planner, or Viva Engage.
 - Never quote messages, name colleagues from search hits, give counts, or mention private events. Present findings as "it looks like…".
 - The no-negative-remarks rule applies to everything found. Keep the work lesson; drop blame and private details.
 - Every found value is a suggestion, including `directoryProfile` job title and department. The user confirms or corrects it.
@@ -46,9 +46,9 @@ Send one short message in the interview language: this takes a moment. No tool n
 
 Follow `references/sources.md`.
 
-1. **Broad pass** over the sources in that file. Sent mail, own calendar, own Teams messages, own files, own notes, own Planner tasks, communities only.
+1. **Broad pass** over the sources in that file. Sent mail, the user's own Teams messages, and SharePoint files. Nothing else.
 2. **Targeted pass** for the systems, projects, and processes the first pass found. Do not open a third pass.
-3. Read only a few full documents, via SharePoint `get_file` or OneNote `get_page`.
+3. Read only a few full documents, via SharePoint `get_file`.
 4. Always drop, client-side: anything older than six months, private or confidential items, and other people's messages.
 
 If a listed action does not exist, skip that source. Do not invent a replacement call.

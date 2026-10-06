@@ -131,7 +131,7 @@ const KnowledgeRetentionUtils = {
     existingInterview:
       'I found an existing interview. You need to complete the open interview before you can start a new one.',
     consentOffer:
-      'To save you time, I can look through your recent work in Microsoft 365 (documents, meetings, Teams, Planner and sent emails from the last six months) and draft your role profile for you. You review, correct and add to it; nothing is saved until you confirm. This is used only to prepare the profile, not your interview answers.',
+      'To save you time, I can look through your sent emails, Teams activity, and SharePoint documents from the last six months and draft your role profile for you. You review, correct and add to it; nothing is saved until you confirm. This is used only to prepare the profile, not your interview answers.',
     consentQuestion:
       'Would you like to enable this functionality for the current interview? Please explicitly confirm or decline.',
     postGeneration:

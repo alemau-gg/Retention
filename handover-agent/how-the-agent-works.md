@@ -22,7 +22,7 @@ When structure changes, update this file in the same change as the code/prompt/s
 | `system-prompt.md` | System prompt for the administrator-facing handover agent |
 | `knowledge-retention-contributing` | Edit playbook skill (`references/integration-modification.md`, `scripts/` for sync/verify) |
 | `knowledge-retention-interviewing` | Discovery bar + topic/question generation |
-| `knowledge-retention-discovery-prefill` | Discovery draft from the employee's recent work, only when the prefilled discovery instruction says to load it |
+| `knowledge-retention-discovery-prefill` | Discovery draft from sent email, Teams, and SharePoint, only when the prefilled discovery instruction says to load it |
 | `knowledge-retention-reporting` | Topic summaries + final handover, both drafted as Markdown (the backend renders the `.docx`) |
 | Interview system prompt | Employee-facing agent in Langdock |
 | Knowledge Retention Backend | Live integration in Langdock — fetch via Langdock API tools before any code change |
@@ -88,7 +88,7 @@ External systems (backend / adjacent, not conversational skills):
 | **SharePoint (CKR site)** | Folder + `.docx` uploads; invite verified, non-fatal; user can always share further |
 | **Outlook Calendar** | Pause scheduling proposal only — not in the state machine |
 | **CKR Company Context folder** | Optional grounding for topic generation |
-| **Discovery prefill** | Optional; gated by `prefillEnabled`. Discovery profile only. Runs only when the prefilled discovery instruction says to load `knowledge-retention-discovery-prefill`. Search results never feed interview answers, topic summaries, or the handover |
+| **Discovery prefill** | Optional; gated by `prefillEnabled`. Discovery profile only, from sent email, Teams, and SharePoint. Not OneDrive. Runs only when the prefilled discovery instruction says to load `knowledge-retention-discovery-prefill`. Search results never feed interview answers, topic summaries, or the handover |
 | **Interview size** | Connection fields `minTopics`, `maxTopics`, `minQuestionsPerTopic`, `maxQuestionsPerTopic` (blank = 4, 6, 3, 6; clamped to 1–10 topics and 1–15 questions). The generate instruction states the counts and `save_topics_and_questions` enforces them before writing. |
 | **Test folders** | Optional connection field `tagTestFolders`: `true` prefixes interview folder names with `[DEV]`, giving `Interviews/[DEV] 42`. `false` or blank in production keeps `Interviews/42`. Set it before testing; changing it mid-interview splits that interview's files. |
 
@@ -121,7 +121,7 @@ Skills are methodology packs the agent loads when told to. They do **not** own p
 
 | Skill | When loaded | What it does | What it does not do |
 |---|---|---|---|
-| **`knowledge-retention-discovery-prefill`** | Only when the prefilled `RunPreInterviewDiscovery` instruction says to load it | Two-pass draft of the discovery profile from the employee's recent work; user confirms before `save_discovery` | Not loaded for standard discovery. No interview answers, topic summaries, or handover. Unload after `save_discovery` |
+| **`knowledge-retention-discovery-prefill`** | Only when the prefilled `RunPreInterviewDiscovery` instruction says to load it | Two-pass draft of the discovery profile from sent email, Teams, and SharePoint; user confirms before `save_discovery` | Not loaded for standard discovery. Does not search OneDrive, calendar, OneNote, Planner, or Viva Engage. No interview answers, topic summaries, or handover. Unload after `save_discovery` |
 | **`knowledge-retention-interviewing`** | Backend: `GenerateTopicsAndQuestions` (not auto-loaded at `created`). Also the thin-answer bar during discovery | Thin-answer discovery bar; **topic and question counts from the connection (default 4–6 topics × 3–6 questions)** grounded in discovery (+ Company Context) | Does not search. No live question rewrite in `AskActiveQuestion`; no summaries |
 | **`knowledge-retention-reporting`** | Topic summary (default); final doc when asked | Topic: `summary-format.md` only → summary Markdown drafted with the `write` tool; the backend renders `Topic-{n}-{slug}.docx`. Final: `final-document.md` → handover Markdown drafted with the `write` tool; the backend renders the `.docx` | No discovery/questions; never blend topic and final passes |
 | **BASF document template skill** | Not loaded — no longer used for the handover | — | Not summary methodology; never edit it |
@@ -245,7 +245,7 @@ When `prefillEnabled` is false, this gate is skipped server-side regardless of v
 
 The offer is at status `created`, before discovery, not after topics. The agent offers this text verbatim, then waits for an explicit confirm or decline:
 
-"To save you time, I can look through your recent work in Microsoft 365 (documents, meetings, Teams, Planner and sent emails from the last six months) and draft your role profile for you. You review, correct and add to it; nothing is saved until you confirm. This is used only to prepare the profile, not your interview answers."
+"To save you time, I can look through your sent emails, Teams activity, and SharePoint documents from the last six months and draft your role profile for you. You review, correct and add to it; nothing is saved until you confirm. This is used only to prepare the profile, not your interview answers."
 
 `save_consent` writes only at `created`. On an explicit yes it returns:
 
@@ -340,7 +340,7 @@ Consent is offered at status `created`, before discovery, and only when prefill 
    If `prefillEnabled` and consent is `notAsked`: `OfferKnowledgePrefillConsent` before any discovery question. The agent offers the consent text verbatim and accepts only an explicit yes or no → `save_consent`. Yes stays at `created` and continues into prefilled discovery. The yes response includes `directoryProfile` (`{ jobTitle, department }` or `null`, suggestions only) and `directoryLookupFailure` when the lookup failed. A lookup failure does not block discovery. No stays at `created` and continues into standard discovery, with no search. If prefill is off, this step is skipped server-side. `save_consent` at any later status returns `conflict: true` and writes nothing.
 
 4. **Discovery (`RunPreInterviewDiscovery`)**  
-   The agent explains that discovery is short, and that this is the only phase where the profile is saved as one complete unit rather than quickly after each confirmation. **Prefilled** (consent accepted): the instruction says to load `knowledge-retention-discovery-prefill`. The agent drafts the profile from the employee's recent work, invites them to add anything missed (skipping that is fine), asks focus topics explicitly, and still applies the interviewing skill's thin-answer bar before save. **Standard** (prefill off or consent declined): question-by-question discovery, no search. Either way the profile is read back; only after explicit confirm → `save_discovery`. Nothing is saved before that. The agent then tells the user that discovery is complete and the profile is retained for future sessions. Search results are not used again.
+   The agent explains that discovery is short, and that this is the only phase where the profile is saved as one complete unit rather than quickly after each confirmation. **Prefilled** (consent accepted): the instruction says to load `knowledge-retention-discovery-prefill`. The agent drafts the profile from sent email, Teams activity, and SharePoint documents, invites them to add anything missed (skipping that is fine), asks focus topics explicitly, and still applies the interviewing skill's thin-answer bar before save. **Standard** (prefill off or consent declined): question-by-question discovery, no search. Either way the profile is read back; only after explicit confirm → `save_discovery`. Nothing is saved before that. The agent then tells the user that discovery is complete and the profile is retained for future sessions. Search results are not used again.
 
 5. **Topic generation (`GenerateTopicsAndQuestions`)**  
    Agent loads **interviewing** skill. Produces the topic count and questions per topic set on the connection (default 4–6 topics, 3–6 questions each; `save_topics_and_questions` rejects other counts), most critical first, grounded in discovery (+ Company Context). Coverage should include risk/failure, stakeholder, and systems/tools unless N/A. Presents the full overview, then `save_topics_and_questions`. The returned instruction is `AskActiveQuestion`; the agent asks `nextQuestionText` verbatim with no readiness wait. Consent is not offered here.
@@ -499,7 +499,7 @@ Structural SoT: **this document**. Edit playbook: **contributing skill**. Live i
 ## 9. Mental model
 
 - **Agent:** Conductor; obeys backend instructions; never guesses stage from chat.
-- **Discovery prefill skill:** Optional draft of the discovery profile from the employee's recent work. Loaded only from the prefilled discovery instruction. Unloads after `save_discovery`.
+- **Discovery prefill skill:** Optional draft of the discovery profile from sent email, Teams, and SharePoint. Not OneDrive. Loaded only from the prefilled discovery instruction. Unloads after `save_discovery`.
 - **Interviewing skill:** Discovery quality bar, and the right topics/questions for *this* person. Does not search.
 - **Reporting skill:** Confirmed Q&A → successor-ready topic notes and final handover Markdown (the backend renders the Word files); no invented facts.
 - **Backend:** Stage, next question, concurrency, consent, SharePoint filing, completion — helpers duplicated per action file.

@@ -36,7 +36,7 @@
     {
       "slug": "prefillEnabled",
       "label": "Knowledge prefill enabled",
-      "description": "Set to true to offer a discovery-only profile draft from the interviewee's recent Microsoft 365 work. While false or blank, consent is skipped and discovery runs question by question. This does not pre-fill interview answers. Set it before an interview starts.",
+      "description": "Set to true to offer a discovery-only profile draft from the interviewee's sent email, Teams activity, and SharePoint documents. Not OneDrive. While false or blank, consent is skipped and discovery runs question by question. This does not pre-fill interview answers. Set it before an interview starts.",
       "placeholder": "false",
       "type": "TEXT",
       "required": true,
