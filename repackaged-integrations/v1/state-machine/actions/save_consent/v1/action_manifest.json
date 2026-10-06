@@ -1,7 +1,7 @@
 {
   "slug": "save_consent",
   "name": "Save consent",
-  "description": "Records the interviewee's explicit decision on knowledge prefill for the caller's open interview.",
+  "description": "Records an explicit yes or no to a discovery-only profile draft. Accepted only while the interview status is created (before discovery is saved); a later call writes nothing and returns conflict true with fresh state. On an explicit yes at that stage, also returns directoryProfile (jobTitle and department, each a string or null) and directoryLookupFailure (null, or a short admin-only reason). directoryProfile is null when no lookup ran or the lookup failed.",
   "nativeActionType": "NONE",
   "actionType": "API",
   "requiresConfirmation": false,

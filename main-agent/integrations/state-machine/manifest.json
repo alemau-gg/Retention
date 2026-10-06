@@ -36,7 +36,7 @@
     {
       "slug": "prefillEnabled",
       "label": "Knowledge prefill enabled",
-      "description": "Set to true only once the delegated WorkIQ prefill (v1.1) is provisioned. While false, the consent step is skipped server-side, matching the original WorkIQEnabled=false behavior.",
+      "description": "Set to true to offer a discovery-only profile draft from the interviewee's sent email, Teams activity, and SharePoint documents. Not OneDrive. While false or blank, consent is skipped and discovery runs question by question. This does not pre-fill interview answers. Set it before an interview starts.",
       "placeholder": "false",
       "type": "TEXT",
       "required": true,
@@ -110,7 +110,7 @@
     {
       "slug": "get_runtime_state",
       "name": "Get runtime state",
-      "description": "Loads the caller's interview, topics, and questions and returns the computed next action plus a backend-authored instruction. Call once at the start of a conversation, and again when the user pauses if questionsRemaining is not in the latest tool result.",
+      "description": "Loads the caller's interview, topics, and questions and returns the computed next action plus a backend-authored instruction. Call once at the start of a conversation, and again when the user pauses if questionsRemaining is not in the latest tool result. When the open interview is at the created stage with prefill enabled and consent accepted, the response includes directoryProfile and directoryLookupFailure; otherwise both are null.",
       "activeLabel": "Checking where we were",
       "doneLabel": "Checked where we were",
       "failedLabel": "Failed to check where we were",
@@ -290,7 +290,7 @@
     {
       "slug": "save_consent",
       "name": "Save consent",
-      "description": "Records the interviewee's explicit decision on knowledge prefill for the caller's open interview.",
+      "description": "Records an explicit yes or no to a discovery-only profile draft. Accepted only while the interview status is created (before discovery is saved); a later call writes nothing and returns conflict true with fresh state. On an explicit yes at that stage, also returns directoryProfile (jobTitle and department, each a string or null) and directoryLookupFailure (null, or a short admin-only reason). directoryProfile is null when no lookup ran or the lookup failed.",
       "nativeActionType": "NONE",
       "actionType": "API",
       "requiresConfirmation": false,

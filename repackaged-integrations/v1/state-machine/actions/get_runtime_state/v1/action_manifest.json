@@ -1,7 +1,7 @@
 {
   "slug": "get_runtime_state",
   "name": "Get runtime state",
-  "description": "Loads the caller's interview, topics, and questions and returns the computed next action plus a backend-authored instruction. Call once at the start of a conversation, and again when the user pauses if questionsRemaining is not in the latest tool result.",
+  "description": "Loads the caller's interview, topics, and questions and returns the computed next action plus a backend-authored instruction. Call once at the start of a conversation, and again when the user pauses if questionsRemaining is not in the latest tool result. When the open interview is at the created stage with prefill enabled and consent accepted, the response includes directoryProfile and directoryLookupFailure; otherwise both are null.",
   "activeLabel": "Checking where we were",
   "doneLabel": "Checked where we were",
   "failedLabel": "Failed to check where we were",
