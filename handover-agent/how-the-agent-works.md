@@ -46,7 +46,7 @@ One employee, one interview, one question at a time. Capture undocumented know-h
 
 1. Per-topic summary Word docs (`Topic-{n}-{slug}.docx`, rendered by the backend from the approved Markdown)
 2. Final handover (`InterviewFinalSummary_{interviewNumber}.docx`, rendered by the backend from the approved Markdown)
-3. SharePoint folder `Interviews/{interviewNumber}` on the CKR site (employee + manager when resolvable)
+3. SharePoint folder `Interviews/{interviewNumber}` (`Interviews/[DEV] {interviewNumber}` when `tagTestFolders` is true) on the CKR site (employee + manager when resolvable)
 
 ---
 
@@ -88,6 +88,7 @@ External systems (backend / adjacent, not conversational skills):
 | **CKR Company Context folder** | Optional grounding for topic generation |
 | **WorkIQ / prefill** | Optional; gated by `prefillEnabled` |
 | **Interview size** | Connection fields `minTopics`, `maxTopics`, `minQuestionsPerTopic`, `maxQuestionsPerTopic` (blank = 4, 6, 3, 6; clamped to 1–10 topics and 1–15 questions). The generate instruction states the counts and `save_topics_and_questions` enforces them before writing. |
+| **Test folders** | Optional connection field `tagTestFolders`: `true` prefixes interview folder names with `[DEV]`, giving `Interviews/[DEV] 42`. `false` or blank in production keeps `Interviews/42`. Set it before testing; changing it mid-interview splits that interview's files. |
 
 ---
 
@@ -333,7 +334,7 @@ flowchart TD
    For each topic in order: show **topic name** (bold), then ask `nextQuestionText` verbatim. Clarify → confirm → `save_answer` with both `expectedQuestionOrder` and `expectedTopicOrder`. One question per message; never preview the next question.
 
 7. **Folder setup (once, before first topic document)**  
-   When the first topic’s questions are done and no folder URL yet: `set_up_interview_folder`. Path: `Interviews/{interviewNumber}`. The employee and (when resolvable) their manager are invited with edit rights, but the invite response is checked rather than assumed: `accessGranted` is true only on HTTP 200/201; `managerGranted` is true only when a manager was found *and* the invite succeeded. A failed invite is non-fatal (uploads run app-only). On a failed or unconfirmed invite the instruction says access “could not be confirmed” (idempotent re-runs can hit this even when access was granted earlier) and asks the user to open/share the folder themselves. Either way the agent reminds them they can share with their manager or anyone else they consider relevant — automatic grants never cover colleagues. The same reminder repeats in the closing message.
+   When the first topic’s questions are done and no folder URL yet: `set_up_interview_folder`. Path: `Interviews/{interviewNumber}`, or `Interviews/[DEV] {interviewNumber}` when the connection sets `tagTestFolders` to true. The employee and (when resolvable) their manager are invited with edit rights, but the invite response is checked rather than assumed: `accessGranted` is true only on HTTP 200/201; `managerGranted` is true only when a manager was found *and* the invite succeeded. A failed invite is non-fatal (uploads run app-only). On a failed or unconfirmed invite the instruction says access “could not be confirmed” (idempotent re-runs can hit this even when access was granted earlier) and asks the user to open/share the folder themselves. Either way the agent reminds them they can share with their manager or anyone else they consider relevant — automatic grants never cover colleagues. The same reminder repeats in the closing message.
 
 8. **Topic summary (`GenerateOrReviewTopicSummary`)**  
    Agent loads **reporting** skill (topic-summary path only). Builds from `topicQnA` in state (and may also call `get_answers` per the system prompt) using `summary-format.md` — never from the branded template. The agent drafts the summary as a Markdown file with the `write` tool; the user may revise until explicit approval → `save_topic_summary` (stores that exact file) → `generate_topic_document` (`topicOrder` only; renders, files, and returns `Topic-{order}-{slug}.docx`) → show the returned file and folder link. The agent never builds or uploads a topic `.docx`; `upload_document` with `docType: topic` is legacy only. Repeat for each topic.
@@ -462,7 +463,7 @@ The `final-document.md` workflow must re-fetch discovery and answers via tools (
 | `Source transcripts/InterviewFinalSummary_{n}.md` | After the user approves the full handover text | `final-document.md` phases → Markdown drafted with the `write` tool → `save_final_document` (`handoverFile`); no Word file, no status change |
 | `InterviewFinalSummary_{n}.docx` | Instructed immediately after `finalize_interview`, and re-instructed on every reopen until status is 70 | `generate_final_document` (no arguments) renders the stored Markdown with the same renderer as topic documents, files it at the interview-folder root, returns it as an attachment, and advances the row to `documentGenerated` (70); at 70 it replaces the file. No BASF template skill |
 | User-confirmed supporting file | Only when the user attaches a useful file and explicitly approves filing it | Original file format and a unique filename → `upload_document` (`supporting`); no state transition and no automatic generation |
-| SharePoint folder `Interviews/{n}` | First time before summary filing | `set_up_interview_folder`; URL shown as markdown link + raw URL |
+| SharePoint folder `Interviews/{n}` (`Interviews/[DEV] {n}` when `tagTestFolders` is true) | First time before summary filing | `set_up_interview_folder`; URL shown as markdown link + raw URL |
 
 Folder link: show when first available and again whenever a document is saved. Rendering path: see “Canonical when sources disagree”.
 

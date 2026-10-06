@@ -820,9 +820,16 @@ const KnowledgeRetentionUtils = {
     return slug ? `Topic-${n}-${slug}.docx` : `Topic-${n}.docx`;
   },
 
-  interviewFolderPath(interview) {
-    const number = interview[KnowledgeRetentionUtils.SCHEMA.interview.number];
-    return `Interviews/${number}`;
+  // The tagTestFolders connection field marks test interview folders by name.
+  // Changing it mid-interview splits that interview's files.
+  interviewFolderName(data, interview) {
+    const number = String(interview[KnowledgeRetentionUtils.SCHEMA.interview.number]);
+    const tagged = String(data.auth && data.auth.tagTestFolders).toLowerCase() === 'true';
+    return tagged ? `[DEV] ${number}` : number;
+  },
+
+  interviewFolderPath(data, interview) {
+    return `Interviews/${KnowledgeRetentionUtils.interviewFolderName(data, interview)}`;
   },
 
   async graph(data, token, { method, path, body, headers, isBinary }) {
@@ -988,7 +995,7 @@ if (!interview) {
 
 const graphToken = await KnowledgeRetentionUtils.graphToken(data);
 const siteId = data.auth.sharepointSiteId;
-const interviewPath = KnowledgeRetentionUtils.interviewFolderPath(interview);
+const interviewPath = KnowledgeRetentionUtils.interviewFolderPath(data, interview);
 const encodedInterviewPath = interviewPath
   .split('/')
   .map((segment) => encodeURIComponent(segment))

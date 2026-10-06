@@ -52,6 +52,15 @@
       "maxLength": 512
     },
     {
+      "slug": "tagTestFolders",
+      "label": "Tag test folders",
+      "description": "Set to true on DEV and test connections to name interview folders Interviews/[DEV] 42. Leave false or blank in production for Interviews/42. Set it before testing starts; changing it mid-interview splits that interview's files across two folders.",
+      "placeholder": "false",
+      "type": "TEXT",
+      "required": false,
+      "maxLength": 8
+    },
+    {
       "slug": "tenantId",
       "label": "Tenant ID",
       "description": "Microsoft Entra tenant ID (GUID) of the BASF tenant that hosts the Dataverse environment and the CKR SharePoint site.",

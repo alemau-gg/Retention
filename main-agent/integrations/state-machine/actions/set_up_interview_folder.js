@@ -822,9 +822,16 @@ const KnowledgeRetentionUtils = {
     return slug ? `Topic-${n}-${slug}.docx` : `Topic-${n}.docx`;
   },
 
-  interviewFolderPath(interview) {
-    const number = interview[KnowledgeRetentionUtils.SCHEMA.interview.number];
-    return `Interviews/${number}`;
+  // The tagTestFolders connection field marks test interview folders by name.
+  // Changing it mid-interview splits that interview's files.
+  interviewFolderName(data, interview) {
+    const number = String(interview[KnowledgeRetentionUtils.SCHEMA.interview.number]);
+    const tagged = String(data.auth && data.auth.tagTestFolders).toLowerCase() === 'true';
+    return tagged ? `[DEV] ${number}` : number;
+  },
+
+  interviewFolderPath(data, interview) {
+    return `Interviews/${KnowledgeRetentionUtils.interviewFolderName(data, interview)}`;
   },
 
   async graph(data, token, { method, path, body, headers, isBinary }) {
@@ -878,7 +885,7 @@ const KnowledgeRetentionUtils = {
 
 };
 
-// Creates the SharePoint folder Interviews/{interviewNumber} on the central CKR
+// Creates the SharePoint folder Interviews/{tag} {interviewNumber} on the central CKR
 // site and grants edit to the employee and their manager. App-only Graph; the
 // folder is derived from identity, never an input. Idempotent.
 const identity = KnowledgeRetentionUtils.resolveIdentity(data);
@@ -897,7 +904,6 @@ if (!interview) {
   throw new Error('No interview found. Start an interview first.');
 }
 const siteId = data.auth.sharepointSiteId;
-const interviewNumber = interview[S.interview.number];
 const graphToken = await KnowledgeRetentionUtils.graphToken(data);
 
 // Ensure the parent "Interviews" folder, then the per-interview folder. We tag
@@ -944,7 +950,7 @@ async function ensureFolder(parentPath, name) {
 }
 
 await ensureFolder('', 'Interviews');
-const folder = await ensureFolder('Interviews', String(interviewNumber));
+const folder = await ensureFolder('Interviews', KnowledgeRetentionUtils.interviewFolderName(data, interview));
 const folderItemId = folder.id;
 const webUrl = folder.webUrl;
 
