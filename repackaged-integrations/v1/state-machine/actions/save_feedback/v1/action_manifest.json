@@ -1,0 +1,49 @@
+{
+  "slug": "save_feedback",
+  "name": "Save feedback",
+  "description": "Saves the interviewee's three feedback answers on the most recently completed interview. Works after the interview is finalized.",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": false,
+  "inputFields": [
+    {
+      "slug": "q1",
+      "label": "Helpfulness rating",
+      "description": "Answer to: how helpful was the agent in documenting your knowledge? A rating from 1 to 5, captured as text.",
+      "placeholder": null,
+      "type": "TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 100,
+      "jsonSchema": null
+    },
+    {
+      "slug": "q3",
+      "label": "Improvement feedback",
+      "description": "Answer to: what would you like to improve, which functionality did you miss? Free text.",
+      "placeholder": null,
+      "type": "MULTI_LINE_TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 20000,
+      "jsonSchema": null
+    },
+    {
+      "slug": "q2",
+      "label": "Intuitiveness rating",
+      "description": "Answer to: how intuitive was the agent to use? A rating from 1 to 5, captured as text.",
+      "placeholder": null,
+      "type": "TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 100,
+      "jsonSchema": null
+    }
+  ]
+}

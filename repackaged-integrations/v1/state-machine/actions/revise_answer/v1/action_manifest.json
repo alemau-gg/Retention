@@ -1,0 +1,75 @@
+{
+  "slug": "revise_answer",
+  "name": "Revise answer",
+  "description": "Records a new version of the interviewee's answer to an EARLIER, already-answered question (not the question currently being asked). Requires finalAnswer plus rawUserMessages (verbatim revision transcript). The previous version is kept as history. If that question's topic summary was already approved, the summary is flagged for regeneration. Only works before the interview is finalized; identify the question by its topic and question order from the current state, never by an ID.",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": false,
+  "inputFields": [
+    {
+      "slug": "finalAnswer",
+      "label": "Final answer",
+      "description": "The interviewee's confirmed corrected answer. Save only after explicit confirmation.",
+      "placeholder": null,
+      "type": "MULTI_LINE_TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 20000,
+      "jsonSchema": null
+    },
+    {
+      "slug": "rawUserMessages",
+      "label": "Raw user messages",
+      "description": "Required. The interviewee's own messages for this revision, in chronological order: the correction plus every follow-up. THE ONE EXCEPTION, AND IT SUPERSEDES THE VERBATIM RULE: remove every negative remark about another person before copying. This is extremely important because this field is stored and visible to others. Negative remarks are judgments of someone's effort, competence, or attitude (for example useless, lazy, incompetent, unreliable), accounts of their mistakes, their words quoted as evidence of a shortcoming, and private details. Replace only that passage with a neutral process lesson not tied to the person: \"Martin is useless, he never updates the log\" becomes \"The log is often not updated; check it before relying on it.\" If there is no process lesson, drop the passage. Praise stays. Apart from this one exception, copy everything verbatim. Do not EVER paraphrase, condense, omit, or substitute the cleaned finalAnswer. This is of utmost importance.",
+      "placeholder": null,
+      "type": "MULTI_LINE_TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 20000,
+      "jsonSchema": null
+    },
+    {
+      "slug": "targetQuestionOrder",
+      "label": "Target question order",
+      "description": "The order number (from the current state) of the earlier, already-answered question being corrected. Pair it with topicOrder when that order exists in more than one topic.",
+      "placeholder": null,
+      "type": "NUMBER",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": null,
+      "jsonSchema": null
+    },
+    {
+      "slug": "expectedSequence",
+      "label": "Expected answer version",
+      "description": "Optional. The latest known answer-version number for that question, used as a concurrency token. A mismatch returns a conflict and no write.",
+      "placeholder": null,
+      "type": "NUMBER",
+      "required": false,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": null,
+      "jsonSchema": null
+    },
+    {
+      "slug": "topicOrder",
+      "label": "Topic order",
+      "description": "Optional. The order number of the topic the question belongs to. Question order repeats across topics, so send this whenever the question order alone matches more than one answered question; a conflict response names the candidate topics.",
+      "placeholder": null,
+      "type": "NUMBER",
+      "required": false,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": null,
+      "jsonSchema": null
+    }
+  ]
+}

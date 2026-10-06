@@ -1,0 +1,62 @@
+{
+  "slug": "upload_document",
+  "name": "Upload document",
+  "description": "Uploads a user-confirmed supporting file, or a legacy .docx, on the central CKR site. Supporting files are stored in the fixed Supporting documents/ subfolder; legacy final and topic files are stored at the caller's interview-folder root. The destination is resolved server-side from the caller's identity. Do not use this action for the handover. The agent path is save_final_document, then generate_final_document with no arguments: that pair stores the approved Markdown, renders InterviewFinalSummary_{n}.docx, returns it, and advances a finalized interview to Document Generated. The docType \"final\" code path remains only for a legacy uploaded .docx. Do NOT use this for per-topic documents: generate_topic_document produces those from the stored summary. If recovery reports a missing topic document, call generate_topic_document with its returned topic order. The docType \"topic\" contract remains only for backend legacy compatibility.",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": false,
+  "inputFields": [
+    {
+      "slug": "docType",
+      "label": "Document type",
+      "description": "Whether this is a legacy final .docx, an optional supporting file, or a legacy per-topic document. Do not use \"final\" for the handover; call save_final_document then generate_final_document. Use \"supporting\" for a user-confirmed attachment. For per-topic documents, including recovery, call generate_topic_document with topicOrder instead; do not use \"topic\" in the agent flow. The \"final\" and \"topic\" values remain for backend legacy compatibility.",
+      "placeholder": null,
+      "type": "SELECT",
+      "required": true,
+      "options": [
+        {
+          "label": "Topic summary (legacy recovery)",
+          "value": "topic"
+        },
+        {
+          "label": "Final summary (legacy)",
+          "value": "final"
+        },
+        {
+          "label": "Supporting file",
+          "value": "supporting"
+        }
+      ],
+      "allowMultiSelect": false,
+      "allowMultiFile": false,
+      "maxLength": null,
+      "jsonSchema": null
+    },
+    {
+      "slug": "file",
+      "label": "File",
+      "description": "The single user-confirmed file to upload. Supporting files may use their original format. A legacy final or topic file is a .docx. Do not upload the handover with this action.",
+      "placeholder": null,
+      "type": "FILE",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": null,
+      "jsonSchema": null
+    },
+    {
+      "slug": "fileName",
+      "label": "File name",
+      "description": "The unique file name to store, including its extension (e.g. Topic-1 Stakeholder map.docx, InterviewFinalSummary_42.docx, or Process-Checklist.pdf). Supporting files are stored under Supporting documents/; final and legacy topic files stay at the interview-folder root.",
+      "placeholder": null,
+      "type": "TEXT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": 400,
+      "jsonSchema": null
+    }
+  ]
+}

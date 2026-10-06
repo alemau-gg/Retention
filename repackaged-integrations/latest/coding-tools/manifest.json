@@ -24,6 +24,5 @@
       "required": false,
       "maxLength": null
     }
-  ],
-  "triggers": []
+  ]
 }
