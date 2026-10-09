@@ -1,0 +1,88 @@
+handover-agent/integrations/coding-tools/actions/sync_helpers.js
+  s_8d209c1fdadb1e::t_09fc4697a3a6f1 6-7
+README.md
+  s_8d209c1fdadb1e::t_55801a6181afcc 11
+main-agent/integrations/admin/actions/admin_bulk_writeback.js
+  s_8d209c1fdadb1e::t_08f1ae173596ab 1-596,603-774
+  s_8d209c1fdadb1e::t_74e37490da1133 597-602
+handover-agent/skills/knowledge-retention-contributing/references/scope-and-regression.md
+  s_8d209c1fdadb1e::t_236369876f2ffd 144
+  s_8d209c1fdadb1e::t_dfac433d43c5e6 135-137
+handover-agent/skills/knowledge-retention-contributing/scripts/README.md
+  s_8d209c1fdadb1e::t_04ae661c887049 20-21
+repackaged-integrations/README.md
+  s_8d209c1fdadb1e::t_d65c9498257dfc 17
+handover-agent/how-the-agent-works.md
+  s_8d209c1fdadb1e::t_ac2658b6c1c2fc 134
+  s_8d209c1fdadb1e::t_c0b56f35918800 454
+  s_8d209c1fdadb1e::t_9fa6d0d15669d6 196
+  s_8d209c1fdadb1e::t_eae31fb1e0b792 162-163
+handover-agent/system-prompt.md
+  s_8d209c1fdadb1e::t_617ba77f2213b3 96
+  s_8d209c1fdadb1e::t_a3e1539c06ed3e 196
+  s_8d209c1fdadb1e::t_f604bc28492fa4 92
+  s_8d209c1fdadb1e::t_9b87e0be536384 28
+  s_8d209c1fdadb1e::t_237d34e3c3725c 189,191
+handover-agent/skills/knowledge-retention-contributing/scripts/verify-helpers.js
+  s_8d209c1fdadb1e::t_55629bec658297 160
+handover-agent/integrations/coding-tools/actions/verify_helpers.js
+  s_8d209c1fdadb1e::t_7193647db8796a 7-8
+handover-agent/skills/knowledge-retention-contributing/references/integration-modification.md
+  s_8d209c1fdadb1e::t_01c4b8f81a6a92 188
+handover-agent/skills/knowledge-retention-contributing/scripts/sync-helpers.js
+  s_8d209c1fdadb1e::t_804f6ce7a53b20 63
+  s_8d209c1fdadb1e::t_2516972d093a30 5-6
+  s_8d209c1fdadb1e::t_21817cf38ffe65 16
+main-agent/integrations/admin/manifest.json
+  s_8d209c1fdadb1e::t_ac63000e4cacd2 1-218
+repackaged-integrations/latest/admin/actions/admin_bulk_writeback/latest/action_manifest.json
+  s_8d209c1fdadb1e::t_eda588a9572895 1-36
+repackaged-integrations/latest/admin/actions/admin_bulk_writeback/latest/code.js
+  s_8d209c1fdadb1e::t_647a76e115834e 1-774
+repackaged-integrations/latest/admin/actions/admin_describe_schema/latest/action_manifest.json
+  s_8d209c1fdadb1e::t_f573458ad6bcaa 4
+repackaged-integrations/latest/admin/actions/admin_describe_schema/latest/code.js
+  s_8d209c1fdadb1e::t_ee6d59f0bcb84d 4-5,144,188,190-192
+repackaged-integrations/latest/admin/actions/admin_query_records/latest/action_manifest.json
+  s_8d209c1fdadb1e::t_58e301b6a43027 4
+repackaged-integrations/latest/admin/manifest.json
+  s_8d209c1fdadb1e::t_8a3067569d201d 1-46
+repackaged-integrations/latest/coding-tools/actions/sync_helpers/latest/code.js
+  s_8d209c1fdadb1e::t_18aa1a20e03aa0 6-7
+repackaged-integrations/latest/coding-tools/actions/verify_helpers/latest/code.js
+  s_8d209c1fdadb1e::t_b98b5879fa7914 7-8
+repackaged-integrations/v1/admin/actions/admin_bulk_writeback/v1/action_manifest.json
+  s_8d209c1fdadb1e::t_88a3bc0c35707e 1-36
+repackaged-integrations/v1/admin/actions/admin_bulk_writeback/v1/code.js
+  s_8d209c1fdadb1e::t_ffb4a35dfe8470 1-774
+repackaged-integrations/v1/admin/actions/admin_describe_schema/v1/action_manifest.json
+  s_8d209c1fdadb1e::t_3c6511f8c062a5 4
+repackaged-integrations/v1/admin/actions/admin_describe_schema/v1/code.js
+  s_8d209c1fdadb1e::t_e4dc4f87ac575b 4-5,144,188,190-192
+repackaged-integrations/v1/admin/actions/admin_query_records/v1/action_manifest.json
+  s_8d209c1fdadb1e::t_640bdf279cb5da 4
+repackaged-integrations/v1/admin/manifest.json
+  s_8d209c1fdadb1e::t_4b9a00edfa5d20 1-46
+repackaged-integrations/v1/coding-tools/actions/sync_helpers/v1/code.js
+  s_8d209c1fdadb1e::t_f7a017dd6814ee 6-7
+repackaged-integrations/v1/coding-tools/actions/verify_helpers/v1/code.js
+  s_8d209c1fdadb1e::t_1227a15b780ff6 7-8
+main-agent/integrations/admin/actions/admin_describe_schema.js
+  s_8d209c1fdadb1e::t_c8f1c546fac87b 4-5,144,188,190-192
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "c9829a8098f240d200c9c4d73a72a1595bd31409",
+  "prompts": {},
+  "sessions": {
+    "s_8d209c1fdadb1e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "0d1e5849-2435-4a7d-afc2-56f0afe31ef2",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
