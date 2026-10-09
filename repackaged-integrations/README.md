@@ -14,6 +14,7 @@ Each integration contains metadata-only `manifest.json`, optional `authTest.js`/
 Included packages:
 
 - `state-machine` — Knowledge Retention Backend
+- `admin` — Knowledge Retention Admin (schema, query, bulk writeback; not used by the employee interview)
 - `sharepoint-search` — SharePoint Scoped Search
 - `coding-tools` — Langdock coding tools
 

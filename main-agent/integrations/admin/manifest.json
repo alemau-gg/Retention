@@ -1,0 +1,218 @@
+{
+  "id": "8f804ffa-9bf1-43a6-9b1c-f766376bc2ed",
+  "name": "Knowledge Retention Admin",
+  "color": "#6B4C9A",
+  "description": "Admin tools for CKR Dataverse: describe schema, query records, and bulk writeback. Not used by the employee interview.",
+  "authType": "API_KEY",
+  "integrationType": "API",
+  "authFields": [
+    {
+      "slug": "clientId",
+      "label": "Client ID",
+      "description": "Application (client) ID of the Azure app registration used for app-only access to Dataverse and Microsoft Graph.",
+      "placeholder": "00000000-0000-0000-0000-000000000000",
+      "type": "TEXT",
+      "required": true,
+      "maxLength": 100
+    },
+    {
+      "slug": "clientSecret",
+      "label": "Client secret",
+      "description": "Client secret of the Azure app registration. Rotate before the configured expiry; expiry surfaces to interviewees as a contact-your-administrator error.",
+      "placeholder": "",
+      "type": "PASSWORD",
+      "required": true,
+      "maxLength": 4096
+    },
+    {
+      "slug": "dataverseUrl",
+      "label": "Dataverse environment URL",
+      "description": "Base URL of the Dataverse environment, with no trailing slash (e.g. https://org12345.crm4.dynamics.com).",
+      "placeholder": "https://org12345.crm4.dynamics.com",
+      "type": "TEXT",
+      "required": true,
+      "maxLength": 2048
+    },
+    {
+      "slug": "tenantId",
+      "label": "Tenant ID",
+      "description": "Microsoft Entra tenant ID (GUID) of the BASF tenant that hosts the Dataverse environment and the CKR SharePoint site.",
+      "placeholder": "00000000-0000-0000-0000-000000000000",
+      "type": "TEXT",
+      "required": true,
+      "maxLength": 100
+    }
+  ],
+  "actions": [
+    {
+      "slug": "admin_describe_schema",
+      "name": "Admin: describe schema",
+      "description": "Discovers the CKR Dataverse tables and columns that admin_query_records can filter, select, or sort by, resolved live from Dataverse's own EntityDefinitions/Attributes metadata rather than a hard-coded list, so it can't drift from what actually exists in this environment. Also resolves the human-readable labels for Choice/Picklist columns (e.g. ckr_topicstatus) where the environment supports it. Each column includes writable from IsValidForUpdate. Lookup columns also include writeField, the attribute logical name to send to admin_bulk_writeback (field stays the read form, _logicalname_value). Call with a table to get its columns, or omit table to list every ckr_ entity. Call this before admin_query_records or admin_bulk_writeback if you don't already know the field names for a table.",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": [
+        {
+          "slug": "table",
+          "label": "Table",
+          "description": "Optional. The CKR entity to describe, by its Dataverse logical name or entity set name (e.g. ckr_interview / ckr_interviews). Omit to list every entity whose logical name starts with ckr_.",
+          "placeholder": "ckr_interview",
+          "type": "TEXT",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        }
+      ]
+    },
+    {
+      "slug": "admin_query_records",
+      "name": "Admin: query records",
+      "description": "Runs an ad hoc query against any CKR Dataverse table with structured column filters, sorting, and projection. Field names, types, and valid operators are resolved live from Dataverse metadata, not hard-coded; call admin_describe_schema first (with the same table) to learn them rather than guessing. This is an admin/monitoring tool over the whole CKR dataset, gated only by who has access to this connection, and the employee interview never calls it. Returns matching rows as JSON by default, or as a downloadable CSV when exportAsCsv is set. An unknown table, field, or operator returns an error naming the problem and pointing back to admin_describe_schema. This action does not write; to change rows, call admin_describe_schema first and then admin_bulk_writeback.",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": [
+        {
+          "slug": "table",
+          "label": "Table",
+          "description": "The CKR entity to query, by its Dataverse logical name or entity set name (e.g. ckr_interview / ckr_interviews). These names are effectively static, but call admin_describe_schema if unsure of the exact one for this environment.",
+          "placeholder": "ckr_interview",
+          "type": "TEXT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        },
+        {
+          "slug": "select",
+          "label": "Columns to return",
+          "description": "Optional. Field identifiers (from admin_describe_schema) to include in each row. Defaults to every attribute on the entity when omitted.",
+          "placeholder": null,
+          "type": "OBJECT",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": "{\"type\":\"array\",\"items\":{\"type\":\"string\"}}"
+        },
+        {
+          "slug": "exportAsCsv",
+          "label": "Export as CSV",
+          "description": "Return the matching rows as a downloadable CSV file instead of an inline JSON list.",
+          "placeholder": null,
+          "type": "BOOLEAN",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        },
+        {
+          "slug": "filters",
+          "label": "Filters",
+          "description": "Optional. Column filters to apply, ANDed together. Each entry needs a field (a field identifier returned by admin_describe_schema for this table, e.g. a lookup column reads as _ckr_interview_value), an operator, and a value. String fields support eq/ne/contains/startswith; numbers and dates support eq/ne/gt/ge/lt/le; booleans and GUIDs support eq/ne only.",
+          "placeholder": null,
+          "type": "OBJECT",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": "{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"field\":{\"type\":\"string\",\"description\":\"Field identifier for the chosen table, from admin_describe_schema\"},\"operator\":{\"type\":\"string\",\"enum\":[\"eq\",\"ne\",\"gt\",\"ge\",\"lt\",\"le\",\"contains\",\"startswith\"]},\"value\":{\"type\":[\"string\",\"number\",\"boolean\"]}},\"required\":[\"field\",\"operator\",\"value\"]}}"
+        },
+        {
+          "slug": "top",
+          "label": "Max rows",
+          "description": "Optional. Maximum number of rows to return, capped at 5000. Defaults to 200.",
+          "placeholder": null,
+          "type": "NUMBER",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        },
+        {
+          "slug": "orderBy",
+          "label": "Sort by",
+          "description": "Optional. A field identifier (from admin_describe_schema) to sort by. Defaults to createdon.",
+          "placeholder": null,
+          "type": "TEXT",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        },
+        {
+          "slug": "orderDirection",
+          "label": "Sort direction",
+          "description": "Optional. Defaults to descending.",
+          "placeholder": null,
+          "type": "SELECT",
+          "required": false,
+          "options": [
+            {
+              "label": "Ascending",
+              "value": "asc"
+            },
+            {
+              "label": "Descending",
+              "value": "desc"
+            }
+          ],
+          "allowMultiSelect": false,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        }
+      ]
+    },
+    {
+      "slug": "admin_bulk_writeback",
+      "name": "Admin: bulk writeback",
+      "description": "Writes caller-specified fields on existing CKR rows. Call admin_describe_schema for the table first and send attribute logical names (writeField for lookups), never the read-form _logicalname_value name. Validates the entire rows payload before writing anything, merges values when the same table and id appear more than once, and sends Dataverse UpdateMultiple in chunks of 1000 (one request per table per chunk). If UpdateMultiple is not available, falls back to one $batch changeset per chunk. dryRun validates and returns the plan without writing. A Dataverse failure mid-flight stops later chunks and reports what was already written. Not used by the employee interview.",
+      "nativeActionType": "NONE",
+      "actionType": "API",
+      "requiresConfirmation": false,
+      "inputFields": [
+        {
+          "slug": "rows",
+          "label": "Rows",
+          "description": "Rows to update. Each item needs table (CKR logical name or entity set name), id (primary-key GUID), and values (attribute logical names to write). Call admin_describe_schema first. Same table and id are merged. At most 5000 rows.",
+          "placeholder": null,
+          "type": "OBJECT",
+          "required": true,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": "{\"type\":\"array\",\"minItems\":1,\"maxItems\":5000,\"items\":{\"type\":\"object\",\"additionalProperties\":false,\"required\":[\"table\",\"id\",\"values\"],\"properties\":{\"table\":{\"type\":\"string\",\"description\":\"CKR logical name or entity set name (ckr_interview or ckr_interviews).\"},\"id\":{\"type\":\"string\",\"description\":\"Primary-key GUID of that row.\"},\"values\":{\"type\":\"object\",\"minProperties\":1,\"additionalProperties\":{\"type\":[\"string\",\"number\",\"boolean\",\"null\"]},\"description\":\"Keys are Dataverse attribute logical names (ckr_roletitle), not the read-form lookup name (_ckr_interview_value). Use writeField from admin_describe_schema for lookups. Values are string, number, boolean, or null. null clears the field. For a lookup, the value is the target record GUID.\"}}}}"
+        },
+        {
+          "slug": "dryRun",
+          "label": "Dry run",
+          "description": "Optional. When true, validate the payload and return the write plan, but do not write anything.",
+          "placeholder": null,
+          "type": "BOOLEAN",
+          "required": false,
+          "options": null,
+          "allowMultiSelect": null,
+          "allowMultiFile": false,
+          "maxLength": null,
+          "jsonSchema": null
+        }
+      ]
+    }
+  ],
+  "triggers": []
+}

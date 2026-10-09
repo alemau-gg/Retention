@@ -38,8 +38,6 @@ const REQUIRED_ACTION_SLUGS = [
   'upload_document',
   'save_feedback',
   'abandon_interview',
-  'admin_describe_schema',
-  'admin_query_records',
   'read_supporting_document',
 ];
 
@@ -159,7 +157,7 @@ function verifyHelpers(input) {
   const manifest = (input && input.manifest) || null;
   const authTest = (input && input.authTest) || '';
   const adminSlugs = new Set(
-    (input && input.adminSlugs) || ['admin_describe_schema', 'admin_query_records'],
+    (input && input.adminSlugs) || [],
   );
   const canonicalSlug = (input && input.canonicalSlug) || 'get_runtime_state';
 

@@ -1,7 +1,8 @@
 // Discovers the CKR Dataverse schema live from EntityDefinitions/Attributes
 // metadata (entities whose logical name starts with "ckr_"): tables, columns,
 // their filterable types/operators, and choice option values. Read-only.
-// Lets the model learn admin_query_records's queryable fields before calling it.
+// Lets the caller learn admin_query_records's queryable fields, and the
+// writable / writeField names admin_bulk_writeback needs, before calling them.
 
 const MAX_ENTITIES_WITHOUT_FILTER = 10;
 
@@ -140,7 +141,7 @@ async function fetchAttributes(data, token, logicalName) {
   const result = await dvGet(
     data,
     token,
-    `/EntityDefinitions(LogicalName='${logicalName}')/Attributes?$select=LogicalName,AttributeType,DisplayName,RequiredLevel`,
+    `/EntityDefinitions(LogicalName='${logicalName}')/Attributes?$select=LogicalName,AttributeType,DisplayName,RequiredLevel,IsValidForUpdate`,
   );
   return (result && result.value) || [];
 }
@@ -184,7 +185,11 @@ async function describeEntity(data, token, entity) {
       attributeType: attribute.AttributeType,
       type: bucket,
       operators: bucket ? OPERATORS_BY_TYPE[bucket] : [],
+      writable: attribute.IsValidForUpdate === true,
     };
+    // Read queries use _logicalname_value. admin_bulk_writeback needs the
+    // attribute logical name (writeField), and it resolves the lookup target itself.
+    if (isLookup) column.writeField = attribute.LogicalName;
     if (OPTION_SET_CAST_TYPE[attribute.AttributeType]) {
       const options = await fetchOptionSetOptions(data, token, entity.LogicalName, attribute);
       if (options) column.options = options;
