@@ -2,7 +2,8 @@
  * Sync shared helpers across Knowledge Retention Backend actions.
  *
  * Copies the KnowledgeRetentionUtils block from get_runtime_state into every
- * other non-admin action, keeping each action's own ACTION_SLUG.
+ * other action, keeping each action's own ACTION_SLUG. Admin tools are a
+ * separate integration and are not in this set.
  *
  * 1. Fetch every KR Backend action source via Langdock tools.
  * 2. Run this script with data.input.actions = { slug: source, ... }.
@@ -12,7 +13,7 @@
  * data.input = {
  *   actions: { [slug]: sourceString, ... },
  *   canonicalSlug?: "get_runtime_state",
- *   adminSlugs?: ["admin_describe_schema", "admin_query_records"]
+ *   adminSlugs?: []
  * }
  */
 
@@ -40,8 +41,6 @@ const REQUIRED_ACTION_SLUGS = [
   'upload_document',
   'save_feedback',
   'abandon_interview',
-  'admin_describe_schema',
-  'admin_query_records',
   'read_supporting_document',
 ];
 
@@ -61,7 +60,7 @@ function syncHelpers(input) {
   const actions = (input && input.actions) || {};
   const canonicalSlug = (input && input.canonicalSlug) || 'get_runtime_state';
   const adminSlugs = new Set(
-    (input && input.adminSlugs) || ['admin_describe_schema', 'admin_query_records'],
+    (input && input.adminSlugs) || [],
   );
 
   const blockers = [];
