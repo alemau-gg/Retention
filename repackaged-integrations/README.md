@@ -14,7 +14,6 @@ Each integration contains metadata-only `manifest.json`, optional `authTest.js`/
 Included packages:
 
 - `state-machine` — Knowledge Retention Backend
-- `sharepoint-search` — SharePoint Scoped Search
 - `coding-tools` — Langdock coding tools
 
 `manifest.json` must not contain top-level `actions` or `triggers` arrays; the importer rejects them. No `_shared.js` is included.
