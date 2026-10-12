@@ -132,14 +132,16 @@ concrete test plan. The agent does not execute actions:
 
 ## Admin Dataverse
 
-Use `admin_describe_schema` before `admin_query_records` and before any recommendation that depends on column, choice, or operator identity.
+Admin tools are the separate **Knowledge Retention Admin** integration: `admin_describe_schema`, `admin_query_records`, and `admin_bulk_writeback`. They are not actions on the interview backend. The employee interview never calls them.
+
+Use `admin_describe_schema` before `admin_query_records` or `admin_bulk_writeback`, and before any recommendation that depends on column, choice, operator, or writable-field identity.
 
 - Use only schema-returned fields and operators.
 - Narrow selects and filters.
 - Respect `top` limits.
 - Use `exportAsCsv` when a file is needed.
 - Treat data as sensitive production data.
-- Do not bypass the state machine unless explicitly requested and the blast radius is mapped.
+- Do not bypass the interview state machine with an ad hoc write. A requested data correction goes through `admin_bulk_writeback` after describe, with the blast radius mapped.
 - If schema and HOW conflict, surface the conflict instead of silently choosing.
 
 ## Content-skill boundaries

@@ -8,6 +8,7 @@ Knowledge Retention agent sources, split by agent.
   - `system-prompt.md` — interview system prompt
   - `skills/` — `knowledge-retention-interviewing`, `knowledge-retention-reporting`
   - `integrations/state-machine/` — Knowledge Retention Backend actions + manifest
+  - `integrations/admin/` — Knowledge Retention Admin (schema, query, bulk writeback). Not used by the employee interview
 
 - **`handover-agent/`** — administrator-facing handover agent
   - `system-prompt.md` — handover system prompt

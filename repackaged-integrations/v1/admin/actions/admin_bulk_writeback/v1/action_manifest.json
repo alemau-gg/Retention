@@ -1,0 +1,36 @@
+{
+  "slug": "admin_bulk_writeback",
+  "name": "Admin: bulk writeback",
+  "description": "Writes caller-specified fields on existing CKR rows. Call admin_describe_schema for the table first and send attribute logical names (writeField for lookups), never the read-form _logicalname_value name. Validates the entire rows payload before writing anything, merges values when the same table and id appear more than once, and sends Dataverse UpdateMultiple in chunks of 1000 (one request per table per chunk). If UpdateMultiple is not available, falls back to one $batch changeset per chunk. dryRun validates and returns the plan without writing. A Dataverse failure mid-flight stops later chunks and reports what was already written. Not used by the employee interview.",
+  "nativeActionType": "NONE",
+  "actionType": "API",
+  "requiresConfirmation": false,
+  "inputFields": [
+    {
+      "slug": "rows",
+      "label": "Rows",
+      "description": "Rows to update. Each item needs table (CKR logical name or entity set name), id (primary-key GUID), and values (attribute logical names to write). Call admin_describe_schema first. Same table and id are merged. At most 5000 rows.",
+      "placeholder": null,
+      "type": "OBJECT",
+      "required": true,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": null,
+      "jsonSchema": "{\"type\":\"array\",\"minItems\":1,\"maxItems\":5000,\"items\":{\"type\":\"object\",\"additionalProperties\":false,\"required\":[\"table\",\"id\",\"values\"],\"properties\":{\"table\":{\"type\":\"string\",\"description\":\"CKR logical name or entity set name (ckr_interview or ckr_interviews).\"},\"id\":{\"type\":\"string\",\"description\":\"Primary-key GUID of that row.\"},\"values\":{\"type\":\"object\",\"minProperties\":1,\"additionalProperties\":{\"type\":[\"string\",\"number\",\"boolean\",\"null\"]},\"description\":\"Keys are Dataverse attribute logical names (ckr_roletitle), not the read-form lookup name (_ckr_interview_value). Use writeField from admin_describe_schema for lookups. Values are string, number, boolean, or null. null clears the field. For a lookup, the value is the target record GUID.\"}}}}"
+    },
+    {
+      "slug": "dryRun",
+      "label": "Dry run",
+      "description": "Optional. When true, validate the payload and return the write plan, but do not write anything.",
+      "placeholder": null,
+      "type": "BOOLEAN",
+      "required": false,
+      "options": null,
+      "allowMultiSelect": null,
+      "allowMultiFile": false,
+      "maxLength": null,
+      "jsonSchema": null
+    }
+  ]
+}

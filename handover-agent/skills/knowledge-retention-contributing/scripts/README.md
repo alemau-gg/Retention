@@ -17,6 +17,8 @@ data.input = {
 
 Both scripts require the **full** known action set (see `REQUIRED_ACTION_SLUGS` inside each file). A partial fetch cannot succeed. If you add or remove a backend action, update that list in both scripts.
 
+`admin_describe_schema`, `admin_query_records`, and `admin_bulk_writeback` are the separate Knowledge Retention Admin integration. They are not part of `REQUIRED_ACTION_SLUGS`. The employee interview never calls them.
+
 ## When to run
 
 | Script | When |

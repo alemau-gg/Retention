@@ -1,7 +1,7 @@
 {
   "slug": "admin_query_records",
   "name": "Admin: query records",
-  "description": "Runs an ad hoc query against any CKR Dataverse table with structured column filters, sorting, and projection. Field names, types, and valid operators are resolved live from Dataverse metadata, not hard-coded; call admin_describe_schema first (with the same table) to learn them rather than guessing. Unlike every other action here, this is NOT scoped to the caller's own interview: it is an admin/monitoring tool over the whole dataset, gated only by who has access to this connection. Returns matching rows as JSON by default, or as a downloadable CSV when exportAsCsv is set. An unknown table, field, or operator returns an error naming the problem and pointing back to admin_describe_schema.",
+  "description": "Runs an ad hoc query against any CKR Dataverse table with structured column filters, sorting, and projection. Field names, types, and valid operators are resolved live from Dataverse metadata, not hard-coded; call admin_describe_schema first (with the same table) to learn them rather than guessing. This is an admin/monitoring tool over the whole CKR dataset, gated only by who has access to this connection, and the employee interview never calls it. Returns matching rows as JSON by default, or as a downloadable CSV when exportAsCsv is set. An unknown table, field, or operator returns an error naming the problem and pointing back to admin_describe_schema. This action does not write; to change rows, call admin_describe_schema first and then admin_bulk_writeback.",
   "nativeActionType": "NONE",
   "actionType": "API",
   "requiresConfirmation": false,

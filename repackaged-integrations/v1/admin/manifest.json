@@ -1,0 +1,46 @@
+{
+  "id": "8f804ffa-9bf1-43a6-9b1c-f766376bc2ed",
+  "name": "Knowledge Retention Admin",
+  "color": "#6B4C9A",
+  "description": "Admin tools for CKR Dataverse: describe schema, query records, and bulk writeback. Not used by the employee interview.",
+  "authType": "API_KEY",
+  "integrationType": "API",
+  "authFields": [
+    {
+      "slug": "clientId",
+      "label": "Client ID",
+      "description": "Application (client) ID of the Azure app registration used for app-only access to Dataverse and Microsoft Graph.",
+      "placeholder": "00000000-0000-0000-0000-000000000000",
+      "type": "TEXT",
+      "required": true,
+      "maxLength": 100
+    },
+    {
+      "slug": "clientSecret",
+      "label": "Client secret",
+      "description": "Client secret of the Azure app registration. Rotate before the configured expiry; expiry surfaces to interviewees as a contact-your-administrator error.",
+      "placeholder": "",
+      "type": "PASSWORD",
+      "required": true,
+      "maxLength": 4096
+    },
+    {
+      "slug": "dataverseUrl",
+      "label": "Dataverse environment URL",
+      "description": "Base URL of the Dataverse environment, with no trailing slash (e.g. https://org12345.crm4.dynamics.com).",
+      "placeholder": "https://org12345.crm4.dynamics.com",
+      "type": "TEXT",
+      "required": true,
+      "maxLength": 2048
+    },
+    {
+      "slug": "tenantId",
+      "label": "Tenant ID",
+      "description": "Microsoft Entra tenant ID (GUID) of the BASF tenant that hosts the Dataverse environment and the CKR SharePoint site.",
+      "placeholder": "00000000-0000-0000-0000-000000000000",
+      "type": "TEXT",
+      "required": true,
+      "maxLength": 100
+    }
+  ]
+}

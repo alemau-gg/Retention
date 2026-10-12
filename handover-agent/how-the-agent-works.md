@@ -131,7 +131,7 @@ Both content skills: no invented knowledge; preserve specifics; visible gaps bea
 
 **Role:** Authoritative state machine over Dataverse + SharePoint. Every mutating action returns fresh state with `nextAction` and `instruction`.
 
-**Auth:** Service account (app-only) against Entra / Dataverse / Graph. Identity of the interviewee comes from the Langdock session: the stable Langdock user id, plus UPN (else email) as a snapshot — the backend scopes all non-admin actions to that caller’s interview. Ownership lookup (shared helper, every non-admin action): match the stable id in `cr32c_aisuiteid` first; only if that finds nothing, fall back to the caller’s own `ckr_employeeemail`, and claim a matching row **only when its id column is blank** — the stable id is then written back so the next lookup matches on id. A row that already carries a different id is never claimed. The email is **not** lowercased: OData `eq` on `ckr_employeeemail` is case-sensitive in practice, matching the original Copilot Studio flows. `alternativeEmail` is never consulted. Actions never take a record ID as input; targets are resolved server-side from status columns.
+**Auth:** Service account (app-only) against Entra / Dataverse / Graph. Identity of the interviewee comes from the Langdock session: the stable Langdock user id, plus UPN (else email) as a snapshot — the backend scopes every action to that caller’s interview. Ownership lookup (shared helper, every action): match the stable id in `cr32c_aisuiteid` first; only if that finds nothing, fall back to the caller’s own `ckr_employeeemail`, and claim a matching row **only when its id column is blank** — the stable id is then written back so the next lookup matches on id. A row that already carries a different id is never claimed. The email is **not** lowercased: OData `eq` on `ckr_employeeemail` is case-sensitive in practice, matching the original Copilot Studio flows. `alternativeEmail` is never consulted. Actions never take a record ID as input; targets are resolved server-side from status columns.
 
 **Core actions (user path):**
 
@@ -159,7 +159,8 @@ Both content skills: no invented knowledge; preserve specifics; visible gaps bea
 | `revise_answer` | New version of an earlier answer, keyed by `targetQuestionOrder` plus optional `topicOrder`; if that topic’s summary was confirmed, marks summary `needsReview` |
 | `get_answers` / `get_discovery` | Read-backs; prefer open interview, fall back to the latest closed one (`completed: true`, i.e. 60 or 70) — needed because finalize flips status before the final doc is built |
 | `abandon_interview` | Sets status `cancelled` (80); confirmed, irreversible |
-| `admin_*` | Monitoring over CKR tables only — both actions resolve entities through a `ckr_` prefix filter, so the app-only credential cannot be pointed at unrelated Dataverse tables. Not part of the employee path |
+
+**Knowledge Retention Admin** is a separate integration, not part of this backend: `admin_describe_schema`, `admin_query_records`, and `admin_bulk_writeback`. They operate over CKR tables only (a `ckr_` prefix filter, so the app-only credential cannot be pointed at unrelated Dataverse tables) and are gated by who has that connection. The employee interview never calls them.
 
 **Optimistic concurrency (per action, not uniform):**
 
@@ -192,7 +193,7 @@ Progress is not one enum. Dataverse keeps **five independent status columns** th
 
 Open = `status < 60`. Closed = `60 ≤ status < 80`, which spans both 60 and 70 — every post-finalize lookup (`completed: true`) uses that range, so a document-generated interview stays reachable for `save_feedback`, `get_answers`, `get_discovery`, `upload_document`, `save_final_document`, `generate_final_document`, and `set_up_interview_folder`. Cancelled (80) is reachable by neither lookup.
 
-60 → 70 is the one status transition SharePoint drives: `finalize_interview` writes 60, and `generate_final_document` filing the Word file is what advances the row (`save_final_document` alone does not). That is why the resume path can tell “finalized, document still owed” from “fully closed out” without inspecting the folder (§6). Codes 40 (In Progress) and 50 (Awaiting Confirmation) exist in the Dataverse picklist but this integration never writes them — question-level status already carries that granularity. All 19 non-admin action files carry the full map including 70 and 80.
+60 → 70 is the one status transition SharePoint drives: `finalize_interview` writes 60, and `generate_final_document` filing the Word file is what advances the row (`save_final_document` alone does not). That is why the resume path can tell “finalized, document still owed” from “fully closed out” without inspecting the folder (§6). Codes 40 (In Progress) and 50 (Awaiting Confirmation) exist in the Dataverse picklist but this integration never writes them — question-level status already carries that granularity. All 19 action files carry the full map including 70 and 80.
 
 #### Topic — `ckr_topicstatus`
 
@@ -450,7 +451,7 @@ Point to HR contact; offer pause; progress saved.
 The `final-document.md` workflow must re-fetch discovery and answers via tools (not memory). If any topic lacks an approved summary, stop and run the default topic-summary workflow first. Chapter boundaries may merge/split interview topics for successor readability — but every claim must still trace to approved summaries.
 
 ### Admin path
-`admin_describe_schema` / `admin_query_records` are monitoring tools over the whole CKR dataset, gated by who has the connection — not used in the employee interview loop. Usage rules (schema before every query; no guessing) are in skill `knowledge-retention-contributing`.
+`admin_describe_schema`, `admin_query_records`, and `admin_bulk_writeback` live on the separate **Knowledge Retention Admin** integration, not on this interview backend. They are monitoring and bulk-write tools over the whole CKR dataset, gated by who has that connection. The employee interview never calls them. Usage rules (schema before every query or write; no guessing) are in skill `knowledge-retention-contributing`.
 
 ---
 

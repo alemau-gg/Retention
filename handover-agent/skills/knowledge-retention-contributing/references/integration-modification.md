@@ -185,7 +185,7 @@ Every non-admin action inlines the full helper block. Sandbox forbids `require` 
 1. Edit the canonical block in live **`get_runtime_state`** first.
 2. Sync that block into **every** other non-admin action via the Dev-only `sync_helpers` custom action, then write each confirmed update back. The only intentional difference per file is `ACTION_SLUG: '<that_action>'`.
 3. Never trim “unused” methods. Actions that rarely call `computeState` (`finalize_interview`, `save_feedback`, `get_answers`, `get_discovery`, …) still carry the full helper.
-4. Do not edit `admin_describe_schema` / `admin_query_records` helpers as part of employee-path sync.
+4. Do not edit Knowledge Retention Admin actions (`admin_describe_schema`, `admin_query_records`, `admin_bulk_writeback`) as part of employee-path sync. They are a separate integration and are not on the interview backend.
 5. After sync: run the Dev-only `verify_helpers` custom action on a fresh full fetch (`ok` must be true). Spot-check that methods the action body calls still exist on the helper.
 
 A half-synced helper set is a production incident. If a write fails mid-sync, stop and finish sync before any further behaviour edits.
