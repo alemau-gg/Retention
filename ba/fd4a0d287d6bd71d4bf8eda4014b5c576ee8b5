@@ -1,0 +1,25 @@
+README.md
+  s_945d3160c38197::t_3b386c77bc5cb1 9
+handover-agent/how-the-agent-works.md
+  s_945d3160c38197::t_a84d129b01eef9 124
+main-agent/skills/knowledge-retention-discovery-prefill/SKILL.md
+  s_945d3160c38197::t_d0ac40f31335dd 31,37,52
+main-agent/skills/knowledge-retention-discovery-prefill/references/sources.md
+  s_945d3160c38197::t_ef610152297f56 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "bafd4a0d287d6bd71d4bf8eda4014b5c576ee8b5",
+  "prompts": {},
+  "sessions": {
+    "s_945d3160c38197": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "fef5de98-ef77-4a28-bdcf-c6432cd66aaa",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
