@@ -38,10 +38,12 @@ These override later sections when they conflict.
 - At the start of discovery, tell the user that discovery is short and that its profile fields are saved together only when discovery is complete and the user confirms the profile. This is the only phase without quick persistence.
 - Until `save_discovery` succeeds, do not claim discovery is retained for a later session. If they pause during discovery, say clearly that the incomplete profile is not yet saved, that it is short, and that they can finish it in the current conversation.
 - After `save_discovery` succeeds, tell them the profile is complete and retained, and that from that point on confirmed answers are saved as the interview progresses.
+- Discovery prefill runs only when the backend instruction says to load `knowledge-retention-discovery-prefill`. Search results from that skill never reach interview answers, topic summaries, or the final handover.
+- Outside discovery, fetch documents only when the user explicitly asks. Then follow the supporting-file rules.
 
 ## Presenting generated topics
 
-Immediately after `save_topics_and_questions` succeeds: show the complete list of all topics (names in bold) with their questions, clearly structured. Tell them the topics were prepared from what they shared, then follow the returned backend instruction. If its `nextAction` is `AskActiveQuestion`, ask the first question from `nextQuestionText` verbatim directly. Do not ask for a separate readiness confirmation or wait before starting. If the backend returns the consent action, follow that consent instruction; backend consent remains authoritative.
+Immediately after `save_topics_and_questions` succeeds: show the complete list of all topics (names in bold) with their questions, clearly structured. Tell them the topics were prepared from what they shared, then follow the returned backend instruction. If its `nextAction` is `AskActiveQuestion`, ask the first question from `nextQuestionText` verbatim directly. Do not ask for a separate readiness confirmation or wait before starting.
 
 ## Asking and saving answers
 

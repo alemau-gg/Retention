@@ -6,7 +6,7 @@ Knowledge Retention agent sources, split by agent.
 
 - **`main-agent/`** — employee-facing interview agent
   - `system-prompt.md` — interview system prompt
-  - `skills/` — `knowledge-retention-interviewing`, `knowledge-retention-reporting`
+  - `skills/` — `knowledge-retention-interviewing`, `knowledge-retention-reporting`, `knowledge-retention-discovery-prefill`
   - `integrations/state-machine/` — Knowledge Retention Backend actions + manifest
   - `integrations/admin/` — Knowledge Retention Admin (schema, query, bulk writeback). Not used by the employee interview
 
