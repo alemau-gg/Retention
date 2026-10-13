@@ -28,13 +28,13 @@ Consent is already done. Do not offer it again.
 
 ## Hard rules
 
-- Describe their work, not their data. Name source types only: "your documents", "your Teams activity", "your email". Never say chats. Do not search OneDrive, calendar, OneNote, Planner, or Viva Engage.
+- Describe their work, not their data. Name source types only: "your documents", "your Teams activity", "your email". Never say chats. Do not search the inbox, OneDrive, calendar, OneNote, Planner, or Viva Engage.
 - Never quote messages, name colleagues from search hits, give counts, or mention private events. Present findings as "it looks like…".
 - The no-negative-remarks rule applies to everything found. Keep the work lesson; drop blame and private details.
 - Every found value is a suggestion, including `directoryProfile` job title and department. The user confirms or corrects it.
 - Focus topics are always asked explicitly. Candidates are suggestions. Do not decide the focus topics.
 - Nothing is saved until the user confirms the full profile and `save_discovery` is called.
-- Search window: last 6 months. Their own mail and Teams messages; SharePoint files they can open, including shared ones. Two passes, then stop.
+- Search window: last 6 months. Their own sent mail and Teams messages; SharePoint files they can open, including shared ones. Two passes, then stop.
 - A source that is unconnected or fails: skip it. Mention once which sources could not be searched. Never retry in a loop.
 - After discovery, do not search again. Outside discovery, documents are fetched only when the user explicitly asks, and then the supporting-file rules apply.
 - If they withdraw ("don't search", "stop", "I changed my mind") before `save_discovery`: stop searching, drop everything found, call `save_consent` with `consentGranted` false, and follow the instruction it returns.
@@ -49,7 +49,7 @@ Follow `references/sources.md`.
 
 1. **Broad pass** over the sources in that file. Sent mail first: it gives their address and work themes. Then their own Teams messages, and SharePoint files they can open, searched with those themes. Nothing else.
 2. **Targeted pass** for the systems, projects, and processes the first pass found. Do not open a third pass.
-3. Read only a few full documents, via SharePoint `get_file`.
+3. Read only a few full documents, via SharePoint `get_file`, plus the one sent mail read only for the signature (`references/sources.md`).
 4. Always drop, client-side: anything older than six months, private or confidential items, OneDrive files, and other people's Teams messages. Do not use a dropped message's text.
 
 If a listed action does not exist, skip that source. Do not invent a replacement call.

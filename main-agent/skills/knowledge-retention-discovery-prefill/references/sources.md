@@ -4,7 +4,7 @@ Operational calls for `knowledge-retention-discovery-prefill`. Policy (what may 
 
 Last 6 months. Their own sent mail and Teams messages; SharePoint files they can open, including files others shared with them. Two passes: broad, then targeted on systems, projects, and processes the broad pass found. Read only a few full documents.
 
-Sources are sent email, Teams, and SharePoint. Do not call OneDrive, Outlook Calendar, OneNote, Planner, or Viva Engage.
+Sources are sent email, Teams, and SharePoint. Do not search the inbox. Do not call OneDrive, Outlook Calendar, OneNote, Planner, or Viva Engage.
 
 If a call fails or the source is not connected, skip that source. The skill mentions it once. Do not retry in a loop. Do not invent an action that is not listed here.
 
