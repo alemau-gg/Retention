@@ -290,7 +290,7 @@
     {
       "slug": "save_consent",
       "name": "Save consent",
-      "description": "Records an explicit yes or no to a discovery-only profile draft. Accepted only while the interview status is created (before discovery is saved); a later call writes nothing and returns conflict true with fresh state. On an explicit yes at that stage, also returns directoryProfile (jobTitle and department, each a string or null) and directoryLookupFailure (null, or a short admin-only reason). directoryProfile is null when no lookup ran or the lookup failed.",
+      "description": "Records an explicit yes or no to a discovery-only profile draft. Accepted only while the interview status is created (before discovery is saved); a later call writes nothing and returns conflict true with fresh state. At that stage a no is always written, including a withdrawal after an earlier yes. After a no, a yes writes nothing and returns conflict true; prefill stays off for that interview. On an explicit yes at that stage, also returns directoryProfile (jobTitle and department, each a string or null) and directoryLookupFailure (null, or a short admin-only reason). directoryProfile is null when no lookup ran or the lookup failed.",
       "nativeActionType": "NONE",
       "actionType": "API",
       "requiresConfirmation": false,

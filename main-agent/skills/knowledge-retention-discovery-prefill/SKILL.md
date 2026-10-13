@@ -37,6 +37,7 @@ Consent is already done. Do not offer it again.
 - Search window: last 6 months. Own work only. Two passes, then stop.
 - A source that is unconnected or fails: skip it. Mention once which sources could not be searched. Never retry in a loop.
 - After discovery, do not search again. Outside discovery, documents are fetched only when the user explicitly asks, and then the supporting-file rules apply.
+- If they withdraw ("don't search", "stop", "I changed my mind") before `save_discovery`: stop searching, drop everything found, call `save_consent` with `consentGranted` false, and follow the instruction it returns.
 
 ## Before searching
 
@@ -46,10 +47,10 @@ Send one short message in the interview language: this takes a moment. No tool n
 
 Follow `references/sources.md`.
 
-1. **Broad pass** over the sources in that file. Sent mail, the user's own Teams messages, and SharePoint files. Nothing else.
+1. **Broad pass** over the sources in that file. Sent mail first: it gives their address, name, and work themes. Then their own Teams messages and their own SharePoint files, searched with those themes. Nothing else.
 2. **Targeted pass** for the systems, projects, and processes the first pass found. Do not open a third pass.
 3. Read only a few full documents, via SharePoint `get_file`.
-4. Always drop, client-side: anything older than six months, private or confidential items, and other people's messages.
+4. Always drop, client-side: anything older than six months, private or confidential items, OneDrive files, and other people's messages and files. Do not use a dropped hit's preview or summary text.
 
 If a listed action does not exist, skip that source. Do not invent a replacement call.
 
@@ -59,7 +60,7 @@ One entry per discovery field. Suggestions only.
 
 | Field | How to draft |
 |---|---|
-| Role and business unit | `directoryProfile` first (`jobTitle`, `department`). If it is null or the instruction says "not available", use the email signature. |
+| Role and business unit | Per field. Role from `jobTitle`, business unit from `department`. Use the email signature only for a field that is null or "not available". Never replace a directory value with the signature. |
 | Responsibilities | Concrete work the sources support. |
 | Additional responsibilities | Own entry in the draft. `save_discovery` has no separate input: after they confirm, include this text in `responsibilities`, still distinct in the read-back. |
 | Systems and tools | Named systems the work actually uses. |
@@ -80,4 +81,4 @@ Read the full profile back. Explicit confirmation, then `save_discovery`. Silenc
 
 ## Nothing usable
 
-If the passes produce nothing you can draft, say so briefly and stop searching. Run standard discovery with `knowledge-retention-interviewing`, question by question. Do not retry the sources.
+If the passes produce nothing you can draft, or sent mail gave no address to match their own Teams messages and files against, say so briefly and stop searching. Run standard discovery with `knowledge-retention-interviewing`, question by question. Do not retry the sources.

@@ -50,9 +50,9 @@ Live follow-ups are the system prompt (this skill is not loaded on `AskActiveQue
 
 **Done when:** every required field is concrete, you read the profile back, user explicitly confirmed, then `save_discovery`.
 
-When the backend instruction says to load `knowledge-retention-discovery-prefill`, follow that skill for the draft. Do not run the search yourself from this skill. This skill's thin-answer bar and field list still apply before save.
+When the backend instruction says to load `knowledge-retention-discovery-prefill`, follow that skill for the draft. Do not run the search yourself from this skill. This skill's thin-answer bar and field list still apply before save. With a draft, ask only for fields that are missing or below the bar, one at a time. Do not re-ask a field the user already confirmed or corrected in the draft. Focus topics are always asked.
 
-Collect one question at a time:
+Without a draft, collect one question at a time:
 
 - role title and business unit
 - core responsibilities and tasks

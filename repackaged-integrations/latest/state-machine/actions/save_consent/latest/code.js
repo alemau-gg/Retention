@@ -998,20 +998,32 @@ if (Number(interview[S.interview.status]) !== ST.interview.created) {
   };
 }
 
-const body = {};
-body[S.interview.consentStatus] = consentGranted ? ST.consent.accepted : ST.consent.declined;
-await KnowledgeRetentionUtils.dv(data, token, {
-  method: 'PATCH',
-  path: `/${S.entitySets.interviews}(${interview[S.interview.id]})`,
-  body,
-});
+// Withdrawing consent is always honored. A decline is final for this interview, so a
+// repeat call can never turn search on after the user said no.
+const storedConsent = Number(interview[S.interview.consentStatus] || ST.consent.notAsked);
+const alreadyRecorded = storedConsent === ST.consent.declined || (storedConsent === ST.consent.accepted && consentGranted);
+let interviewForState = interview;
+if (!alreadyRecorded) {
+  const body = {};
+  body[S.interview.consentStatus] = consentGranted ? ST.consent.accepted : ST.consent.declined;
+  await KnowledgeRetentionUtils.dv(data, token, {
+    method: 'PATCH',
+    path: `/${S.entitySets.interviews}(${interview[S.interview.id]})`,
+    body,
+  });
+  interviewForState = Object.assign({}, interview, body);
+}
+const effectiveConsent = alreadyRecorded ? storedConsent === ST.consent.accepted : consentGranted;
+const conflict = alreadyRecorded && effectiveConsent !== consentGranted;
+const conflictReason = conflict
+  ? 'Prefill was already declined for this interview and cannot be turned back on. Nothing was written. Follow the returned state.'
+  : null;
 
-const interviewForState = Object.assign({}, interview, body);
 const prefillEnabled = String(data.auth.prefillEnabled).toLowerCase() === 'true';
 let directoryProfile = null;
 let directoryLookupFailure = null;
 let state;
-if (consentGranted && prefillEnabled) {
+if (effectiveConsent && prefillEnabled) {
   const lookup = await lookupDirectoryProfile(data, email);
   directoryProfile = lookup.profile;
   directoryLookupFailure = lookup.failure;
@@ -1020,12 +1032,13 @@ if (consentGranted && prefillEnabled) {
   state = KnowledgeRetentionUtils.computeState(data, interviewForState, children);
 }
 return {
-  consentGranted: consentGranted,
-  conflict: false,
+  consentGranted: effectiveConsent,
+  conflict: conflict,
+  conflictReason: conflictReason,
   directoryProfile: directoryProfile,
   directoryLookupFailure: directoryLookupFailure,
   nextAction: state.nextAction,
-  instruction: state.instruction,
+  instruction: conflict ? `${conflictReason} ${state.instruction}` : state.instruction,
   language: state.language,
   progressLabel: state.progressLabel,
   questionsRemaining: state.questionsRemaining,

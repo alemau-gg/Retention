@@ -144,7 +144,7 @@ Content skills: no invented knowledge; preserve specifics; visible gaps beat smo
 | `create_interview` | Creates interview in chosen language (`created`) |
 | `save_discovery` | Writes the complete confirmed profile together and sets status `discovery`; before this succeeds, discovery fields are not retained for resume. Refuses with `conflict: true` once status is `>= generated` |
 | `save_topics_and_questions` | Topics/questions → status `generated` (idempotent no-op if already `>= generated`). Validates that topic and per-topic question orders are positive integers with no duplicates **before** cleaning up any partial rows from a failed prior attempt |
-| `save_consent` | Prefill yes/no, only when prefill is enabled, and only at status `created`. On yes, the response includes `directoryProfile` and `directoryLookupFailure`. Any later status returns `conflict: true` and writes nothing |
+| `save_consent` | Prefill yes/no, only when prefill is enabled, and only at status `created`. On yes, the response includes `directoryProfile` and `directoryLookupFailure`. Any later status returns `conflict: true` and writes nothing. At `created` a no is always written, including a withdrawal after a yes. A yes after a no writes nothing and returns `conflict: true` |
 | `save_answer` | Confirmed answer; concurrency via required `expectedQuestionOrder` and `expectedTopicOrder` |
 | `set_up_interview_folder` | Creates SharePoint folder + grants; idempotent; reports `accessGranted` from the actual invite response and `managerGranted` only when a manager was found *and* the invite succeeded. A failed invite is non-fatal (uploads are app-only) and turns the instruction into “share it yourself”. Reloads the interview with the open-or-completed fallback, so the finalize-without-folder recovery path works |
 | `save_topic_summary` | Stores the exact user-approved Markdown `summaryFile` in Dataverse; topic → summarized; concurrency via `expectedTopicOrder`. Creates no Word file; returns action-authored `GenerateTopicDocument` |
@@ -253,7 +253,7 @@ The offer is at status `created`, before discovery, not after topics. The agent 
 - `directoryProfile`: `{ jobTitle, department }`, or `null`. Suggestions only, including when the object is present. The prefilled discovery instruction states each value or "not available".
 - `directoryLookupFailure`: included on that yes response. A failed lookup never blocks discovery. The agent continues with the prefilled draft (signature and the other sources) or with standard discovery if nothing usable is found.
 
-`get_runtime_state` returns the same two fields when it resumes a `created` interview whose consent is already `accepted`. `save_consent` at any later status returns `conflict: true` and writes nothing.
+`get_runtime_state` returns the same two fields when it resumes a `created` interview whose consent is already `accepted`. `save_consent` at any later status returns `conflict: true` and writes nothing. At `created`, a no is always written, including a withdrawal after a yes. A yes after a no writes nothing and returns `conflict: true`.
 
 ### 3.2 Runtime `nextAction`
 
