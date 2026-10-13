@@ -710,9 +710,13 @@ const KnowledgeRetentionUtils = {
         });
       }
 
+      const declinedSentence =
+        consentStatus === ST.consent.declined
+          ? ' Prefill is declined: do not search, and do not use anything found by an earlier search in this conversation.'
+          : '';
       return Object.assign(base, {
         nextAction: 'RunPreInterviewDiscovery',
-        instruction: `In ${language}, explain that ${M.discoveryIntro} and say: "${M.discoverySaveNotice}". Then run pre-interview discovery: role, organizational unit, responsibilities, tools, focus topics, and optionally KPIs/constraints. Ask conversationally; do not invent answers. Read the profile back, get explicit confirmation, then call save_discovery.${supportingFileInstruction}`,
+        instruction: `In ${language}, explain that ${M.discoveryIntro} and say: "${M.discoverySaveNotice}". Then run pre-interview discovery: role, organizational unit, responsibilities, tools, focus topics, and optionally KPIs/constraints. Ask conversationally; do not invent answers.${declinedSentence} Read the profile back, get explicit confirmation, then call save_discovery.${supportingFileInstruction}`,
       });
     }
 
