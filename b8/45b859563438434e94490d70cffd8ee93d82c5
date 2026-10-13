@@ -1,0 +1,48 @@
+repackaged-integrations/v1/state-machine/actions/save_consent/v1/action_manifest.json
+  s_945d3160c38197::t_6d161ef30767ac 4
+main-agent/skills/knowledge-retention-interviewing/SKILL.md
+  s_945d3160c38197::t_1aaa8c6c73e60f 53,55
+repackaged-integrations/latest/state-machine/actions/save_consent/latest/action_manifest.json
+  s_945d3160c38197::t_6d161ef30767ac 4
+repackaged-integrations/latest/state-machine/actions/save_consent/latest/code.js
+  s_945d3160c38197::t_a5e9cdede05600 1003,1005-1018,1020-1021,1026,1035-1037,1041
+  s_945d3160c38197::t_6d161ef30767ac 1001-1002,1004,1019
+main-agent/skills/knowledge-retention-discovery-prefill/SKILL.md
+  s_945d3160c38197::t_1aaa8c6c73e60f 40,50,53,63,84
+handover-agent/how-the-agent-works.md
+  s_945d3160c38197::t_6d161ef30767ac 147,256
+main-agent/skills/knowledge-retention-discovery-prefill/references/sources.md
+  s_945d3160c38197::t_076e4160ab8679 35-39
+  s_945d3160c38197::t_1aaa8c6c73e60f 43
+  s_945d3160c38197::t_d02e38666d9f4f 95-99,101
+  s_945d3160c38197::t_6b5da8732b62f4 107,109,134
+  s_945d3160c38197::t_e2d1ca9b8884ea 13,15-19,27
+  s_945d3160c38197::t_b1c42994319757 73,77,79,81
+  s_945d3160c38197::t_d125a733edd21a 132-133
+main-agent/integrations/state-machine/actions/save_consent.js
+  s_945d3160c38197::t_e96c3ea0bb1148 1019
+  s_945d3160c38197::t_bae48414f83403 1001-1002,1004
+  s_945d3160c38197::t_3786589ba274c7 1041
+  s_945d3160c38197::t_a0dec3555b35bd 1003,1005-1018,1020-1021,1026,1035-1037
+main-agent/integrations/state-machine/manifest.json
+  s_945d3160c38197::t_6d161ef30767ac 293
+repackaged-integrations/v1/state-machine/actions/save_consent/v1/code.js
+  s_945d3160c38197::t_6d161ef30767ac 1001-1002,1004,1019
+  s_945d3160c38197::t_a5e9cdede05600 1003,1005-1018,1020-1021,1026,1035-1037,1041
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "b845b859563438434e94490d70cffd8ee93d82c5",
+  "prompts": {},
+  "sessions": {
+    "s_945d3160c38197": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "fef5de98-ef77-4a28-bdcf-c6432cd66aaa",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
