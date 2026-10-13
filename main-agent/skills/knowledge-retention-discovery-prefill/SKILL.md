@@ -34,7 +34,7 @@ Consent is already done. Do not offer it again.
 - Every found value is a suggestion, including `directoryProfile` job title and department. The user confirms or corrects it.
 - Focus topics are always asked explicitly. Candidates are suggestions. Do not decide the focus topics.
 - Nothing is saved until the user confirms the full profile and `save_discovery` is called.
-- Search window: last 6 months. Own work only. Two passes, then stop.
+- Search window: last 6 months. Their own mail and Teams messages; SharePoint files they can open, including shared ones. Two passes, then stop.
 - A source that is unconnected or fails: skip it. Mention once which sources could not be searched. Never retry in a loop.
 - After discovery, do not search again. Outside discovery, documents are fetched only when the user explicitly asks, and then the supporting-file rules apply.
 - If they withdraw ("don't search", "stop", "I changed my mind") before `save_discovery`: stop searching, drop everything found, call `save_consent` with `consentGranted` false, and follow the instruction it returns.
@@ -47,10 +47,10 @@ Send one short message in the interview language: this takes a moment. No tool n
 
 Follow `references/sources.md`.
 
-1. **Broad pass** over the sources in that file. Sent mail first: it gives their address, name, and work themes. Then their own Teams messages and their own SharePoint files, searched with those themes. Nothing else.
+1. **Broad pass** over the sources in that file. Sent mail first: it gives their address and work themes. Then their own Teams messages, and SharePoint files they can open, searched with those themes. Nothing else.
 2. **Targeted pass** for the systems, projects, and processes the first pass found. Do not open a third pass.
 3. Read only a few full documents, via SharePoint `get_file`.
-4. Always drop, client-side: anything older than six months, private or confidential items, OneDrive files, and other people's messages and files. Do not use a dropped hit's preview or summary text.
+4. Always drop, client-side: anything older than six months, private or confidential items, OneDrive files, and other people's Teams messages. Do not use a dropped message's text.
 
 If a listed action does not exist, skip that source. Do not invent a replacement call.
 
@@ -81,4 +81,4 @@ Read the full profile back. Explicit confirmation, then `save_discovery`. Silenc
 
 ## Nothing usable
 
-If the passes produce nothing you can draft, or sent mail gave no address to match their own Teams messages and files against, say so briefly and stop searching. Run standard discovery with `knowledge-retention-interviewing`, question by question. Do not retry the sources.
+If the passes produce nothing you can draft, say so briefly and stop searching. Run standard discovery with `knowledge-retention-interviewing`, question by question. Do not retry the sources.

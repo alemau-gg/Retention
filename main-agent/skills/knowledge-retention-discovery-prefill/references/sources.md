@@ -2,7 +2,7 @@
 
 Operational calls for `knowledge-retention-discovery-prefill`. Policy (what may be said, when to stop, what is saved) stays in `SKILL.md`.
 
-Last 6 months. Own work only. Two passes: broad, then targeted on systems, projects, and processes the broad pass found. Read only a few full documents.
+Last 6 months. Their own sent mail and Teams messages; SharePoint files they can open, including files others shared with them. Two passes: broad, then targeted on systems, projects, and processes the broad pass found. Read only a few full documents.
 
 Sources are sent email, Teams, and SharePoint. Do not call OneDrive, Outlook Calendar, OneNote, Planner, or Viva Engage.
 
@@ -12,11 +12,9 @@ Slugs below are the Langdock action slugs. Input names are the manifest slugs, i
 
 ## Signed-in identity
 
-Outlook Email has no `get_current_user`. Do not call it, and do not skip Outlook Email. Use `search_own_emails` first. The user's address is the `senderEmail` on their sent mail, and their display name is the `senderName`. Both are needed to keep only their own Teams messages and SharePoint files.
+Outlook Email has no `get_current_user`. Do not call it, and do not skip Outlook Email. Use `search_own_emails` first. The user's address is the `senderEmail` on their sent mail. It is needed to keep only their own Teams messages. Match it case-insensitively.
 
-If sent mail was skipped or returned nothing, the identity is unknown. Then skip Teams and SharePoint too, so other people's messages and files are not used. Run standard discovery as in "Nothing usable" in `SKILL.md`.
-
-Match addresses case-insensitively. Match a display name only when the address field is empty.
+If sent mail was skipped or returned nothing, the address is unknown. Then skip Teams so other people's messages are not used. SharePoint can still run.
 
 ## Client-side filters (always)
 
@@ -24,7 +22,8 @@ Apply these even when a server filter was also set:
 
 - Older than six months.
 - Private, personal, or confidential items. Do not mention them.
-- Other people's messages and files. Keep the user's own (rules per source below). Do not read, use, or draft from a hit you drop, including its preview or summary text.
+- Other people's Teams messages. Keep the user's own. Do not read or use a dropped message's `summary`.
+- OneDrive files, including files others shared from their OneDrive.
 
 A free-text `query` that an action forwards to Graph is not a date, author, or sender filter. Do not put `LastModifiedTime`, `author:`, or `from:<email>` in those queries.
 
@@ -32,9 +31,9 @@ A free-text `query` that an action forwards to Graph is not a date, author, or s
 
 | Source | Action | Call |
 |---|---|---|
-| Outlook Email | `search_own_emails` | Sent mail only. One call per month for six months. Previews only. Run this first: it gives the identity and the themes for the other two sources. |
+| Outlook Email | `search_own_emails` | Sent mail only. One call per month for six months. Previews only. Run this first: it gives their address for the Teams filter and the themes for the other two sources. |
 | Teams | `search_messages` | One call per theme from their sent mail (a system, project, or process name), up to five. Keep only their own messages. |
-| SharePoint | `list_recent_files` for search words only, then `search_files` | `search_files` with themes from sent mail and the titles of recent files. Keep only their own files. |
+| SharePoint | `list_recent_files`, then `search_files` | Recently used files, plus `search_files` with themes from sent mail. |
 
 Do not call `list_all_teams` or `list_all_channels`. `search_messages` has no team or channel input, so listing them does not narrow the search.
 
@@ -92,11 +91,12 @@ When speaking, say "your Teams activity". Never say chats. Never quote a message
 
 No date input. No author input. `query` is forwarded as Graph Search `queryString` for `driveItem`. A URL is resolved as one file instead of a search. The action does not apply a KQL date or author filter. Do not put `LastModifiedTime` or `author:` in `query`.
 
-It searches every file the user can open, including other people's files and OneDrive. Keep a hit only when all of these hold:
+It searches every file the user can open, including files others shared with them. Those are fine to use. Keep a hit when:
 
-- **Own file.** `author.id` or `lastModifiedByUserId.id` matches the signed-in address. When that `id` is empty, `author.name` or `lastModifiedByUserId.name` matches their display name. Otherwise drop it.
 - **Not OneDrive.** Drop a hit whose `url` host contains `-my.sharepoint.com`.
 - **Recent.** `lastModifiedByAnyone` (a timestamp, not a person) or `createdDate` is inside the six-month window.
+
+Files they created or edited (`author` or `lastModifiedByUserId` is them) say the most about their own work. Weigh those first when drafting.
 
 A kept hit's `documentId` plus `parent` is what `get_file` needs.
 
@@ -106,7 +106,7 @@ A kept hit's `documentId` plus `parent` is what `get_file` needs.
 |---|---|---|
 | `maxResults` | no | Default 50. Pass 20. Not `limit`. |
 
-No date input. These are files the user recently opened, not files they wrote, and there is no author field. Use a row only for search words: take the `title` of rows inside six months (`lastAccessedDateTime` or `lastModifiedDateTime`) whose `containerType` is not `OneDriveBusiness` and whose `url` host does not contain `-my.sharepoint.com`, and pass a few as `search_files` queries. Never read `previewText`. Never draft from a row directly. These rows have no `parent`. Do not call `get_file` with them.
+No date input. Files the user recently opened (insights), theirs or shared with them. Drop rows older than six months (`lastAccessedDateTime` or `lastModifiedDateTime`), rows whose `containerType` is `OneDriveBusiness`, and rows whose `url` host contains `-my.sharepoint.com`. `title` and `previewText` may be used. These rows have no `parent`. To read one in full, find it with `search_files` by title, then `get_file`.
 
 ### `get_file`
 
@@ -129,6 +129,6 @@ A few files only. Protected files fail closed; skip them. Do not retry.
 | Email private / confidential | Client: `sensitivity` is personal, private, or confidential. The SELECT cannot exclude those levels |
 | Teams own messages | Client: `senderEmail`. `from:<email>` is not a schema filter |
 | Teams date window | Client: `createdDateTime` |
-| SharePoint date / author | Client: `author` or `lastModifiedByUserId` against the signed-in address, then name. `search_files` has no date or author field and does not accept a KQL date/author filter |
-| SharePoint recent files | Client: date window and OneDrive check. Titles are search words only, never draft content |
+| SharePoint date | Client. `search_files` has no date field and does not accept a KQL date filter. Shared files are allowed |
+| SharePoint recent files | Client: date window and OneDrive check |
 | OneDrive results | Client: drop `url` hosts containing `-my.sharepoint.com` and recent rows with `containerType` `OneDriveBusiness`. Do not call the OneDrive integration |
