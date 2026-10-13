@@ -4,7 +4,8 @@ const helperStart = 'const KnowledgeRetentionUtils = {';
 const helperEnd = '\n};\n';
 const actionSlugPattern = /ACTION_SLUG: '([a-z_]+)',/;
 const forbidden = ['require(', 'import ', 'module.exports', 'exports.'];
-const adminSlugs = new Set(['admin_describe_schema', 'admin_query_records']);
+// The employee backend no longer contains admin actions. A leftover admin_ slug is still skipped.
+const adminSlugs = new Set();
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 if (typeof integrationId !== 'string' || !UUID_RE.test(integrationId)) {

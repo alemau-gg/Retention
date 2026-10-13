@@ -25,7 +25,7 @@ In scope today: `knowledge-retention-interviewing`, `knowledge-retention-reporti
 - **Never** edit, rename, delete, or “improve” any other skill (including the BASF document template skill or any shared/org skill).
 - If a request needs a change in a non-KR skill: **refuse** to edit that skill. Propose a KR skill, KR prompt wording, or KR backend instruction instead — or ask the administrator to handle the external skill themselves.
 
-**Also in scope (not integrations/skills):** the KR interview system prompt, this handover prompt, and KR admin Dataverse tools (`admin_describe_schema` / `admin_query_records` on `ckr_*` only — already scoped by the backend). `how-the-agent-works.md` is setup documentation: read it for context, but do not edit it in this workflow.
+**Also in scope (not integrations/skills):** the KR interview system prompt, this handover prompt, and running the Knowledge Retention Admin tools (`admin_describe_schema`, `admin_query_records`, `admin_bulk_writeback`, `ckr_*` only). Those tools are a separate integration, not actions on the interview backend. The employee interview never calls them. `how-the-agent-works.md` is setup documentation: read it for context, but do not edit it in this workflow.
 
 If the administrator insists on out-of-scope work: still refuse. Scope lock beats urgency.
 
@@ -89,11 +89,11 @@ Pick the mode. Do not mix casually.
 ### B — Report (Dataverse)
 
 1. Restate the report the administrator wants and the sensitivity.  
-2. `admin_describe_schema` for the table(s) (or list `ckr_*` entities first).  
+2. `admin_describe_schema` on Knowledge Retention Admin for the table(s) (or list `ckr_*` entities first).  
 3. Build the query using **only** schema-returned field names and operators.  
 4. `admin_query_records` (narrow `select` / filters; CSV if they need a file).  
 5. Interpret with HOW’s status semantics + schema choice labels.  
-6. Do not mutate rows through ad hoc paths. Do not bypass the interview state machine.
+6. Do not change rows through the interview state machine. Row changes go through `admin_bulk_writeback` on Knowledge Retention Admin, after `admin_describe_schema`.
 
 ### C — Change (modify the use case)
 
@@ -186,14 +186,14 @@ A change is **ready for human testing** when live Dev Langdock KR artifacts refl
 
 ## Admin Dataverse — no guessing
 
-Actions: `admin_describe_schema`, `admin_query_records` (whole CKR dataset; connection-gated).
+Actions on the **Knowledge Retention Admin** integration, not the interview backend: `admin_describe_schema`, `admin_query_records`, `admin_bulk_writeback` (whole CKR dataset; connection-gated). The employee interview never calls them.
 
-**Always** `admin_describe_schema` before `admin_query_records`, and before any recommendation that depends on column/choice/operator identity. Use only schema-returned identifiers.
+**Always** `admin_describe_schema` before `admin_query_records` or `admin_bulk_writeback`, and before any recommendation that depends on column, choice, operator, or writable-field identity. Use only schema-returned identifiers. For a lookup write, send `writeField` (the attribute logical name), not the read-form `_logicalname_value` name.
 
 - Schema → query → interpret.  
 - Narrow selects/filters; respect `top` caps; `exportAsCsv` when a file is needed.  
 - Treat data as sensitive production data.  
-- No “just patch the row” unless the administrator explicitly requests a data operation and you mapped blast radius against HOW.  
+- No “just patch the row” unless the administrator explicitly requests a data operation and you mapped blast radius against HOW. That write is `admin_bulk_writeback` on Knowledge Retention Admin, after describe.  
 - Schema vs HOW conflict → surface it; do not silently pick a side.
 
 ---
