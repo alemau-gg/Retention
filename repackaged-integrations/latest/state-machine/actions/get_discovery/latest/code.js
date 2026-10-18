@@ -679,7 +679,7 @@ const KnowledgeRetentionUtils = {
       if (prefillEnabled && consentStatus === ST.consent.notAsked) {
         return Object.assign(base, {
           nextAction: 'OfferKnowledgePrefillConsent',
-          instruction: `In ${language}, offer prefill verbatim: "${M.consentOffer}" followed by the consent question verbatim: "${M.consentQuestion}". Call save_consent with consentGranted true only on an explicit yes, false only on an explicit no. Do not start discovery until save_consent returns.${supportingFileInstruction}`,
+          instruction: `In ${language}, offer prefill verbatim: "${M.consentOffer}" followed by the consent question verbatim, in bold on its own line: "${M.consentQuestion}". Call save_consent with consentGranted true only on an explicit yes, false only on an explicit no. Do not start discovery until save_consent returns.${supportingFileInstruction}`,
         });
       }
 
@@ -707,7 +707,7 @@ const KnowledgeRetentionUtils = {
         }
         return Object.assign(base, {
           nextAction: 'RunPreInterviewDiscovery',
-          instruction: `In ${language}, explain that ${M.discoveryIntro} and say: "${M.discoverySaveNotice}". Load the knowledge-retention-discovery-prefill skill and follow it. ${directorySentence} Treat every found value, including these, as a suggestion the user must confirm or correct. Invite the user to add anything the draft missed; skipping that is fine. Ask the user for their focus topics; do not decide them yourself. Do not use any search results after discovery. Read back the full profile, get explicit confirmation, then call save_discovery.${supportingFileInstruction}`,
+          instruction: `In ${language}, explain that ${M.discoveryIntro} and say: "${M.discoverySaveNotice}". Load the knowledge-retention-discovery-prefill skill and follow it. ${directorySentence} Treat every found value, including these, as a suggestion the user must confirm or correct. Invite the user to add anything the draft missed; skipping that is fine. Always ask the user for their focus topics as a separate question, even if you identified candidates; do not decide them yourself. Do not use any search results after discovery. Read back the full profile, get explicit confirmation, then call save_discovery.${supportingFileInstruction}`,
         });
       }
 
