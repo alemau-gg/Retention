@@ -1,0 +1,154 @@
+repackaged-integrations/v1/state-machine/actions/abandon_interview/v1/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 134
+repackaged-integrations/v1/state-machine/manifest.json
+  s_52e0c0a51fca89::t_d7885879308f82 39
+main-agent/integrations/state-machine/actions/get_answers.js
+  s_52e0c0a51fca89::t_364245118dfddf 134
+main-agent/integrations/state-machine/actions/save_feedback.js
+  s_52e0c0a51fca89::t_9a18d078d75b8d 135
+repackaged-integrations/v1/state-machine/actions/save_discovery/v1/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+repackaged-integrations/latest/state-machine/actions/save_consent/latest/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+repackaged-integrations/v1/state-machine/actions/save_consent/v1/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+main-agent/integrations/state-machine/manifest.json
+  s_52e0c0a51fca89::t_c34b4ab005315b 39
+main-agent/integrations/state-machine/actions/finalize_interview.js
+  s_52e0c0a51fca89::t_5288673cae0340 135
+repackaged-integrations/v1/state-machine/actions/save_answer/v1/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+main-agent/integrations/state-machine/actions/save_topics_and_questions.js
+  s_52e0c0a51fca89::t_45546f2937a726 135
+main-agent/integrations/state-machine/actions/abandon_interview.js
+  s_52e0c0a51fca89::t_e8bdd1d56c162a 134
+main-agent/integrations/state-machine/actions/save_consent.js
+  s_52e0c0a51fca89::t_084ac7950fd171 135
+repackaged-integrations/latest/state-machine/manifest.json
+  s_52e0c0a51fca89::t_6292376f55af77 39
+repackaged-integrations/latest/state-machine/actions/generate_final_document/latest/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+repackaged-integrations/latest/state-machine/actions/save_answer/latest/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+repackaged-integrations/v1/state-machine/actions/finalize_interview/v1/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+repackaged-integrations/latest/state-machine/actions/save_final_document/latest/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+main-agent/integrations/state-machine/actions/revise_answer.js
+  s_52e0c0a51fca89::t_2e44732b2bde32 135
+main-agent/integrations/state-machine/actions/save_final_document.js
+  s_52e0c0a51fca89::t_c11878d8d123c9 135
+repackaged-integrations/v1/state-machine/actions/save_feedback/v1/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+repackaged-integrations/latest/state-machine/actions/save_topic_summary/latest/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+main-agent/integrations/state-machine/actions/get_discovery.js
+  s_52e0c0a51fca89::t_0ec679c6ad1507 134
+repackaged-integrations/latest/state-machine/actions/save_topics_and_questions/latest/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+repackaged-integrations/v1/state-machine/actions/save_topics_and_questions/v1/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+main-agent/integrations/state-machine/actions/generate_topic_document.js
+  s_52e0c0a51fca89::t_9ceef014bbaf33 135
+main-agent/integrations/state-machine/actions/get_runtime_state.js
+  s_52e0c0a51fca89::t_944818fbafbb1f 135
+repackaged-integrations/latest/state-machine/actions/get_answers/latest/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 134
+repackaged-integrations/latest/state-machine/actions/set_up_interview_folder/latest/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+main-agent/integrations/state-machine/actions/read_supporting_document.js
+  s_52e0c0a51fca89::t_c1fd253a45ed5b 133
+repackaged-integrations/v1/state-machine/actions/save_topic_summary/v1/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+main-agent/integrations/state-machine/actions/set_up_interview_folder.js
+  s_52e0c0a51fca89::t_0d7f4e4e148557 135
+main-agent/integrations/state-machine/actions/save_answer.js
+  s_52e0c0a51fca89::t_a9d6995f06f1d8 135
+main-agent/integrations/state-machine/actions/create_interview.js
+  s_52e0c0a51fca89::t_ebc6b10c8e7640 135
+repackaged-integrations/latest/state-machine/actions/revise_answer/latest/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+repackaged-integrations/v1/state-machine/actions/save_final_document/v1/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+repackaged-integrations/latest/state-machine/actions/finalize_interview/latest/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+repackaged-integrations/v1/state-machine/actions/get_answers/v1/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 134
+main-agent/integrations/state-machine/actions/generate_final_document.js
+  s_52e0c0a51fca89::t_b92ef78bf7ffe0 135
+repackaged-integrations/v1/state-machine/actions/generate_topic_document/v1/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+repackaged-integrations/latest/state-machine/actions/generate_topic_document/latest/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+repackaged-integrations/latest/state-machine/actions/read_supporting_document/latest/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 133
+repackaged-integrations/latest/state-machine/actions/save_feedback/latest/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+repackaged-integrations/v1/state-machine/actions/revise_answer/v1/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+main-agent/integrations/state-machine/actions/upload_document.js
+  s_52e0c0a51fca89::t_3ba9c53bf69ffd 135
+repackaged-integrations/v1/state-machine/actions/get_discovery/v1/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 134
+main-agent/integrations/state-machine/actions/save_discovery.js
+  s_52e0c0a51fca89::t_562f4dfcf57de4 135
+repackaged-integrations/latest/state-machine/actions/save_discovery/latest/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+repackaged-integrations/latest/state-machine/actions/create_interview/latest/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+repackaged-integrations/v1/state-machine/actions/create_interview/v1/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+main-agent/skills/knowledge-retention-discovery-prefill/SKILL.md
+  s_52e0c0a51fca89::t_f2aafa3f21c709 35
+  s_52e0c0a51fca89::t_98f7d061f658e1 58,60,62-68,70,72,74,76,78
+  s_52e0c0a51fca89::t_f6a47723961f2d 43-44
+  s_52e0c0a51fca89::t_20753c8f6f1e4c 19,21
+  s_52e0c0a51fca89::t_e848bf71d718bc 42
+  s_52e0c0a51fca89::t_389ebeb2c80c5b 50
+  s_52e0c0a51fca89::t_b96cb1c14ca8f8 15,17,23,27,31
+  s_52e0c0a51fca89::t_4b790595145f69 11,13,25,29,33,37,39,41,45-48,51-56,82
+  s_52e0c0a51fca89::t_9829f8521f80d8 49
+repackaged-integrations/latest/state-machine/actions/get_discovery/latest/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 134
+repackaged-integrations/v1/state-machine/actions/generate_final_document/v1/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+repackaged-integrations/v1/state-machine/actions/read_supporting_document/v1/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 133
+repackaged-integrations/latest/state-machine/actions/get_runtime_state/latest/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+repackaged-integrations/v1/state-machine/actions/get_runtime_state/v1/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+handover-agent/how-the-agent-works.md
+  s_52e0c0a51fca89::t_e7d98c2c59bd01 346
+  s_52e0c0a51fca89::t_59944401ba61ed 25
+  s_52e0c0a51fca89::t_f9464a4063532f 505
+  s_52e0c0a51fca89::t_8568537f5b87b3 124
+  s_52e0c0a51fca89::t_5be14545b8ee3b 91
+  s_52e0c0a51fca89::t_b0958e11331c74 249
+main-agent/integrations/state-machine/actions/save_topic_summary.js
+  s_52e0c0a51fca89::t_6a81d7123fea59 135
+repackaged-integrations/latest/state-machine/actions/abandon_interview/latest/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 134
+repackaged-integrations/v1/state-machine/actions/set_up_interview_folder/v1/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+repackaged-integrations/latest/state-machine/actions/upload_document/latest/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+repackaged-integrations/v1/state-machine/actions/upload_document/v1/code.js
+  s_52e0c0a51fca89::t_157592e6ff3dbe 135
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "6db27f28b89f9ff4437ac64f0d0c8fa3196bdbcc",
+  "prompts": {},
+  "sessions": {
+    "s_52e0c0a51fca89": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "da2237fc-72e3-4915-bb9d-6b2ee53debda",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
