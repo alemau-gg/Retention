@@ -1,0 +1,23 @@
+main-agent/skills/knowledge-retention-discovery-prefill/SKILL.md
+  s_52e0c0a51fca89::t_c812c2f5bd0c2d 35
+  s_52e0c0a51fca89::t_f5b1ee23570e23 27-29,33,36-39,43
+  s_52e0c0a51fca89::t_e9f113ad5ef343 45
+  s_52e0c0a51fca89::t_ee0e0e7f633508 34
+  s_52e0c0a51fca89::t_0faedb441fecf5 44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "79d19202a369c04d370d23101ebeb97f838b0982",
+  "prompts": {},
+  "sessions": {
+    "s_52e0c0a51fca89": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "da2237fc-72e3-4915-bb9d-6b2ee53debda",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Alessandro <alessandro.maugeri@langdock.com>"
+    }
+  }
+}
