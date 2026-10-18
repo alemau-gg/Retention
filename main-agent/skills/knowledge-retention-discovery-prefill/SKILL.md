@@ -8,77 +8,75 @@ description: >-
 
 # Knowledge Retention Discovery Prefill
 
-Draft the discovery profile from the employee's own recent work, then hand the draft to them. Progress and `save_discovery` still come from the backend instruction.
+Research who this person is and what their work actually involves, then hand them a draft discovery profile to correct. Progress and `save_discovery` still come from the backend instruction.
 
-Parameters, action slugs, and which filters are real: `references/sources.md`. This file is the policy.
-
-## When to load
-
-Load only when the backend instruction for `RunPreInterviewDiscovery` says to load `knowledge-retention-discovery-prefill`. That is pre-interview discovery, after they accepted discovery prefill. Once per conversation.
-
-| Load | Moment | Use this skill for |
-|---|---|---|
-| Yes | Prefilled `RunPreInterviewDiscovery` | Search, draft, invite additions, then the interviewing skill's field list before save |
-| No | Standard `RunPreInterviewDiscovery` (prefill off or declined) | Do not search. Interviewing skill runs question-by-question discovery |
-| No | After `save_discovery` | Unload. Interview answers, topic summaries, and the handover never use this search |
-
-On resume, discovery is not saved yet, so search again. Do not search a second time in the same conversation.
-
-Consent is already done. Do not offer it again.
-
-## Hard rules
-
-- Describe their work, not their data. Name source types only: "your documents", "your Teams activity", "your email". Never say chats. Do not search the inbox, OneDrive, calendar, OneNote, Planner, or Viva Engage.
-- Never quote messages, name colleagues from search hits, give counts, or mention private events. Present findings as "it looks like…".
-- The no-negative-remarks rule applies to everything found. Keep the work lesson; drop blame and private details.
-- Every found value is a suggestion, including `directoryProfile` job title and department. The user confirms or corrects it.
-- Focus topics are always asked explicitly. Candidates are suggestions. Do not decide the focus topics.
-- Nothing is saved until the user confirms the full profile and `save_discovery` is called.
-- Search window: last 6 months. Their own sent mail and Teams messages; SharePoint files they can open, including shared ones. Two passes, then stop.
-- A source that is unconnected or fails: skip it. Mention once which sources could not be searched. Never retry in a loop.
-- After discovery, do not search again. Outside discovery, documents are fetched only when the user explicitly asks, and then the supporting-file rules apply.
-- If they withdraw ("don't search", "stop", "I changed my mind") before `save_discovery`: stop searching, drop everything found, call `save_consent` with `consentGranted` false, and follow the instruction it returns.
+Load only when the prefilled `RunPreInterviewDiscovery` instruction says so. Consent is already given; do not offer it again. On resume, discovery is not saved yet, so research again, once per conversation.
 
 ## Before searching
 
-Send one short message in the interview language: this takes a moment. No tool names, no action names, no source-by-source narration.
+Ask once whether there is any system, project, or topic they would rather you not look into. Respect whatever they name for the rest of the research. Then say this takes a moment, and work silently; no narration of tools or sources.
 
-## Search
+Use every connected source: their email, Teams, and SharePoint, including everything those connections let them see. Stick to the last six months so the profile reflects what they do now, not a role they left. If a source is not connected or fails, skip it and mention once what could not be searched.
 
-Follow `references/sources.md`.
+Keep a short running picture of the person (role, responsibilities, systems, threads still open) and update it as you go. Carry that forward, not raw search results. Judge hits by their previews and open a full document only when it looks like it defines their work.
 
-1. **Broad pass** over the sources in that file. Sent mail first: it gives their address and work themes. Then their own Teams messages, and SharePoint files they can open, searched with those themes. Nothing else.
-2. **Targeted pass** for the systems, projects, and processes the first pass found. Do not open a third pass.
-3. Read only a few full documents, via SharePoint `get_file`, plus the one sent mail read only for the signature (`references/sources.md`).
-4. Always drop, client-side: anything older than six months, private or confidential items, OneDrive files, and other people's Teams messages. Do not use a dropped message's text.
+## Method
 
-If a listed action does not exist, skip that source. Do not invent a replacement call.
+### 1. Establish who they are
 
-## Draft
+Start from what you already know: their name, email address, and `directoryProfile` (job title, department). Read the signature on a mail they sent for title, team, location, and site. Then search their name, and common variants of it, in every source. Their own documents, presentations they authored, and threads they drive show what they own better than any title.
 
-One entry per discovery field. Suggestions only.
+### 2. Map their work broadly
 
-| Field | How to draft |
-|---|---|
-| Role and business unit | Per field. Role from `jobTitle`, business unit from `department`. Use the email signature only for a field that is null or "not available". Never replace a directory value with the signature. |
-| Responsibilities | Concrete work the sources support. |
-| Additional responsibilities | Own entry in the draft. `save_discovery` has no separate input: after they confirm, include this text in `responsibilities`, still distinct in the read-back. |
-| Systems and tools | Named systems the work actually uses. |
-| KPIs and constraints | Only if found. Do not invent one. If none was found, leave it empty. |
-| Focus topic candidates | Suggestions beside the draft. Do not treat them as the chosen focus topics. |
+Skim their email and Teams activity for recurring themes: systems, projects, processes, plants, customers, committees, reports. Look at the SharePoint files they work on. Build a working list of threads worth pulling.
 
-Then invite them to add anything the draft missed. Say that skipping that is fine. Wait for an addition or a skip before the gap questions.
+### 3. Follow the threads
 
-## Gaps, then save
+Take the strongest threads and dig. Search each system, project, or process name across every source; a term found in email is often best explained by a SharePoint document, and the reverse. When a hit names something new and specific (a tool, a recurring report, a handover partner role, a KPI), follow it one more level. Open the few documents that look like they define their responsibilities: role descriptions, process docs, status reports, slides they presented.
 
-Ask only the gaps, one question at a time. The thin-answer bar and the field list live in `knowledge-retention-interviewing`. Apply that bar before save. Do not invent a second bar. Do not search from that skill.
+Go down a rabbit hole while it keeps adding something new about *their* work. Stop when searches return what you already know, when a thread is about someone else's work, or when you have enough to draft every field. Two or three levels deep on the main threads is usually enough; don't exhaust every hit.
 
-Ask focus topics explicitly even when candidates exist. They choose.
+### 4. Weigh what you found
 
-Read the full profile back. Explicit confirmation, then `save_discovery`. Silence, "I guess", or a topic change is not confirmation.
+- What they created, sent, or edited says more than what they were merely sent or copied on.
+- Recurring beats one-off. A system they mention every month is core; a single mention is a candidate to ask about.
+- When newer material contradicts older, the newer wins; they may have changed role or handed something off.
+- Look for what a successor would miss: things only they seem to do, recurring deadlines and reports, the roles that come to them for answers, where their working knowledge lives. These make the best focus topic candidates.
+- Others' messages and documents may show what they are known for. Use them to understand their work, never to quote or attribute anything to a colleague.
+- Drop private, personal, or confidential material entirely, and do not mention it.
 
-**Done when:** the profile was read back, they explicitly confirmed, and `save_discovery` succeeded. Then unload this skill. Do not search again for answers, summaries, or the handover.
+## Hard rules
+
+- Describe their work, not their data. Messages are referred to only as "your email" or "your Teams activity"; never say chats. Documents may be named by title.
+- Never quote messages, name colleagues, give counts, or mention private events. Present findings as "it looks like…".
+- The no-negative-remarks rule applies to everything found. Keep the work lesson; drop blame and private details.
+- Every found value is a suggestion, including the directory job title and department.
+- Nothing is saved until the user confirms the full profile and `save_discovery` succeeds.
+- If they withdraw ("don't search", "stop", "I changed my mind") before `save_discovery`: stop, drop everything found, call `save_consent` with `consentGranted` false, and follow the instruction it returns.
+- After `save_discovery`, unload this skill. Search results never feed interview answers, topic summaries, or the handover.
+
+## Present the draft
+
+Present what you concluded as one structured message, with a bold heading per section and short bullet points under each. Every bullet is a suggestion. Where the evidence is thin, phrase it as a question rather than a claim, and mark any section you found nothing for as open.
+
+1. **Role and business unit:** directory values first; the signature fills only what the directory left empty.
+2. **Core responsibilities:** the concrete work the research supports.
+3. **Additional responsibilities:** case-specific or occasional duties, kept separate.
+4. **Systems and tools:** the named systems their work actually uses.
+5. **KPIs and constraints:** only if found. Never invent one.
+6. **Possible focus topics:** candidates for the handover, clearly labelled as suggestions.
+7. **Based on:** the few documents that shaped the draft, by title, plus "your email" and "your Teams activity" where they contributed.
+
+End by asking them to correct, remove, or add anything; skipping additions is fine.
+
+## Refine, then save
+
+Work through their corrections, then the gaps, one question at a time. After each round, show only the sections that changed. Do not repeat the whole draft every turn.
+
+Steer every follow-up toward the fields `save_discovery` needs: role, business unit, responsibilities, systems and tools, and focus topics are required; KPIs and constraints are optional but probed once. Apply the thin-answer bar from `knowledge-retention-interviewing`. Do not re-ask a field they already confirmed or corrected. Always ask focus topics explicitly, even when candidates exist; they choose.
+
+When every required field meets the bar, read the full profile back in the same sections. Explicit confirmation, then `save_discovery`, with additional responsibilities folded into `responsibilities`. Silence, "I guess", or a topic change is not confirmation.
 
 ## Nothing usable
 
-If the passes produce nothing you can draft, say so briefly and stop searching. Run standard discovery with `knowledge-retention-interviewing`, question by question. Do not retry the sources.
+If the research yields nothing you can draft from, say so briefly and run standard discovery with `knowledge-retention-interviewing`, question by question. Do not retry the sources.
