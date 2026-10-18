@@ -24,15 +24,25 @@ Keep a short running picture of the person (role, responsibilities, systems, thr
 
 ### 1. Establish who they are
 
-Start from what you already know: their name, email address, and `directoryProfile` (job title, department). Read the signature on a mail they sent for title, team, location, and site. Then search their name, and common variants of it, in every source. Their own documents, presentations they authored, and threads they drive show what they own better than any title.
+Start from the connected account (name, email address) and `directoryProfile` (job title, department). Read the signature on a mail they sent for title, team, location, and site. Then search their name, and common variants of it, in every source. Their own documents, presentations they authored, and threads they drive show what they own better than any title.
+
+Their surroundings say a lot too: the people they interact with most (by role and department, never by name), the teams they belong to, and the SharePoint sites they work in.
 
 ### 2. Map their work broadly
 
-Skim their email and Teams activity for recurring themes: systems, projects, processes, plants, customers, committees, reports. Look at the SharePoint files they work on. Build a working list of threads worth pulling.
+Cast a wide net before going deep:
+
+- **Email:** the mail folders they created (people file by project, customer, or process), and recurring themes in recent mail. If their mail or signature points to a shared mailbox they work from, such as a team or support inbox, search that too; what lands there is often part of their job.
+- **Teams:** the teams and channels they are in, and what they post about.
+- **SharePoint:** the sites they use, the files they recently worked on, and the lists on those sites. Trackers, issue logs, and registers often show recurring duties better than any document.
+
+Look for systems, projects, processes, plants, customers, committees, and reports. Build a working list of threads worth pulling.
 
 ### 3. Follow the threads
 
-Take the strongest threads and dig. Search each system, project, or process name across every source; a term found in email is often best explained by a SharePoint document, and the reverse. When a hit names something new and specific (a tool, a recurring report, a handover partner role, a KPI), follow it one more level. Open the few documents that look like they define their responsibilities: role descriptions, process docs, status reports, slides they presented.
+Take the strongest threads and dig. Search each system, project, or process name across every source; a term found in email is often best explained by a SharePoint document, and the reverse. When a hit names something new and specific (a tool, a recurring report, a handover partner role, a KPI), follow it one more level.
+
+Go from snippets to full content only where it pays: the full email of a key thread and its attachments (often the actual report or spec), the channel conversation behind a hit, the items of a tracker they maintain, a site page describing their process, and the few documents that define their responsibilities (role descriptions, process docs, status reports, slides they presented).
 
 Go down a rabbit hole while it keeps adding something new about *their* work. Stop when searches return what you already know, when a thread is about someone else's work, or when you have enough to draft every field. Two or three levels deep on the main threads is usually enough; don't exhaust every hit.
 
