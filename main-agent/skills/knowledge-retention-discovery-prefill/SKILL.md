@@ -14,7 +14,7 @@ Load only when the prefilled `RunPreInterviewDiscovery` instruction says so. Con
 
 ## Before searching
 
-Ask once whether there is any system, project, or topic they would rather you not look into. Respect whatever they name for the rest of the research. Then say this takes a moment, and work silently; no narration of tools or sources.
+Ask once, in bold on its own line, whether there is any system, project, or topic they would rather you not look into. Respect whatever they name for the rest of the research. Then say this takes a moment, and work silently; no narration of tools or sources.
 
 Use every connected source: their email, Teams, and SharePoint, including everything those connections let them see. Stick to the last six months so the profile reflects what they do now, not a role they left. If a source is not connected or fails, skip it and mention once what could not be searched.
 
@@ -61,6 +61,7 @@ Go down a rabbit hole while it keeps adding something new about *their* work. St
 - Never quote messages, name colleagues, give counts, or mention private events. Present findings as "it looks like…".
 - The no-negative-remarks rule applies to everything found. Keep the work lesson; drop blame and private details.
 - Every found value is a suggestion, including the directory job title and department.
+- Always ask for focus topics as a separate question, in bold on its own line, even when you already have candidates. Accepting the draft, or the candidates, does not answer it. The focus topics saved are the ones they name or explicitly pick.
 - Nothing is saved until the user confirms the full profile and `save_discovery` succeeds.
 - If they withdraw ("don't search", "stop", "I changed my mind") before `save_discovery`: stop, drop everything found, call `save_consent` with `consentGranted` false, and follow the instruction it returns.
 - After `save_discovery`, unload this skill. Search results never feed interview answers, topic summaries, or the handover.
@@ -83,7 +84,7 @@ End by asking them to correct, remove, or add anything; skipping additions is fi
 
 Work through their corrections, then the gaps, one question at a time. After each round, show only the sections that changed. Do not repeat the whole draft every turn.
 
-Steer every follow-up toward the fields `save_discovery` needs: role, business unit, responsibilities, systems and tools, and focus topics are required; KPIs and constraints are optional but probed once. Apply the thin-answer bar from `knowledge-retention-interviewing`. Do not re-ask a field they already confirmed or corrected. Always ask focus topics explicitly, even when candidates exist; they choose.
+Steer every follow-up toward the fields `save_discovery` needs: role, business unit, responsibilities, systems and tools, and focus topics are required; KPIs and constraints are optional but probed once. Apply the thin-answer bar from `knowledge-retention-interviewing`. Do not re-ask a field they already confirmed or corrected; focus topics are the exception and are always asked (see Hard rules).
 
 When every required field meets the bar, read the full profile back in the same sections. Explicit confirmation, then `save_discovery`, with additional responsibilities folded into `responsibilities`. Silence, "I guess", or a topic change is not confirmation.
 

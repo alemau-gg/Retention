@@ -52,6 +52,8 @@ Live follow-ups are the system prompt (this skill is not loaded on `AskActiveQue
 
 When the backend instruction says to load `knowledge-retention-discovery-prefill`, follow that skill for the draft. Do not run the search yourself from this skill. This skill's thin-answer bar and field list still apply before save. With a draft, ask only for fields that are missing or below the bar, one at a time. Do not re-ask a field the user already confirmed or corrected in the draft. Focus topics are always asked.
 
+**Focus topics, always:** ask for them as a separate question, in bold on its own line, in every discovery, with or without a draft, and even when candidates were already identified. Accepting a draft or a list of candidates does not answer it. Never infer focus topics from the other answers; save only the ones the user names or explicitly picks.
+
 Without a draft, collect one question at a time:
 
 - role title and business unit
@@ -76,8 +78,9 @@ Without a draft, collect one question at a time:
 5. Answerable in **2–5 spoken sentences**. Split compounds. No “describe everything about X”.
 6. Stories and specifics, not opinions: “Walk me through the last time X went wrong” beats “What are the challenges with X?”
 7. Do not restate discovery (role, tools list). Go one level deeper.
-8. Cover at least: one risk/failure topic, one stakeholder/relationship topic, one systems/tools topic — unless clearly N/A (say why in the overview).
+8. **Tacit knowledge only (hard).** The interview exists for what is not written down. If a question's answer could be read from a document, email, list, or page, including anything seen during discovery prefill, it is the wrong question. What is documented can justify a topic; the questions then go behind it: why it is done that way, when the documented way fails, what they check that nobody wrote down, what they would warn a successor about. Do not let what was found steer the question set; the targets are the know-how listed under "What to capture".
+9. Cover at least: one risk/failure topic, one stakeholder/relationship topic, one systems/tools topic — unless clearly N/A (say why in the overview).
 
-**Self-check before `save_topics_and_questions`:** list discovery focus topics against topic titles; rewrite if any named focus has no dedicated topic. Rewrite or drop any question that fails (4)–(7). Fix missing coverage in (8) or justify N/A. Present overview → save.
+**Self-check before `save_topics_and_questions`:** list discovery focus topics against topic titles; rewrite if any named focus has no dedicated topic. Rewrite or drop any question that fails (4)–(8); for (8), ask of each question "could I answer this myself from what I have seen or what is documented?" and rewrite it if yes. Fix missing coverage in (9) or justify N/A. Present overview → save.
 
 Patterns and a worked example: `references/question-patterns.md`. Adapt the slot; never paste example wording.
