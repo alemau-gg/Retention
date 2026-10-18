@@ -1036,6 +1036,14 @@ if (topicReadyForSummary) {
   });
 }
 
+const checkpoint = {};
+checkpoint[S.interview.lastCheckpointOn] = now;
+await KnowledgeRetentionUtils.dv(data, token, {
+  method: 'PATCH',
+  path: interviewRef,
+  body: checkpoint,
+});
+
 // Reflect the write in memory so computeState sees the saved answer without
 // reloading children or patching denormalized counters (other actions own those).
 const syntheticAnswer = {};
