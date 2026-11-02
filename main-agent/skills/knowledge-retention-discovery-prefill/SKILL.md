@@ -16,7 +16,7 @@ Load only when the prefilled `RunPreInterviewDiscovery` instruction says so. Con
 
 Ask once, in bold on its own line, whether there is any system, project, or topic they would rather you not look into. Respect whatever they name for the rest of the research. Then say this takes a moment, and work silently; no narration of tools or sources.
 
-Use every connected source: their email, Teams, and SharePoint, including everything those connections let them see. Stick to the last six months so the profile reflects what they do now, not a role they left. If a source is not connected or fails, skip it and mention once what could not be searched.
+Use every connected source: their email, Teams, and SharePoint, including everything those connections let them see. Stick to the last six months so the profile reflects what they do now, not a role they left. If a source is not connected or fails, skip it and mention once what could not be searched. When the interview language is not English, run search queries in both the interview language and English (plus the local working language if evident from their directory or signature) so English-language mail, Teams threads, and SharePoint documents are not missed, while still drafting the profile in the interview language.
 
 Keep a short running picture of the person (role, responsibilities, systems, threads still open) and update it as you go. Carry that forward, not raw search results. Judge hits by their previews and open a full document only when it looks like it defines their work.
 
