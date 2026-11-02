@@ -90,7 +90,7 @@ External systems (backend / adjacent, not conversational skills):
 | **CKR Company Context folder** | Optional grounding for topic generation |
 | **Discovery prefill** | Optional; gated by `prefillEnabled`. Discovery profile only, from everything the user can see in email, Teams, and SharePoint over the last six months, minus anything they ask to leave out. Runs only when the prefilled discovery instruction says to load `knowledge-retention-discovery-prefill`. Search results never feed interview answers, topic summaries, or the handover |
 | **Interview size** | Connection fields `minTopics`, `maxTopics`, `minQuestionsPerTopic`, `maxQuestionsPerTopic` (blank = 4, 6, 3, 6; clamped to 1–10 topics and 1–15 questions). The generate instruction states the counts and `save_topics_and_questions` enforces them before writing. |
-| **Test folders** | Optional connection field `tagTestFolders`: `true` prefixes interview folder names with `[DEV]`, giving `Interviews/[DEV] 42`. `false` or blank in production keeps `Interviews/42`. Set it before testing; changing it mid-interview splits that interview's files. |
+| **Test folders** | Optional connection field `tagTestFolders`: `true` sets `cr32c_devinterview = true` on new `ckr_interviews` rows and prefixes interview folder names with `[DEV]`, giving `Interviews/[DEV] 42`. `false` or blank in production sets `cr32c_devinterview = false` and keeps `Interviews/42`. Set it before testing; changing it mid-interview splits that interview's files. |
 
 ---
 
@@ -337,7 +337,7 @@ Consent is offered at status `created`, before discovery, and only when prefill 
    Agent always loads runtime state. Resume across days works for any open interview because progress lives in Dataverse, and for a closed interview that still owes its final document or its feedback — see §6.
 
 2. **Overview and language (`CollectProfile`)**  
-   Before asking anything, the agent explains the interview purpose and stages. It then always uses `ask_user_question` for the single language question, without recommending an option. User picks one of: English, German, Chinese, French, Spanish, Portuguese. Fixed for the life of the interview.
+   Before asking anything, the agent explains the interview purpose and stages. It then always uses `ask_user_question` for the single language question, without recommending an option. Default choices are English, German, Chinese, French, Spanish, Portuguese, and the user may also specify any other language (via "Other" or in chat); the agent never refuses a requested language. Fixed for the life of the interview.
 
 3. **Discovery prefill consent (optional, status `created`)**  
    If `prefillEnabled` and consent is `notAsked`: `OfferKnowledgePrefillConsent` before any discovery question. The agent offers the consent text verbatim and accepts only an explicit yes or no → `save_consent`. Yes stays at `created` and continues into prefilled discovery. The yes response includes `directoryProfile` (`{ jobTitle, department }` or `null`, suggestions only) and `directoryLookupFailure` when the lookup failed. A lookup failure does not block discovery. No stays at `created` and continues into standard discovery, with no search. If prefill is off, this step is skipped server-side. `save_consent` at any later status returns `conflict: true` and writes nothing.

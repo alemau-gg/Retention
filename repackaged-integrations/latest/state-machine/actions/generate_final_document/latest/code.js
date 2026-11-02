@@ -26,6 +26,7 @@ const KnowledgeRetentionUtils = {
       // cr32c_aisuiteid is the proposed logical name for the Langdock
       // stable-user-ID column and must remain a text field until confirmed.
       userId: 'cr32c_aisuiteid',
+      devInterview: 'cr32c_devinterview',
       email: 'ckr_employeeemail',
       language: 'ckr_language',
       status: 'ckr_interviewstatus',
@@ -204,10 +205,40 @@ const KnowledgeRetentionUtils = {
     return String(value).replace(/'/g, "''");
   },
 
-  // Map a stored language code to its English name for use in instruction prose.
+  // Map a stored language code or name to its English name for use in instruction prose.
   languageName(code) {
-    const names = { en: 'English', de: 'German', zh: 'Chinese', fr: 'French', es: 'Spanish', pt: 'Portuguese' };
-    return names[code] || code || 'the selected language';
+    const raw = code === null || code === undefined ? '' : String(code).trim();
+    if (!raw) return 'the selected language';
+    const names = {
+      en: 'English',
+      de: 'German',
+      zh: 'Chinese',
+      fr: 'French',
+      es: 'Spanish',
+      pt: 'Portuguese',
+      ja: 'Japanese',
+      ko: 'Korean',
+      it: 'Italian',
+      nl: 'Dutch',
+      pl: 'Polish',
+    };
+    const lower = raw.toLowerCase();
+    const subtag = lower.split(/[-_]/)[0];
+    if (Object.prototype.hasOwnProperty.call(names, lower)) return names[lower];
+    if (Object.prototype.hasOwnProperty.call(names, subtag)) return names[subtag];
+    if (
+      /^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$/i.test(raw) &&
+      typeof Intl !== 'undefined' &&
+      typeof Intl.DisplayNames === 'function'
+    ) {
+      try {
+        const display = new Intl.DisplayNames(['en'], { type: 'language' }).of(raw);
+        if (display && display.toLowerCase() !== lower) return display;
+      } catch (_error) {
+        // Fall through to raw string.
+      }
+    }
+    return raw;
   },
 
   // ===========================================================================
@@ -663,7 +694,7 @@ const KnowledgeRetentionUtils = {
     if (!interview) {
       return Object.assign(base, {
         nextAction: 'CollectProfile',
-        instruction: `No interview exists for this user. First give this overview verbatim: "${M.interviewOverview}" Then use ask_user_question exactly once for the language question, verbatim: "${M.languageSelection}", with the choices ${M.languageChoices.join(', ')}. After the user picks one, call create_interview with that language, then follow the instruction that action returns.${supportingFileInstruction}`,
+        instruction: `No interview exists for this user. First give this overview verbatim: "${M.interviewOverview}" Then use ask_user_question exactly once for the language question, verbatim: "${M.languageSelection}", with the default choices ${M.languageChoices.join(', ')}. The user may pick one of those choices or specify any other language (via "Other" or in chat); never refuse a requested language. Once the user picks or names their language, call create_interview with that language, then follow the instruction that action returns.${supportingFileInstruction}`,
       });
     }
 
@@ -856,12 +887,16 @@ const KnowledgeRetentionUtils = {
     return slug ? `Topic-${n}-${slug}.docx` : `Topic-${n}.docx`;
   },
 
-  // The tagTestFolders connection field marks test interview folders by name.
-  // Changing it mid-interview splits that interview's files.
+  // The tagTestFolders connection field marks test interviews in Dataverse and
+  // prefixes their SharePoint folder names. Changing it mid-interview splits
+  // that interview's files.
+  isDevInterview(data) {
+    return String(data.auth && data.auth.tagTestFolders).toLowerCase() === 'true';
+  },
+
   interviewFolderName(data, interview) {
     const number = String(interview[KnowledgeRetentionUtils.SCHEMA.interview.number]);
-    const tagged = String(data.auth && data.auth.tagTestFolders).toLowerCase() === 'true';
-    return tagged ? `[DEV] ${number}` : number;
+    return KnowledgeRetentionUtils.isDevInterview(data) ? `[DEV] ${number}` : number;
   },
 
   interviewFolderPath(data, interview) {
@@ -1891,6 +1926,12 @@ const LABELS = {
     supporting: '支持文档',
     noSupporting: '未提供支持文档。',
   },
+  ja: {
+    title: '最終引き継ぎ · インタビュー',
+    subtitle: 'ナレッジ継承インタビュー',
+    supporting: '補足資料',
+    noSupporting: '補足資料は提供されませんでした。',
+  },
   fr: {
     title: 'Passation finale · Entretien',
     subtitle: 'Entretien de rétention des connaissances',
@@ -1910,7 +1951,47 @@ const LABELS = {
     noSupporting: 'Não foram fornecidos documentos de apoio.',
   },
 };
-const L = LABELS[interview[S.interview.language]] || LABELS.en;
+const LABEL_ALIASES = {
+  english: 'en',
+  german: 'de',
+  deutsch: 'de',
+  chinese: 'zh',
+  mandarin: 'zh',
+  '中文': 'zh',
+  japanese: 'ja',
+  '日本語': 'ja',
+  french: 'fr',
+  'français': 'fr',
+  francais: 'fr',
+  spanish: 'es',
+  'español': 'es',
+  espanol: 'es',
+  castellano: 'es',
+  portuguese: 'pt',
+  'português': 'pt',
+  portugues: 'pt',
+};
+const rawLangKey = String(interview[S.interview.language] || '').trim().toLowerCase();
+const subtagKey = rawLangKey.split(/[-_]/)[0];
+const displayKey = KnowledgeRetentionUtils.languageName(interview[S.interview.language]).toLowerCase();
+const tokenMatch = rawLangKey
+  .split(/[^a-z\u00c0-\u024f\u4e00-\u9fff\u3040-\u30ff]+/)
+  .filter(Boolean)
+  .map((token) =>
+    (Object.prototype.hasOwnProperty.call(LABEL_ALIASES, token) && LABEL_ALIASES[token]) ||
+    (token.length === 2 && Object.prototype.hasOwnProperty.call(LABELS, token) && token) ||
+    null,
+  )
+  .find(Boolean);
+const resolvedCode =
+  (Object.prototype.hasOwnProperty.call(LABELS, rawLangKey) && rawLangKey) ||
+  (Object.prototype.hasOwnProperty.call(LABELS, subtagKey) && subtagKey) ||
+  (Object.prototype.hasOwnProperty.call(LABEL_ALIASES, rawLangKey) && LABEL_ALIASES[rawLangKey]) ||
+  (Object.prototype.hasOwnProperty.call(LABEL_ALIASES, subtagKey) && LABEL_ALIASES[subtagKey]) ||
+  (Object.prototype.hasOwnProperty.call(LABEL_ALIASES, displayKey) && LABEL_ALIASES[displayKey]) ||
+  tokenMatch ||
+  'en';
+const L = LABELS[resolvedCode];
 
 const documentTitle = `${L.title} ${interviewNumber}`;
 const subtitleParts = [`${L.subtitle} ${interviewNumber}`];

@@ -147,7 +147,7 @@ Do not hand-base64 huge buffers for downloads; let the platform handle binary re
 
 | Data | Type | KR notes |
 |---|---|---|
-| Fixed choices | `SELECT` | Language, document type, etc. Prefer over `BOOLEAN` when `false` isn’t simply “off” |
+| Fixed choices | `SELECT` | Document type (`docType`), etc. Prefer over `BOOLEAN` when `false` isn’t simply “off” |
 | Plain text | `TEXT` | Auth GUIDs/URLs, free text; `prefillEnabled` is TEXT `"true"`/`"false"` today — keep that contract unless product redesigns |
 | Long text | `MULTI_LINE_TEXT` | Discovery / answer bodies when length warrants |
 | Number | `NUMBER` | Order tokens (`expectedQuestionOrder`, `expectedTopicOrder`, …) |
