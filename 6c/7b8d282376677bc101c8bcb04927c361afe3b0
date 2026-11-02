@@ -1,0 +1,166 @@
+main-agent/integrations/state-machine/manifest.json
+  s_182100eef287a5::t_c9fd0829554b28 57
+  s_182100eef287a5::t_6745b596e204ed 133-135,137-138,140
+main-agent/integrations/state-machine/actions/generate_topic_document.js
+  s_182100eef287a5::t_4d64510deb0790 1939,1941,1946-1947,1949,1955,1961,1972-1973,1975,1977-1978,1980-1981,1984-1985,1988,1999-2003,2006-2009
+  s_182100eef287a5::t_6cafd9aafb380e 1967-1971,1974,1976,1979,1983,1986-1987
+  s_182100eef287a5::t_d5d13c5625a3ce 1982,1989-1998,2004-2005
+  s_182100eef287a5::t_ebe91f9e625285 29,208,210-241,697,890-896,899
+main-agent/integrations/state-machine/actions/create_interview.js
+  s_182100eef287a5::t_0ae3e5ccd07472 1004-1005
+  s_182100eef287a5::t_4eae92c374005c 29,208,210-241,697,890-896,899,994-998
+main-agent/integrations/state-machine/actions/generate_final_document.js
+  s_182100eef287a5::t_542f9c85ada576 895,1929-1934,1954-1958,1961,1963,1966,1970,1974
+  s_182100eef287a5::t_028c737d1b63f4 1959-1960,1962,1964-1965,1967-1968,1971-1972,1975,1986-1990,1993-1994
+  s_182100eef287a5::t_0d23dc7df2adeb 1969,1976-1985,1991-1992
+  s_182100eef287a5::t_8657fb2f303c61 892-894
+  s_182100eef287a5::t_348fd72ebb4048 896
+  s_182100eef287a5::t_053c53c7d14177 1973
+  s_182100eef287a5::t_b2afab139d7be6 29,208,210-241,697,890-891,899
+main-agent/system-prompt.md
+  s_182100eef287a5::t_f0bc2219c97a3c 32
+  s_182100eef287a5::t_f0b9a7dda7b9b8 35
+repackaged-integrations/latest/state-machine/manifest.json
+  s_182100eef287a5::t_edf4c94a4a75f9 57
+main-agent/integrations/state-machine/actions/get_runtime_state.js
+  s_182100eef287a5::t_63aa20da27ed02 226-228,230
+  s_182100eef287a5::t_06788702f63414 29
+  s_182100eef287a5::t_20ba37501343c4 697
+  s_182100eef287a5::t_eb912953df14ae 208,210-225,229,231-241
+  s_182100eef287a5::t_5912f82bea2ba9 890-896,899
+repackaged-integrations/v1/state-machine/actions/create_interview/v1/action_manifest.json
+  s_182100eef287a5::t_41afacf3cd856a 12-14,16-17,19
+handover-agent/how-the-agent-works.md
+  s_182100eef287a5::t_2d8f860c9781e3 340
+  s_182100eef287a5::t_0fba64ebc22209 93
+repackaged-integrations/v1/state-machine/manifest.json
+  s_182100eef287a5::t_5509be8f23144e 57
+handover-agent/skills/knowledge-retention-contributing/references/integration-modification.md
+  s_182100eef287a5::t_3a84f331354c0a 150
+repackaged-integrations/latest/state-machine/actions/create_interview/latest/action_manifest.json
+  s_182100eef287a5::t_cc8d9a9d848dc1 12-14,16-17,19
+main-agent/skills/knowledge-retention-discovery-prefill/SKILL.md
+  s_182100eef287a5::t_fa939266ff935e 19
+main-agent/integrations/state-machine/actions/abandon_interview.js
+  s_182100eef287a5::t_ef13e7fa9fefa1 28,207,209-240,696,889-895,898
+main-agent/integrations/state-machine/actions/finalize_interview.js
+  s_182100eef287a5::t_342773120ea771 29,208,210-241,697,890-896,899
+main-agent/integrations/state-machine/actions/get_answers.js
+  s_182100eef287a5::t_aa48ee3a0ca897 28,207,209-240,696,889-895,898
+main-agent/integrations/state-machine/actions/get_discovery.js
+  s_182100eef287a5::t_95e38c63aef628 28,207,209-240,696,889-895,898
+main-agent/integrations/state-machine/actions/read_supporting_document.js
+  s_182100eef287a5::t_4d4a57d0f77921 27,206,208-239,695,888-894,897
+main-agent/integrations/state-machine/actions/revise_answer.js
+  s_182100eef287a5::t_83f40195b96d8f 29,208,210-241,697,890-896,899
+main-agent/integrations/state-machine/actions/save_answer.js
+  s_182100eef287a5::t_c6e4a8faee08f6 29,208,210-241,697,890-896,899
+main-agent/integrations/state-machine/actions/save_consent.js
+  s_182100eef287a5::t_2a497f1499ccce 29,208,210-241,697,890-896,899
+main-agent/integrations/state-machine/actions/save_discovery.js
+  s_182100eef287a5::t_7a35a101b0cf9e 29,208,210-241,697,890-896,899
+main-agent/integrations/state-machine/actions/save_feedback.js
+  s_182100eef287a5::t_ac6f894b838afa 29,208,210-241,697,890-896,899
+main-agent/integrations/state-machine/actions/save_final_document.js
+  s_182100eef287a5::t_38678cd96982f4 29,208,210-241,697,890-896,899
+main-agent/integrations/state-machine/actions/save_topic_summary.js
+  s_182100eef287a5::t_3cf9318386effe 29,208,210-241,697,890-896,899
+main-agent/integrations/state-machine/actions/save_topics_and_questions.js
+  s_182100eef287a5::t_b8cf78adfddd26 29,208,210-241,697,890-896,899
+main-agent/integrations/state-machine/actions/set_up_interview_folder.js
+  s_182100eef287a5::t_4db90eb2a68c65 29,208,210-241,697,890-896,899
+main-agent/integrations/state-machine/actions/upload_document.js
+  s_182100eef287a5::t_69f2d248b1499d 29,208,210-241,697,890-896,899
+repackaged-integrations/latest/state-machine/actions/abandon_interview/latest/code.js
+  s_182100eef287a5::t_d5740f844fb0d1 28,207,209-240,696,889-895,898
+repackaged-integrations/latest/state-machine/actions/create_interview/latest/code.js
+  s_182100eef287a5::t_5935b152413b9e 29,208,210-241,697,890-896,899,994-998,1004-1005
+repackaged-integrations/latest/state-machine/actions/finalize_interview/latest/code.js
+  s_182100eef287a5::t_0f2dc0e5c4e493 29,208,210-241,697,890-896,899
+repackaged-integrations/latest/state-machine/actions/generate_final_document/latest/code.js
+  s_182100eef287a5::t_916eb0b270d823 29,208,210-241,697,890-896,899,1929-1934,1954-1994
+repackaged-integrations/latest/state-machine/actions/generate_topic_document/latest/code.js
+  s_182100eef287a5::t_84ed871ba9f4e3 29,208,210-241,697,890-896,899,1939,1941,1946-1947,1949,1955,1961,1967-2009
+repackaged-integrations/latest/state-machine/actions/get_answers/latest/code.js
+  s_182100eef287a5::t_248bf9e72145a4 28,207,209-240,696,889-895,898
+repackaged-integrations/latest/state-machine/actions/get_discovery/latest/code.js
+  s_182100eef287a5::t_704ad1ba03dd62 28,207,209-240,696,889-895,898
+repackaged-integrations/latest/state-machine/actions/get_runtime_state/latest/code.js
+  s_182100eef287a5::t_c804e2ad6a4176 29,208,210-241,697,890-896,899
+repackaged-integrations/latest/state-machine/actions/read_supporting_document/latest/code.js
+  s_182100eef287a5::t_6bf9e7578403ec 27,206,208-239,695,888-894,897
+repackaged-integrations/latest/state-machine/actions/revise_answer/latest/code.js
+  s_182100eef287a5::t_52ae21e9af97c1 29,208,210-241,697,890-896,899
+repackaged-integrations/latest/state-machine/actions/save_answer/latest/code.js
+  s_182100eef287a5::t_5251ea10ebb49a 29,208,210-241,697,890-896,899
+repackaged-integrations/latest/state-machine/actions/save_consent/latest/code.js
+  s_182100eef287a5::t_dd9de5e2ce3c41 29,208,210-241,697,890-896,899
+repackaged-integrations/latest/state-machine/actions/save_discovery/latest/code.js
+  s_182100eef287a5::t_868b2e9e4f8bfb 29,208,210-241,697,890-896,899
+repackaged-integrations/latest/state-machine/actions/save_feedback/latest/code.js
+  s_182100eef287a5::t_3347f7692e67e6 29,208,210-241,697,890-896,899
+repackaged-integrations/latest/state-machine/actions/save_final_document/latest/code.js
+  s_182100eef287a5::t_a7bc08eb38b015 29,208,210-241,697,890-896,899
+repackaged-integrations/latest/state-machine/actions/save_topic_summary/latest/code.js
+  s_182100eef287a5::t_2c0ef9ce948828 29,208,210-241,697,890-896,899
+repackaged-integrations/latest/state-machine/actions/save_topics_and_questions/latest/code.js
+  s_182100eef287a5::t_f81c5e94b31e18 29,208,210-241,697,890-896,899
+repackaged-integrations/latest/state-machine/actions/set_up_interview_folder/latest/code.js
+  s_182100eef287a5::t_aa722ab0f8d643 29,208,210-241,697,890-896,899
+repackaged-integrations/latest/state-machine/actions/upload_document/latest/code.js
+  s_182100eef287a5::t_e974203aa1a339 29,208,210-241,697,890-896,899
+repackaged-integrations/v1/state-machine/actions/abandon_interview/v1/code.js
+  s_182100eef287a5::t_a33c73979d5e58 28,207,209-240,696,889-895,898
+repackaged-integrations/v1/state-machine/actions/create_interview/v1/code.js
+  s_182100eef287a5::t_b29ab10f5fe13b 29,208,210-241,697,890-896,899,994-998,1004-1005
+repackaged-integrations/v1/state-machine/actions/finalize_interview/v1/code.js
+  s_182100eef287a5::t_16935860cd0d7c 29,208,210-241,697,890-896,899
+repackaged-integrations/v1/state-machine/actions/generate_final_document/v1/code.js
+  s_182100eef287a5::t_4e4785560cdec7 29,208,210-241,697,890-896,899,1929-1934,1954-1994
+repackaged-integrations/v1/state-machine/actions/generate_topic_document/v1/code.js
+  s_182100eef287a5::t_66c3cec8ed11c4 29,208,210-241,697,890-896,899,1939,1941,1946-1947,1949,1955,1961,1967-2009
+repackaged-integrations/v1/state-machine/actions/get_answers/v1/code.js
+  s_182100eef287a5::t_2668fde06a854a 28,207,209-240,696,889-895,898
+repackaged-integrations/v1/state-machine/actions/get_discovery/v1/code.js
+  s_182100eef287a5::t_1621634700ef05 28,207,209-240,696,889-895,898
+repackaged-integrations/v1/state-machine/actions/get_runtime_state/v1/code.js
+  s_182100eef287a5::t_e600582dfdef4a 29,208,210-241,697,890-896,899
+repackaged-integrations/v1/state-machine/actions/read_supporting_document/v1/code.js
+  s_182100eef287a5::t_fb9da4d0dbafc7 27,206,208-239,695,888-894,897
+repackaged-integrations/v1/state-machine/actions/revise_answer/v1/code.js
+  s_182100eef287a5::t_f7f0f73a393998 29,208,210-241,697,890-896,899
+repackaged-integrations/v1/state-machine/actions/save_answer/v1/code.js
+  s_182100eef287a5::t_e1f45a850122fe 29,208,210-241,697,890-896,899
+repackaged-integrations/v1/state-machine/actions/save_consent/v1/code.js
+  s_182100eef287a5::t_0447261273391c 29,208,210-241,697,890-896,899
+repackaged-integrations/v1/state-machine/actions/save_discovery/v1/code.js
+  s_182100eef287a5::t_aab749552959a3 29,208,210-241,697,890-896,899
+repackaged-integrations/v1/state-machine/actions/save_feedback/v1/code.js
+  s_182100eef287a5::t_4c9bb50bdfa059 29,208,210-241,697,890-896,899
+repackaged-integrations/v1/state-machine/actions/save_final_document/v1/code.js
+  s_182100eef287a5::t_fb707d533004b9 29,208,210-241,697,890-896,899
+repackaged-integrations/v1/state-machine/actions/save_topic_summary/v1/code.js
+  s_182100eef287a5::t_40e2ff098acc40 29,208,210-241,697,890-896,899
+repackaged-integrations/v1/state-machine/actions/save_topics_and_questions/v1/code.js
+  s_182100eef287a5::t_37e96d9c323858 29,208,210-241,697,890-896,899
+repackaged-integrations/v1/state-machine/actions/set_up_interview_folder/v1/code.js
+  s_182100eef287a5::t_19b1521b2c3afa 29,208,210-241,697,890-896,899
+repackaged-integrations/v1/state-machine/actions/upload_document/v1/code.js
+  s_182100eef287a5::t_f088a4a68b7d18 29,208,210-241,697,890-896,899
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "6c7b8d282376677bc101c8bcb04927c361afe3b0",
+  "prompts": {},
+  "sessions": {
+    "s_182100eef287a5": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "c48403d2-2157-4962-bd43-05075f34dcb4",
+        "model": "grok-4.7"
+      },
+      "human_author": "Alessandro <281597100+alemau-gg@users.noreply.github.com>"
+    }
+  }
+}
