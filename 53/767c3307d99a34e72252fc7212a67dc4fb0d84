@@ -1,0 +1,132 @@
+main-agent/integrations/state-machine/actions/get_runtime_state.js
+  s_e22454439871cc::t_a80d21a5b826da 895
+main-agent/integrations/state-machine/actions/set_up_interview_folder.js
+  s_e22454439871cc::t_8438cbd2a896c9 1067-1078
+  s_e22454439871cc::t_a7cbd994f4d8d0 895
+main-agent/integrations/state-machine/actions/abandon_interview.js
+  s_e22454439871cc::t_24493969007cd7 894
+main-agent/integrations/state-machine/actions/create_interview.js
+  s_e22454439871cc::t_27371da55cc29f 895
+main-agent/integrations/state-machine/actions/finalize_interview.js
+  s_e22454439871cc::t_56f50b06a9be7f 895
+main-agent/integrations/state-machine/actions/generate_final_document.js
+  s_e22454439871cc::t_29a3f1b8af0a27 895
+main-agent/integrations/state-machine/actions/generate_topic_document.js
+  s_e22454439871cc::t_ecfda39bdaf991 895
+main-agent/integrations/state-machine/actions/get_answers.js
+  s_e22454439871cc::t_13cc3c8305cacf 894
+main-agent/integrations/state-machine/actions/get_discovery.js
+  s_e22454439871cc::t_afe1b97a4c5816 894
+main-agent/integrations/state-machine/actions/read_supporting_document.js
+  s_e22454439871cc::t_a0a9d715b9986d 893
+main-agent/integrations/state-machine/actions/revise_answer.js
+  s_e22454439871cc::t_319f4617f156e6 895
+main-agent/integrations/state-machine/actions/save_answer.js
+  s_e22454439871cc::t_c16009176b5ca8 895
+main-agent/integrations/state-machine/actions/save_consent.js
+  s_e22454439871cc::t_4aa9b360302811 895
+main-agent/integrations/state-machine/actions/save_discovery.js
+  s_e22454439871cc::t_86ed9b6b631d0f 895
+main-agent/integrations/state-machine/actions/save_feedback.js
+  s_e22454439871cc::t_87b23ee402bcd4 895
+main-agent/integrations/state-machine/actions/save_final_document.js
+  s_e22454439871cc::t_0047e0938ab226 895
+main-agent/integrations/state-machine/actions/save_topic_summary.js
+  s_e22454439871cc::t_195b449960a5ce 895
+main-agent/integrations/state-machine/actions/save_topics_and_questions.js
+  s_e22454439871cc::t_2e97568b41045c 895
+main-agent/integrations/state-machine/actions/upload_document.js
+  s_e22454439871cc::t_325f0beb822e31 895
+repackaged-integrations/latest/state-machine/actions/abandon_interview/latest/code.js
+  s_e22454439871cc::t_1a56beeecd1936 894
+repackaged-integrations/latest/state-machine/actions/create_interview/latest/code.js
+  s_e22454439871cc::t_57b8343396aeca 895
+repackaged-integrations/latest/state-machine/actions/finalize_interview/latest/code.js
+  s_e22454439871cc::t_5fddbcd8037361 895
+repackaged-integrations/latest/state-machine/actions/generate_final_document/latest/code.js
+  s_e22454439871cc::t_e4afbacb01c0d1 895
+repackaged-integrations/latest/state-machine/actions/generate_topic_document/latest/code.js
+  s_e22454439871cc::t_f408b431b23b32 895
+repackaged-integrations/latest/state-machine/actions/get_answers/latest/code.js
+  s_e22454439871cc::t_9e524ea8fe1790 894
+repackaged-integrations/latest/state-machine/actions/get_discovery/latest/code.js
+  s_e22454439871cc::t_20d3ee29905ad5 894
+repackaged-integrations/latest/state-machine/actions/get_runtime_state/latest/code.js
+  s_e22454439871cc::t_414beea7021dca 895
+repackaged-integrations/latest/state-machine/actions/read_supporting_document/latest/code.js
+  s_e22454439871cc::t_f9c6503759603e 893
+repackaged-integrations/latest/state-machine/actions/revise_answer/latest/code.js
+  s_e22454439871cc::t_525b7216869061 895
+repackaged-integrations/latest/state-machine/actions/save_answer/latest/code.js
+  s_e22454439871cc::t_c66ded979aaa10 895
+repackaged-integrations/latest/state-machine/actions/save_consent/latest/code.js
+  s_e22454439871cc::t_1d8e27b74b23c5 895
+repackaged-integrations/latest/state-machine/actions/save_discovery/latest/code.js
+  s_e22454439871cc::t_2d9806cc4b6bb6 895
+repackaged-integrations/latest/state-machine/actions/save_feedback/latest/code.js
+  s_e22454439871cc::t_7d182a9544be3a 895
+repackaged-integrations/latest/state-machine/actions/save_final_document/latest/code.js
+  s_e22454439871cc::t_900cdda2f884aa 895
+repackaged-integrations/latest/state-machine/actions/save_topic_summary/latest/code.js
+  s_e22454439871cc::t_7bf9b0fa9e715d 895
+repackaged-integrations/latest/state-machine/actions/save_topics_and_questions/latest/code.js
+  s_e22454439871cc::t_4a43b988ce5003 895
+repackaged-integrations/latest/state-machine/actions/set_up_interview_folder/latest/code.js
+  s_e22454439871cc::t_463270d96c543e 895,1067-1078
+repackaged-integrations/latest/state-machine/actions/upload_document/latest/code.js
+  s_e22454439871cc::t_e360430721e0a2 895
+repackaged-integrations/v1/state-machine/actions/abandon_interview/v1/code.js
+  s_e22454439871cc::t_a34df4d72f51ee 894
+repackaged-integrations/v1/state-machine/actions/create_interview/v1/code.js
+  s_e22454439871cc::t_abc09b99186b24 895
+repackaged-integrations/v1/state-machine/actions/finalize_interview/v1/code.js
+  s_e22454439871cc::t_8c7d0be40c2200 895
+repackaged-integrations/v1/state-machine/actions/generate_final_document/v1/code.js
+  s_e22454439871cc::t_3742cd1b858162 895
+repackaged-integrations/v1/state-machine/actions/generate_topic_document/v1/code.js
+  s_e22454439871cc::t_846bd018f4ee6a 895
+repackaged-integrations/v1/state-machine/actions/get_answers/v1/code.js
+  s_e22454439871cc::t_296ffa511e729a 894
+repackaged-integrations/v1/state-machine/actions/get_discovery/v1/code.js
+  s_e22454439871cc::t_422e867ef14f39 894
+repackaged-integrations/v1/state-machine/actions/get_runtime_state/v1/code.js
+  s_e22454439871cc::t_a46509b19f027b 895
+repackaged-integrations/v1/state-machine/actions/read_supporting_document/v1/code.js
+  s_e22454439871cc::t_0239c81aea8271 893
+repackaged-integrations/v1/state-machine/actions/revise_answer/v1/code.js
+  s_e22454439871cc::t_5fb2e54ab07bc6 895
+repackaged-integrations/v1/state-machine/actions/save_answer/v1/code.js
+  s_e22454439871cc::t_7621e0f80b4a65 895
+repackaged-integrations/v1/state-machine/actions/save_consent/v1/code.js
+  s_e22454439871cc::t_2e688abf2c6411 895
+repackaged-integrations/v1/state-machine/actions/save_discovery/v1/code.js
+  s_e22454439871cc::t_21feb55da3d9b0 895
+repackaged-integrations/v1/state-machine/actions/save_feedback/v1/code.js
+  s_e22454439871cc::t_23e70b1eff9dae 895
+repackaged-integrations/v1/state-machine/actions/save_final_document/v1/code.js
+  s_e22454439871cc::t_81b38ce002013a 895
+repackaged-integrations/v1/state-machine/actions/save_topic_summary/v1/code.js
+  s_e22454439871cc::t_fee4a153247bbe 895
+repackaged-integrations/v1/state-machine/actions/save_topics_and_questions/v1/code.js
+  s_e22454439871cc::t_bbb6b37122cc53 895
+repackaged-integrations/v1/state-machine/actions/set_up_interview_folder/v1/code.js
+  s_e22454439871cc::t_9680715162f5a3 895,1067-1078
+repackaged-integrations/v1/state-machine/actions/upload_document/v1/code.js
+  s_e22454439871cc::t_ca9730754b3431 895
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "53767c3307d99a34e72252fc7212a67dc4fb0d84",
+  "prompts": {},
+  "sessions": {
+    "s_e22454439871cc": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "d054555a-5232-4804-9ee3-aec64b1cdcac",
+        "model": "gemini-4-argon"
+      },
+      "human_author": "Alessandro <281597100+alemau-gg@users.noreply.github.com>"
+    }
+  }
+}
