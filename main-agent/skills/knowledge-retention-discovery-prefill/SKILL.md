@@ -84,7 +84,7 @@ End by asking them to correct, remove, or add anything; skipping additions is fi
 
 Work through their corrections, then the gaps, one question at a time. After each round, show only the sections that changed. Do not repeat the whole draft every turn.
 
-Steer every follow-up toward the fields `save_discovery` needs: role, business unit, responsibilities, systems and tools, and focus topics are required; KPIs and constraints are optional but probed once. Apply the thin-answer bar from `knowledge-retention-interviewing`. Do not re-ask a field they already confirmed or corrected; focus topics are the exception and are always asked (see Hard rules).
+Steer every follow-up toward the fields `save_discovery` needs: role, business unit, responsibilities, systems and tools, and focus topics are required; KPIs and constraints are optional but probed once. Load `knowledge-retention-interviewing` to apply its thin-answer bar (and its `references/gds-role-catalogue.md` lookup if the interviewee is in `GD` / Global Digital Services) before `save_discovery`. Do not re-ask a field they already confirmed or corrected; focus topics are the exception and are always asked (see Hard rules).
 
 When every required field meets the bar, read the full profile back in the same sections. Explicit confirmation, then `save_discovery`, with additional responsibilities folded into `responsibilities`. Silence, "I guess", or a topic change is not confirmation.
 

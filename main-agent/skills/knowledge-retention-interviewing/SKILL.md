@@ -71,7 +71,7 @@ Without a draft, collect one question at a time:
 
 **Done when:** the number of topics and questions per topic given in the backend instruction, coverage checks pass, user saw the overview, then `save_topics_and_questions`. Do not ask interview questions before that save succeeds. After it succeeds, follow the returned instruction. When `nextAction` is `AskActiveQuestion`, ask `nextQuestionText` verbatim directly without a readiness confirmation or wait.
 
-**Inputs:** discovery profile (and the GD role profile already read during discovery when applicable); when present, CKR Company Context folder (ground topics there; do not invent org processes from training data).
+**Inputs:** discovery profile; when present, CKR Company Context folder (ground topics there; do not invent org processes from training data); for **GD / Global Digital Services** interviewees (`"GD"`, `"Digital Services"`, `"Digital Solutions"`, or an org code starting with `GD` such as `GDA`–`GDF`, `GDS`, `GDx/...`), [`references/gds-role-catalogue.md`](references/gds-role-catalogue.md) (use the role profile fetched during discovery; if it was not yet fetched during discovery, open `references/gds-role-catalogue.md` and fetch it directly from its URL now before generating topics).
 
 1. **Topic count from the backend instruction** (it is set per environment; default 4–6), most critical first. `save_topics_and_questions` rejects any other count.
 2. **Dedicated focus topics (hard):** every highlighted discovery focus topic gets at least one interview topic whose title and scope name that focus. Do not fold a named focus into a catch-all “role overview” topic. Closely related focuses may share a topic only when the topic title still names those focuses.

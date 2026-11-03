@@ -41,7 +41,7 @@ Use this during discovery to spot responsibilities or focus areas worth probing 
 
 ## Step 3 — Weight and sharpen questions (`GenerateTopicsAndQuestions`)
 
-Use the role profile already read during discovery (do **not** re-fetch the PDF at `GenerateTopicsAndQuestions`):
+Use the role profile already read during discovery (or, if `references/gds-role-catalogue.md` was first opened at `GenerateTopicsAndQuestions`, run Step 1's direct URL fetch once now before generating topics):
 
 1. **Weight questions by the role's focus-area percentages** (while honoring the interviewee's named `focusTopics` per `SKILL.md` rule 2 and the backend topic/question count limits):
    - **Consulting-heavy role:** skew more questions toward stakeholder navigation, managing client/business-unit expectations, unspoken alignment rules, scoping trade-offs, and where formal handoffs break down.
