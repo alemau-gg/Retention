@@ -25,6 +25,7 @@ const KnowledgeRetentionUtils = {
       // stable-user-ID column and must remain a text field until confirmed.
       userId: 'cr32c_aisuiteid',
       devInterview: 'cr32c_devinterview',
+      managerEmail: 'cr32c_manageremail',
       email: 'ckr_employeeemail',
       language: 'ckr_language',
       status: 'ckr_interviewstatus',
@@ -889,7 +890,7 @@ const KnowledgeRetentionUtils = {
   // prefixes their SharePoint folder names. Changing it mid-interview splits
   // that interview's files.
   isDevInterview(data) {
-    return String(data.auth && data.auth.tagTestFolders).toLowerCase() === 'true';
+    return String((data.auth && data.auth.tagTestFolders) || '').trim().toLowerCase() === 'true';
   },
 
   interviewFolderName(data, interview) {

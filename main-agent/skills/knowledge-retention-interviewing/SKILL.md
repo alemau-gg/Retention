@@ -65,11 +65,13 @@ Without a draft, collect one question at a time:
 
 **Thin-answer bar (before save):** at least one named system/tool, one concrete responsibility (not “support the team”), and one focus topic. If thin → one probe, then continue. Do not invent. Conversational, not a form.
 
+**GDS interviewees (`Global Digital Services`):** if discovery shows the interviewee works in **GDS / Global Digital Services**, open [`references/gds-role-catalogue.md`](references/gds-role-catalogue.md) and follow it during discovery and topic generation. Do not open it for non-GDS employees.
+
 ## Generating topics and questions (`GenerateTopicsAndQuestions`)
 
 **Done when:** the number of topics and questions per topic given in the backend instruction, coverage checks pass, user saw the overview, then `save_topics_and_questions`. Do not ask interview questions before that save succeeds. After it succeeds, follow the returned instruction. When `nextAction` is `AskActiveQuestion`, ask `nextQuestionText` verbatim directly without a readiness confirmation or wait.
 
-**Inputs:** discovery profile; when present, CKR Company Context folder (ground topics there; do not invent org processes from training data).
+**Inputs:** discovery profile; when present, CKR Company Context folder (ground topics there; do not invent org processes from training data); for GDS interviewees, [`references/gds-role-catalogue.md`](references/gds-role-catalogue.md).
 
 1. **Topic count from the backend instruction** (it is set per environment; default 4–6), most critical first. `save_topics_and_questions` rejects any other count.
 2. **Dedicated focus topics (hard):** every highlighted discovery focus topic gets at least one interview topic whose title and scope name that focus. Do not fold a named focus into a catch-all “role overview” topic. Closely related focuses may share a topic only when the topic title still names those focuses.
