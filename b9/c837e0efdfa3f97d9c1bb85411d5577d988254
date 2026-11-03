@@ -1,0 +1,22 @@
+main-agent/skills/knowledge-retention-interviewing/SKILL.md
+  s_3928a907dd1838::t_3bca55fe6543f0 18
+  s_3928a907dd1838::t_c57de553ffb51a 51,53,55-56
+main-agent/skills/knowledge-retention-discovery-prefill/SKILL.md
+  s_3928a907dd1838::t_41348b57462bf1 87
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "b9c837e0efdfa3f97d9c1bb85411d5577d988254",
+  "prompts": {},
+  "sessions": {
+    "s_3928a907dd1838": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "07977f45-0c08-48a1-81a0-91a37b554090",
+        "model": "gemini-4-argon"
+      },
+      "human_author": "Alessandro <281597100+alemau-gg@users.noreply.github.com>"
+    }
+  }
+}
