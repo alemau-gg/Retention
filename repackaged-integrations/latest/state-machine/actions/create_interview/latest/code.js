@@ -997,33 +997,9 @@ if (!rawLanguage) {
   throw new Error('Language is required to start an interview.');
 }
 
-// Best-effort manager lookup via Graph so cr32c_manageremail is populated from
-// the start of the interview. Never blocks interview creation on 404 or Graph errors.
-let managerEmail = null;
-if (email) {
-  try {
-    const graphToken = await KnowledgeRetentionUtils.graphToken(data);
-    const managerResponse = await KnowledgeRetentionUtils.graph(data, graphToken, {
-      method: 'GET',
-      path: `/users/${encodeURIComponent(email)}/manager?$select=mail,userPrincipalName`,
-    });
-    if (managerResponse && managerResponse.status === 200 && managerResponse.json) {
-      const resolved = managerResponse.json.mail || managerResponse.json.userPrincipalName || null;
-      if (resolved && String(resolved).trim()) {
-        managerEmail = String(resolved).trim().slice(0, 100);
-      }
-    }
-  } catch (_error) {
-    // Non-fatal: interview creation proceeds without a manager email.
-  }
-}
-
 const body = {};
 body[S.interview.userId] = identity.userId;
 body[S.interview.email] = email;
-if (managerEmail) {
-  body[S.interview.managerEmail] = managerEmail;
-}
 body[S.interview.displayName] = displayName;
 body[S.interview.name] = `KR — ${displayName}`;
 body[S.interview.language] = rawLanguage;
