@@ -1,10 +1,18 @@
-# GDS Role-Profile Catalogue
+# GD / Global Digital Services Role-Profile Catalogue
 
-Load only when the interviewee's business unit, department, or team from discovery is in **Global Digital Services (GDS)** (for example `"GDS"`, `"Global Digital Services"`, or a GDS sub-unit). If they are not in GDS, close this file and continue without it.
+Use this reference whenever the interviewee works in — or likely belongs to — **Global Digital Services (`GD`)**.
+
+## Recognizing a GD employee (navigating naming uncertainty)
+
+Employees rarely write out `"Global Digital Services"` or `"GDS"` in day-to-day work:
+
+- **Common labels:** `"GD"`, `"Global Digital Services"`, `"Digital Services"`, or `"Digital Solutions"`.
+- **Org codes (in `directoryProfile.department`, email signatures, or user answers):** all GD units have an org code starting with **`GD`**, often followed by a third letter and a slash + sub-letter (e.g. `GD`, `GDA`, `GDB`, `GDD`, `GDE`, `GDF`, `GDS`, or `GDA/X`, `GDD/A`, etc. — note that `GDS` specifically is the Cyber Security sub-unit inside `GD`).
+- **When in doubt, check Page 2:** people often use informal job titles or team names instead of official HR conventions. As long as they are within `GD` (or their role sounds like a digital/IT/consulting role and their unit is unclear), **the role itself is the real discriminant**. Open the catalogue and check **Page 2**, which contains the overview of all available role profiles, to see if any role applies.
 
 ## Purpose
 
-The GDS Role-Profile Catalogue (`Updated_December_2025_Global-Role-Profile-Catalogue_final.pdf`) is a curated HR reference (part of company context, not personal prefill search data) that defines the official blueprint for GDS positions: core focus areas and their percentage weights (typically **Technical**, **Consulting**, **Strategy**, **Collaboration**, **Leadership**), prerequisites and expectations, expected day-to-day activities, and skill-progression tiers (*starting in the role* → *increasing expertise* → *strong developed expertise*).
+The GDS Role-Profile Catalogue (`Updated_December_2025_Global-Role-Profile-Catalogue_final.pdf`) is a curated HR reference (part of company context, not personal prefill search data) that defines the official blueprint for GD positions: core focus areas and their percentage weights (typically **Technical**, **Consulting**, **Strategy**, **Collaboration**, **Leadership**), prerequisites and expectations, expected day-to-day activities, and skill-progression tiers (*starting in the role* → *increasing expertise* → *strong developed expertise*).
 
 In the visual layout of the catalogue, each skill category has a dedicated color, and the detailed skill descriptions on a role's page are color-coded to match their category.
 
@@ -12,17 +20,19 @@ Use this catalogue strictly as a **lens to weight and sharpen tacit-knowledge qu
 
 ---
 
-## Step 1 — Locate and read the role page
+## Step 1 — Locate the role via Page 2 and read the role page
 
 1. Access the exact file (via the CKR Company Context folder or SharePoint):
    `Updated_December_2025_Global-Role-Profile-Catalogue_final.pdf`
-2. Match the interviewee's role title from discovery against the catalogue. Search by the specific role title rather than broad keywords.
-3. Locate the single page dedicated to that role profile and read/analyze **only that page**. Do not read or summarize the entire PDF unless:
-   - the interviewee spans more than one GDS role profile;
-   - the interviewee explicitly asks to compare profiles; or
-   - the exact title does not match and you need the table of contents / index to identify the closest profile.
-4. **If no confident match exists (or the file cannot be accessed):** do not guess or invent a profile. If discovery is still open (`RunPreInterviewDiscovery`) and the role title was informal or abbreviated, ask once for their official GDS role profile title; if discovery is already saved (`GenerateTopicsAndQuestions`), do not ask — continue with the standard interviewing framework without the catalogue.
-5. **Keep it in the background:** do not introduce or recite the catalogue unnecessarily during the interview. Use it as background for question selection and interpretation.
+2. **Start with Page 2 (Role Overview) when the title is not an exact match:**
+   - People frequently use working titles, project roles, or abbreviations that do not match HR naming conventions verbatim.
+   - Read **Page 2** of the PDF (the overview of all role profiles in the catalogue) alongside searching for their role title, and map their stated role and responsibilities to the closest profile(s) on Page 2.
+3. **Be pragmatic, not overly rigid:**
+   - If one profile (or a combination of two profiles) on Page 2 clearly corresponds to what the person does, open and read the single page dedicated to that role profile.
+   - During discovery (`RunPreInterviewDiscovery`), if two profiles on Page 2 look plausible or their title is ambiguous, you can briefly ask a natural follow-up question to clarify which angle fits their actual seat better — do not demand that they know the exact HR catalogue title.
+   - Do not read or summarize the entire PDF; stick to **Page 2 (overview)** and the **1–2 specific role-profile pages** that match.
+4. **If no role in the catalogue fits (or the file cannot be accessed):** do not force a match or invent a profile. Simply continue with the standard interviewing framework without the catalogue.
+5. **Keep it in the background:** do not lecture the interviewee about the catalogue or recite their official HR job description back to them. Use it as background context for discovery follow-ups and question design.
 
 ---
 
@@ -58,7 +68,7 @@ From the matched role-profile page, extract:
 - Use the contrast between the formal role profile and their actual experience to frame tacit-knowledge questions:
   - Where their real day-to-day responsibilities and impact diverged from the formal role design (hidden operational load, informal ownership, unwritten expectations).
   - Which capabilities from the profile became most critical in practice, and where constraints in the role forced them to build workarounds or rely on informal networks instead.
-  - What a successor reading only the official GDS role profile would misjudge about their first 90 days in this seat.
+  - What a successor reading only the official GD role profile would misjudge about their first 90 days in this seat.
 
 ### 4. Alignment with `SKILL.md` rules
 - The catalogue's focus-area weights guide the **proportion** of questions across technical, consulting, strategic, collaborative, and leadership themes, while `SKILL.md` rule 8 ("Tacit knowledge only") governs **how each question is asked** (never ask what can be read from a document or the catalogue itself).
