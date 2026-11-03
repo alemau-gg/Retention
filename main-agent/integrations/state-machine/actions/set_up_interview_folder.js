@@ -892,7 +892,7 @@ const KnowledgeRetentionUtils = {
   // prefixes their SharePoint folder names. Changing it mid-interview splits
   // that interview's files.
   isDevInterview(data) {
-    return String(data.auth && data.auth.tagTestFolders).toLowerCase() === 'true';
+    return String((data.auth && data.auth.tagTestFolders) || '').trim().toLowerCase() === 'true';
   },
 
   interviewFolderName(data, interview) {
@@ -1064,14 +1064,18 @@ if (!email) {
 if (managerEmail && String(managerEmail).trim()) {
   const normalizedManagerEmail = String(managerEmail).trim().slice(0, 100);
   if (interview[S.interview.managerEmail] !== normalizedManagerEmail) {
-    const managerBody = {};
-    managerBody[S.interview.managerEmail] = normalizedManagerEmail;
-    await KnowledgeRetentionUtils.dv(data, dvToken, {
-      method: 'PATCH',
-      path: `/${S.entitySets.interviews}(${interview[S.interview.id]})`,
-      body: managerBody,
-    });
-    interview[S.interview.managerEmail] = normalizedManagerEmail;
+    try {
+      const managerBody = {};
+      managerBody[S.interview.managerEmail] = normalizedManagerEmail;
+      await KnowledgeRetentionUtils.dv(data, dvToken, {
+        method: 'PATCH',
+        path: `/${S.entitySets.interviews}(${interview[S.interview.id]})`,
+        body: managerBody,
+      });
+      interview[S.interview.managerEmail] = normalizedManagerEmail;
+    } catch (_error) {
+      // Non-fatal: persisting manager email must never block SharePoint folder setup or invites.
+    }
   }
 }
 

@@ -890,7 +890,7 @@ const KnowledgeRetentionUtils = {
   // prefixes their SharePoint folder names. Changing it mid-interview splits
   // that interview's files.
   isDevInterview(data) {
-    return String(data.auth && data.auth.tagTestFolders).toLowerCase() === 'true';
+    return String((data.auth && data.auth.tagTestFolders) || '').trim().toLowerCase() === 'true';
   },
 
   interviewFolderName(data, interview) {
