@@ -24,7 +24,7 @@ Keep a short running picture of the person (role, responsibilities, systems, thr
 
 ### 1. Establish who they are
 
-Start from the connected account (name, email address) and `directoryProfile` (job title, department). Read the signature on a mail they sent for title, team, org code (for example `GD`, `GDA`–`GDF`, `GDS`, or `GDx/...` indicating Global Digital Services), location, and site. Then search their name, and common variants of it, in every source. Their own documents, presentations they authored, and threads they drive show what they own better than any title.
+Start from the connected account (name, email address) and `directoryProfile` (job title, department). Read the signature on a mail they sent for title, team, location, and site. Then search their name, and common variants of it, in every source. Their own documents, presentations they authored, and threads they drive show what they own better than any title.
 
 Their surroundings say a lot too: the people they interact with most (by role and department, never by name), the teams they belong to, and the SharePoint sites they work in.
 
