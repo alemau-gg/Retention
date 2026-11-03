@@ -15,7 +15,7 @@ Methodology only. Progress, saves, and `nextQuestionText` come from the backend 
 
 | Load | `nextAction` / moment | Use this skill for |
 |---|---|---|
-| Yes | `RunPreInterviewDiscovery` | Thin-answer bar + required discovery fields. If the instruction says to load `knowledge-retention-discovery-prefill`, that skill drafts; do not search from here |
+| Yes | `RunPreInterviewDiscovery` | Thin-answer bar, required discovery fields, and `references/gds-role-catalogue.md` (when in `GD` / Global Digital Services). If the instruction says to load `knowledge-retention-discovery-prefill`, that skill drafts the profile from M365 first |
 | Yes | `GenerateTopicsAndQuestions` | Topic and question counts from the backend instruction; overview; then `save_topics_and_questions` |
 | No | `AskActiveQuestion` | Ask `nextQuestionText` verbatim. Probing follow-ups (max 3, used much more often than not) are the system prompt, not this skill |
 | No | `GenerateOrReviewTopicSummary`, `BuildFinalDocument`, `FinalizeAndCollectFeedback` | Load `knowledge-retention-reporting` instead |
@@ -48,11 +48,12 @@ Live follow-ups are the system prompt (this skill is not loaded on `AskActiveQue
 
 ## Discovery (`RunPreInterviewDiscovery`)
 
-**Done when:** every required field is concrete, you read the profile back, user explicitly confirmed, then `save_discovery`.
+**Done when:** every required field is concrete, the GD role-catalogue page has been fetched and checked (if the interviewee is in `GD`), you read the profile back, user explicitly confirmed, then `save_discovery`.
 
-When the backend instruction says to load `knowledge-retention-discovery-prefill`, follow that skill for the draft. Do not run the search yourself from this skill. This skill's thin-answer bar and field list still apply before save. With a draft, ask only for fields that are missing or below the bar, one at a time. Do not re-ask a field the user already confirmed or corrected in the draft. Focus topics are always asked.
+When the backend instruction says to load `knowledge-retention-discovery-prefill`, follow that skill for the M365 draft. This skill's thin-answer bar, field list, and mandatory GD catalogue gate below still apply before `save_discovery`. With a draft, ask only for fields that are missing or below the bar, one at a time. Do not re-ask a field the user already confirmed or corrected in the draft. Focus topics are always asked.
 
-**GD / Digital Services interviewees:** if discovery (via `directoryProfile.department`, email signature, or the user's answer) indicates or suggests the interviewee is in **GD / Global Digital Services** (`"GD"`, `"Digital Services"`, `"Digital Solutions"`, or an org code starting with `GD` such as `GDA`–`GDF`, `GDS`, `GDx/...`), open [`references/gds-role-catalogue.md`](references/gds-role-catalogue.md) **during discovery (before `save_discovery`)** and follow it.
+**Mandatory GD / Digital Services gate (before read-back and `save_discovery`):**
+Whenever `directoryProfile.department`, an email signature, or the user's business-unit answer indicates **GD / Global Digital Services** (`"GD"`, `"Global Digital Services"`, `"Digital Services"`, `"Digital Solutions"`, or any org code starting with `GD` such as `GDA`, `GDB`, `GDD`, `GDE`, `GDF`, `GDS`, or `GDx/...`), you **MUST** open [`references/gds-role-catalogue.md`](references/gds-role-catalogue.md) and fetch the catalogue PDF from its URL **before** reading the discovery profile back or calling `save_discovery`. Do not skip this step when the user is in `GD`.
 
 **Focus topics, always:** ask for them as a separate question, in bold on its own line, in every discovery, with or without a draft, and even when candidates were already identified. Accepting a draft or a list of candidates does not answer it. Never infer focus topics from the other answers; save only the ones the user names or explicitly picks.
 
@@ -71,7 +72,7 @@ Without a draft, collect one question at a time:
 
 **Done when:** the number of topics and questions per topic given in the backend instruction, coverage checks pass, user saw the overview, then `save_topics_and_questions`. Do not ask interview questions before that save succeeds. After it succeeds, follow the returned instruction. When `nextAction` is `AskActiveQuestion`, ask `nextQuestionText` verbatim directly without a readiness confirmation or wait.
 
-**Inputs:** discovery profile (and the GD role profile already read during discovery when applicable); when present, CKR Company Context folder (ground topics there; do not invent org processes from training data).
+**Inputs:** discovery profile; when present, CKR Company Context folder (ground topics there; do not invent org processes from training data); for **GD / Global Digital Services** interviewees (`"GD"`, `"Digital Services"`, `"Digital Solutions"`, or an org code starting with `GD` such as `GDA`–`GDF`, `GDS`, `GDx/...`), [`references/gds-role-catalogue.md`](references/gds-role-catalogue.md) (use the role profile fetched during discovery; if it was not yet fetched during discovery, open `references/gds-role-catalogue.md` and fetch it directly from its URL now before generating topics).
 
 1. **Topic count from the backend instruction** (it is set per environment; default 4–6), most critical first. `save_topics_and_questions` rejects any other count.
 2. **Dedicated focus topics (hard):** every highlighted discovery focus topic gets at least one interview topic whose title and scope name that focus. Do not fold a named focus into a catch-all “role overview” topic. Closely related focuses may share a topic only when the topic title still names those focuses.
