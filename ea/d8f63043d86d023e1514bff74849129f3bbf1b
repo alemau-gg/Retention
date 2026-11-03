@@ -1,0 +1,19 @@
+handover-agent/how-the-agent-works.md
+  s_e22454439871cc::t_7510a7daabc286 355
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "ead8f63043d86d023e1514bff74849129f3bbf1b",
+  "prompts": {},
+  "sessions": {
+    "s_e22454439871cc": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "d054555a-5232-4804-9ee3-aec64b1cdcac",
+        "model": "gemini-4-argon"
+      },
+      "human_author": "Alessandro <281597100+alemau-gg@users.noreply.github.com>"
+    }
+  }
+}
