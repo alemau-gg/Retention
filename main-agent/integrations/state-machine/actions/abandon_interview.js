@@ -739,7 +739,7 @@ const KnowledgeRetentionUtils = {
         }
         return Object.assign(base, {
           nextAction: 'RunPreInterviewDiscovery',
-          instruction: `In ${language}, explain that ${M.discoveryIntro} and say: "${M.discoverySaveNotice}". Load the knowledge-retention-discovery-prefill skill and follow it. ${directorySentence} Treat every found value, including these, as a suggestion the user must confirm or correct. Invite the user to add anything the draft missed; skipping that is fine. Always ask the user for their focus topics as a separate question, even if you identified candidates; do not decide them yourself. Do not use any search results after discovery. Read back the full profile, get explicit confirmation, then call save_discovery.${supportingFileInstruction}`,
+          instruction: `In ${language}, explain that ${M.discoveryIntro} and say: "${M.discoverySaveNotice}". Load the knowledge-retention-discovery-prefill and knowledge-retention-interviewing skills and follow them. ${directorySentence} Treat every found value, including these, as a suggestion the user must confirm or correct. Invite the user to add anything the draft missed; skipping that is fine. Always ask the user for their focus topics as a separate question, even if you identified candidates; do not decide them yourself. Do not use any search results after discovery. Read back the full profile, get explicit confirmation, then call save_discovery.${supportingFileInstruction}`,
         });
       }
 
@@ -749,7 +749,7 @@ const KnowledgeRetentionUtils = {
           : '';
       return Object.assign(base, {
         nextAction: 'RunPreInterviewDiscovery',
-        instruction: `In ${language}, explain that ${M.discoveryIntro} and say: "${M.discoverySaveNotice}". Then run pre-interview discovery: role, organizational unit, responsibilities, tools, focus topics, and optionally KPIs/constraints. Ask conversationally; do not invent answers.${declinedSentence} Read the profile back, get explicit confirmation, then call save_discovery.${supportingFileInstruction}`,
+        instruction: `In ${language}, explain that ${M.discoveryIntro} and say: "${M.discoverySaveNotice}". Load the knowledge-retention-interviewing skill and run pre-interview discovery: role, organizational unit, responsibilities, tools, focus topics, and optionally KPIs/constraints. Ask conversationally; do not invent answers.${declinedSentence} Read the profile back, get explicit confirmation, then call save_discovery.${supportingFileInstruction}`,
       });
     }
 

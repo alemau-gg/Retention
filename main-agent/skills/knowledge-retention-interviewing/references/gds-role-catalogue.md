@@ -1,6 +1,6 @@
 # GD / Global Digital Services Role-Profile Catalogue
 
-Use this reference whenever the interviewee works in — or likely belongs to — **Global Digital Services (`GD`)**.
+Use this reference **during `RunPreInterviewDiscovery` (before `save_discovery`)** whenever the interviewee works in — or likely belongs to — **Global Digital Services (`GD`)**.
 
 ## Recognizing a GD employee (navigating naming uncertainty)
 
@@ -8,7 +8,7 @@ Employees rarely write out `"Global Digital Services"` or `"GDS"` in day-to-day 
 
 - **Common labels:** `"GD"`, `"Global Digital Services"`, `"Digital Services"`, or `"Digital Solutions"`.
 - **Org codes (in `directoryProfile.department`, email signatures, or user answers):** all GD units have an org code starting with **`GD`**, often followed by a third letter and a slash + sub-letter (e.g. `GD`, `GDA`, `GDB`, `GDD`, `GDE`, `GDF`, `GDS`, or `GDA/X`, `GDD/A`, etc. — note that `GDS` specifically is the Cyber Security sub-unit inside `GD`).
-- **When in doubt, check Page 2:** people often use informal job titles or team names instead of official HR conventions. As long as they are within `GD` (or their role sounds like a digital/IT/consulting role and their unit is unclear), **the role itself is the real discriminant**. Open the catalogue and check **Page 2**, which contains the overview of all available role profiles, to see if any role applies.
+- **When in doubt, check Page 2 during discovery:** people often use informal job titles or team names instead of official HR conventions. As long as they are within `GD` (or their role sounds like a digital/IT/consulting role and their unit is unclear), **the role itself is the real discriminant**. Open the catalogue during discovery and check **Page 2**, which contains the overview of all available role profiles, to see if any role applies.
 
 ## Purpose
 
@@ -16,29 +16,32 @@ The GDS Role-Profile Catalogue (`Updated_December_2025_Global-Role-Profile-Catal
 
 In the visual layout of the catalogue, each skill category has a dedicated color, and the detailed skill descriptions on a role's page are color-coded to match their category.
 
-Use this catalogue strictly as a **lens to weight and sharpen tacit-knowledge questions** for the interviewee's successor — never as a checklist of generic "hard skill" or HR career-reflection questions.
+Use this catalogue during **Discovery** (to understand the ideal role profile and ask targeted discovery follow-ups) and during **Question Generation** (as a lens to weight and sharpen tacit-knowledge questions for the successor — never as a checklist of generic "hard skill" or HR career-reflection questions).
 
 ---
 
-## Step 1 — Locate the role via Page 2 and read the role page
+## Step 1 — Fetch the catalogue via a single targeted request (NO searching)
 
-1. Access the exact file (via the CKR Company Context folder or SharePoint):
-   `Updated_December_2025_Global-Role-Profile-Catalogue_final.pdf`
+1. **Fetch during Discovery (`RunPreInterviewDiscovery`), before `save_discovery`:**
+   - As soon as you see that the interviewee is in `GD` (after prefill finishes or once they state their role/unit in standard discovery), fetch `Updated_December_2025_Global-Role-Profile-Catalogue_final.pdf` **once** during discovery so its profile informs your discovery follow-ups and is already in context when you later generate topics and questions.
+   - **NEVER run `search_files`, `search_sharepoint`, or `search_sites` to look for this file.**
+   - Use the direct SharePoint URL / ID configured below to fetch the file in a single targeted request (if a URL is provided below, resolve/fetch that exact URL directly; once resolved (`driveId` + `driveItemId` / `siteId` + `itemId`), pass those exact IDs to `get_file` in one call):
+     - **Catalogue URL:** `<INSERT_SHAREPOINT_URL_FOR_Updated_December_2025_Global-Role-Profile-Catalogue_final.pdf>`
 2. **Start with Page 2 (Role Overview) when the title is not an exact match:**
    - People frequently use working titles, project roles, or abbreviations that do not match HR naming conventions verbatim.
-   - Read **Page 2** of the PDF (the overview of all role profiles in the catalogue) alongside searching for their role title, and map their stated role and responsibilities to the closest profile(s) on Page 2.
+   - Read **Page 2** of the PDF (the overview of all role profiles in the catalogue) and map their stated role and responsibilities to the closest profile(s) on Page 2.
 3. **Be pragmatic, not overly rigid:**
-   - If one profile (or a combination of two profiles) on Page 2 clearly corresponds to what the person does, open and read the single page dedicated to that role profile.
-   - During discovery (`RunPreInterviewDiscovery`), if two profiles on Page 2 look plausible or their title is ambiguous, you can briefly ask a natural follow-up question to clarify which angle fits their actual seat better — do not demand that they know the exact HR catalogue title.
+   - If one profile (or a combination of two profiles) on Page 2 clearly corresponds to what the person does, read the single page dedicated to that role profile.
+   - During discovery (`RunPreInterviewDiscovery`), if two profiles on Page 2 look plausible or their title is ambiguous, ask a natural follow-up question during discovery to clarify which angle fits their actual seat better — do not demand that they know the exact HR catalogue title.
    - Do not read or summarize the entire PDF; stick to **Page 2 (overview)** and the **1–2 specific role-profile pages** that match.
 4. **If no role in the catalogue fits (or the file cannot be accessed):** do not force a match or invent a profile. Simply continue with the standard interviewing framework without the catalogue.
 5. **Keep it in the background:** do not lecture the interviewee about the catalogue or recite their official HR job description back to them. Use it as background context for discovery follow-ups and question design.
 
 ---
 
-## Step 2 — Extract the role's structure
+## Step 2 — Extract the role's structure (during Discovery)
 
-From the matched role-profile page, extract:
+From the matched role-profile page, extract and keep in mind for both discovery refinement and topic/question generation:
 
 - **Focus-area weights (percentages):** the split across Technical, Consulting, Strategy, Collaboration, Leadership (or the role's specific dimensions).
 - **Role description, responsibilities, and goals:** how the catalogue translates those focus areas into day-to-day expectations.
@@ -46,9 +49,13 @@ From the matched role-profile page, extract:
 - **Dimensions, specialization areas, and capability progression:** the capabilities and skills expected at *starting in the role*, *increasing expertise*, and *strong developed expertise* (color-coded by category to match the focus areas).
 - **Suitable next steps:** treat as low-priority background only, since the interviewee is leaving the role.
 
+During discovery, use this extracted profile to spot any obvious responsibilities or focus areas the interviewee hasn't mentioned yet and probe naturally before confirming and calling `save_discovery`.
+
 ---
 
 ## Step 3 — How this shapes Question Generation (`GenerateTopicsAndQuestions`)
+
+Do **not** re-fetch or search for the PDF during `GenerateTopicsAndQuestions` — use the role profile you already read during discovery.
 
 ### 1. Weighting the question mix
 - **Skew question allocation to match the role's focus-area percentages** (while still honoring the interviewee's named `focusTopics` as dedicated topics per rule 2 of `SKILL.md` and the backend topic/question count limits):
