@@ -25,6 +25,7 @@ const KnowledgeRetentionUtils = {
       // stable-user-ID column and must remain a text field until confirmed.
       userId: 'cr32c_aisuiteid',
       devInterview: 'cr32c_devinterview',
+      managerEmail: 'cr32c_manageremail',
       email: 'ckr_employeeemail',
       language: 'ckr_language',
       status: 'ckr_interviewstatus',
