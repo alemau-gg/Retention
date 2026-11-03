@@ -52,6 +52,8 @@ Live follow-ups are the system prompt (this skill is not loaded on `AskActiveQue
 
 When the backend instruction says to load `knowledge-retention-discovery-prefill`, follow that skill for the draft. Do not run the search yourself from this skill. This skill's thin-answer bar and field list still apply before save. With a draft, ask only for fields that are missing or below the bar, one at a time. Do not re-ask a field the user already confirmed or corrected in the draft. Focus topics are always asked.
 
+**GD / Digital Services interviewees:** if discovery (via `directoryProfile.department`, email signature, or the user's answer) indicates or suggests the interviewee is in **GD / Global Digital Services** (`"GD"`, `"Digital Services"`, `"Digital Solutions"`, or an org code starting with `GD` such as `GDA`–`GDF`, `GDS`, `GDx/...`), open [`references/gds-role-catalogue.md`](references/gds-role-catalogue.md) **during discovery (before `save_discovery`)** and follow it.
+
 **Focus topics, always:** ask for them as a separate question, in bold on its own line, in every discovery, with or without a draft, and even when candidates were already identified. Accepting a draft or a list of candidates does not answer it. Never infer focus topics from the other answers; save only the ones the user names or explicitly picks.
 
 Without a draft, collect one question at a time:
@@ -65,13 +67,11 @@ Without a draft, collect one question at a time:
 
 **Thin-answer bar (before save):** at least one named system/tool, one concrete responsibility (not “support the team”), and one focus topic. If thin → one probe, then continue. Do not invent. Conversational, not a form.
 
-**GD / Digital Services interviewees (`Global Digital Services`):** people in this division rarely say "GDS" — they may say **"GD"**, **"Digital Services"**, **"Digital Solutions"**, or carry an org code starting with **`GD`** (such as `GD`, `GDA`, `GDB`, `GDD`, `GDE`, `GDF`, `GDS`, or `GDx/...` in their `directoryProfile.department`, email signature, or business-unit answer; note that `GDS` specifically is the Cyber Security sub-unit within `GD`). Whenever discovery indicates or suggests they are in any `GD` unit (or in a digital/IT role where `GD` might apply), open [`references/gds-role-catalogue.md`](references/gds-role-catalogue.md) and follow it during discovery and topic generation.
-
 ## Generating topics and questions (`GenerateTopicsAndQuestions`)
 
 **Done when:** the number of topics and questions per topic given in the backend instruction, coverage checks pass, user saw the overview, then `save_topics_and_questions`. Do not ask interview questions before that save succeeds. After it succeeds, follow the returned instruction. When `nextAction` is `AskActiveQuestion`, ask `nextQuestionText` verbatim directly without a readiness confirmation or wait.
 
-**Inputs:** discovery profile; when present, CKR Company Context folder (ground topics there; do not invent org processes from training data); for GD / Global Digital Services interviewees, [`references/gds-role-catalogue.md`](references/gds-role-catalogue.md).
+**Inputs:** discovery profile (and the GD role profile already read during discovery when applicable); when present, CKR Company Context folder (ground topics there; do not invent org processes from training data).
 
 1. **Topic count from the backend instruction** (it is set per environment; default 4–6), most critical first. `save_topics_and_questions` rejects any other count.
 2. **Dedicated focus topics (hard):** every highlighted discovery focus topic gets at least one interview topic whose title and scope name that focus. Do not fold a named focus into a catch-all “role overview” topic. Closely related focuses may share a topic only when the topic title still names those focuses.
