@@ -1,0 +1,135 @@
+main-agent/integrations/state-machine/actions/get_runtime_state.js
+  s_e22454439871cc::t_3208663b6b6889 30
+main-agent/integrations/state-machine/actions/create_interview.js
+  s_e22454439871cc::t_5bce10dbec7945 1000-1020,1024-1026
+  s_e22454439871cc::t_84b7581ab1ae73 30
+main-agent/integrations/state-machine/actions/set_up_interview_folder.js
+  s_e22454439871cc::t_5d1b53f2f95b2a 1064-1077
+  s_e22454439871cc::t_c01ed641ceac92 30
+handover-agent/how-the-agent-works.md
+  s_e22454439871cc::t_cff5320bf11457 355
+main-agent/integrations/state-machine/actions/abandon_interview.js
+  s_e22454439871cc::t_18e06c7fadfec8 29
+main-agent/integrations/state-machine/actions/finalize_interview.js
+  s_e22454439871cc::t_f94bbf69c0972a 30
+main-agent/integrations/state-machine/actions/generate_final_document.js
+  s_e22454439871cc::t_f59862dd173141 30
+main-agent/integrations/state-machine/actions/generate_topic_document.js
+  s_e22454439871cc::t_7150e7636b1f05 30
+main-agent/integrations/state-machine/actions/get_answers.js
+  s_e22454439871cc::t_ae055142e7de10 29
+main-agent/integrations/state-machine/actions/get_discovery.js
+  s_e22454439871cc::t_ab8a875c084351 29
+main-agent/integrations/state-machine/actions/read_supporting_document.js
+  s_e22454439871cc::t_5e9b03b1082505 28
+main-agent/integrations/state-machine/actions/revise_answer.js
+  s_e22454439871cc::t_6809ccb6f1dab6 30
+main-agent/integrations/state-machine/actions/save_answer.js
+  s_e22454439871cc::t_cd8888ddf785d7 30
+main-agent/integrations/state-machine/actions/save_consent.js
+  s_e22454439871cc::t_05fefa9f7a9d6d 30
+main-agent/integrations/state-machine/actions/save_discovery.js
+  s_e22454439871cc::t_0e5c471d9bc090 30
+main-agent/integrations/state-machine/actions/save_feedback.js
+  s_e22454439871cc::t_bf00a3d083f557 30
+main-agent/integrations/state-machine/actions/save_final_document.js
+  s_e22454439871cc::t_1f036c69453abb 30
+main-agent/integrations/state-machine/actions/save_topic_summary.js
+  s_e22454439871cc::t_2a8287830149be 30
+main-agent/integrations/state-machine/actions/save_topics_and_questions.js
+  s_e22454439871cc::t_9dd04eb985846b 30
+main-agent/integrations/state-machine/actions/upload_document.js
+  s_e22454439871cc::t_a16a8b70e759ea 30
+repackaged-integrations/latest/state-machine/actions/abandon_interview/latest/code.js
+  s_e22454439871cc::t_bb169114d4784a 29
+repackaged-integrations/latest/state-machine/actions/create_interview/latest/code.js
+  s_e22454439871cc::t_07c257d6f40d37 30,1000-1020,1024-1026
+repackaged-integrations/latest/state-machine/actions/finalize_interview/latest/code.js
+  s_e22454439871cc::t_0d3e8eb4dfa8b9 30
+repackaged-integrations/latest/state-machine/actions/generate_final_document/latest/code.js
+  s_e22454439871cc::t_b6fa03e5092823 30
+repackaged-integrations/latest/state-machine/actions/generate_topic_document/latest/code.js
+  s_e22454439871cc::t_a939130c6b0b0f 30
+repackaged-integrations/latest/state-machine/actions/get_answers/latest/code.js
+  s_e22454439871cc::t_0670bef52150e1 29
+repackaged-integrations/latest/state-machine/actions/get_discovery/latest/code.js
+  s_e22454439871cc::t_7f1ba8e526ebc4 29
+repackaged-integrations/latest/state-machine/actions/get_runtime_state/latest/code.js
+  s_e22454439871cc::t_6fca59885db103 30
+repackaged-integrations/latest/state-machine/actions/read_supporting_document/latest/code.js
+  s_e22454439871cc::t_eeb3429ba26cb0 28
+repackaged-integrations/latest/state-machine/actions/revise_answer/latest/code.js
+  s_e22454439871cc::t_2b2f3dc5340137 30
+repackaged-integrations/latest/state-machine/actions/save_answer/latest/code.js
+  s_e22454439871cc::t_71e3cab410e92c 30
+repackaged-integrations/latest/state-machine/actions/save_consent/latest/code.js
+  s_e22454439871cc::t_fe7c2d519eeaa7 30
+repackaged-integrations/latest/state-machine/actions/save_discovery/latest/code.js
+  s_e22454439871cc::t_f2c0d9f6a94738 30
+repackaged-integrations/latest/state-machine/actions/save_feedback/latest/code.js
+  s_e22454439871cc::t_48ccf7d376f340 30
+repackaged-integrations/latest/state-machine/actions/save_final_document/latest/code.js
+  s_e22454439871cc::t_6f91032604b8c2 30
+repackaged-integrations/latest/state-machine/actions/save_topic_summary/latest/code.js
+  s_e22454439871cc::t_65670de6a7de82 30
+repackaged-integrations/latest/state-machine/actions/save_topics_and_questions/latest/code.js
+  s_e22454439871cc::t_039a2e1c1889ec 30
+repackaged-integrations/latest/state-machine/actions/set_up_interview_folder/latest/code.js
+  s_e22454439871cc::t_9c4e40ffd58cc1 30,1064-1077
+repackaged-integrations/latest/state-machine/actions/upload_document/latest/code.js
+  s_e22454439871cc::t_d99e84866edfc2 30
+repackaged-integrations/v1/state-machine/actions/abandon_interview/v1/code.js
+  s_e22454439871cc::t_6fc4031c9c2edd 29
+repackaged-integrations/v1/state-machine/actions/create_interview/v1/code.js
+  s_e22454439871cc::t_0c42d341874ea4 30,1000-1020,1024-1026
+repackaged-integrations/v1/state-machine/actions/finalize_interview/v1/code.js
+  s_e22454439871cc::t_d44c3f5881964d 30
+repackaged-integrations/v1/state-machine/actions/generate_final_document/v1/code.js
+  s_e22454439871cc::t_3173b8b86bc3de 30
+repackaged-integrations/v1/state-machine/actions/generate_topic_document/v1/code.js
+  s_e22454439871cc::t_8d41e5b71a789c 30
+repackaged-integrations/v1/state-machine/actions/get_answers/v1/code.js
+  s_e22454439871cc::t_1574e1864e32d3 29
+repackaged-integrations/v1/state-machine/actions/get_discovery/v1/code.js
+  s_e22454439871cc::t_7d5e2869874ff6 29
+repackaged-integrations/v1/state-machine/actions/get_runtime_state/v1/code.js
+  s_e22454439871cc::t_41fe60e3932a8f 30
+repackaged-integrations/v1/state-machine/actions/read_supporting_document/v1/code.js
+  s_e22454439871cc::t_8d67406d963517 28
+repackaged-integrations/v1/state-machine/actions/revise_answer/v1/code.js
+  s_e22454439871cc::t_93c8db2451b888 30
+repackaged-integrations/v1/state-machine/actions/save_answer/v1/code.js
+  s_e22454439871cc::t_c29c5025d9cfdd 30
+repackaged-integrations/v1/state-machine/actions/save_consent/v1/code.js
+  s_e22454439871cc::t_3023c4ca8120bb 30
+repackaged-integrations/v1/state-machine/actions/save_discovery/v1/code.js
+  s_e22454439871cc::t_c852d9a7d33c9b 30
+repackaged-integrations/v1/state-machine/actions/save_feedback/v1/code.js
+  s_e22454439871cc::t_fcc401f19a7d71 30
+repackaged-integrations/v1/state-machine/actions/save_final_document/v1/code.js
+  s_e22454439871cc::t_1de0ecc66bbff3 30
+repackaged-integrations/v1/state-machine/actions/save_topic_summary/v1/code.js
+  s_e22454439871cc::t_f98e6a8ab7534e 30
+repackaged-integrations/v1/state-machine/actions/save_topics_and_questions/v1/code.js
+  s_e22454439871cc::t_e9a3a35c8d9e72 30
+repackaged-integrations/v1/state-machine/actions/set_up_interview_folder/v1/code.js
+  s_e22454439871cc::t_ede654cd72c54e 30,1064-1077
+repackaged-integrations/v1/state-machine/actions/upload_document/v1/code.js
+  s_e22454439871cc::t_7ef8e956de2020 30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "d778e0e6c11119aa7992d6865203ee247cae0c5d",
+  "prompts": {},
+  "sessions": {
+    "s_e22454439871cc": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "d054555a-5232-4804-9ee3-aec64b1cdcac",
+        "model": "gemini-4-argon"
+      },
+      "human_author": "Alessandro <281597100+alemau-gg@users.noreply.github.com>"
+    }
+  }
+}
