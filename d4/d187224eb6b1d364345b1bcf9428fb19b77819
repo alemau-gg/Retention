@@ -1,0 +1,23 @@
+main-agent/skills/knowledge-retention-interviewing/references/gds-role-catalogue.md
+  s_e22454439871cc::t_f48ecfb0726d79 1-6,8-16,18,20-23,26-30,32-34,38-40,42,44,46-56,66
+  s_e22454439871cc::t_587771701bfc9c 7,17,19,24-25,31,35-37,41,43,45,57-65
+main-agent/skills/knowledge-retention-interviewing/SKILL.md
+  s_e22454439871cc::t_66e34dd07f3619 69
+  s_e22454439871cc::t_c4ff551574b66b 68,74
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "d4d187224eb6b1d364345b1bcf9428fb19b77819",
+  "prompts": {},
+  "sessions": {
+    "s_e22454439871cc": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "d054555a-5232-4804-9ee3-aec64b1cdcac",
+        "model": "gemini-4-argon"
+      },
+      "human_author": "Alessandro <281597100+alemau-gg@users.noreply.github.com>"
+    }
+  }
+}
