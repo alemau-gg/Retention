@@ -394,7 +394,16 @@ const KnowledgeRetentionUtils = {
       });
       return result && result.value ? result.value : [];
     };
-    const withStatus = (filter) => (statusFilter ? `${filter} and ${statusFilter}` : filter);
+    // DEV/test and production connections can share one Dataverse environment.
+    // Scope every lookup to this connection's mode so a DEV session never
+    // resumes, claims or blocks on a production interview (and vice versa).
+    // Production also matches null: rows created before cr32c_devinterview
+    // existed never had it written and must stay visible.
+    const modeFilter = KnowledgeRetentionUtils.isDevInterview(data)
+      ? `${S.interview.devInterview} eq true`
+      : `(${S.interview.devInterview} eq false or ${S.interview.devInterview} eq null)`;
+    const withStatus = (filter) =>
+      statusFilter ? `${filter} and ${modeFilter} and ${statusFilter}` : `${filter} and ${modeFilter}`;
 
     if (identity.userId) {
       const safeUserId = KnowledgeRetentionUtils.escapeODataLiteral(identity.userId);
@@ -888,9 +897,10 @@ const KnowledgeRetentionUtils = {
     return slug ? `Topic-${n}-${slug}.docx` : `Topic-${n}.docx`;
   },
 
-  // The tagTestFolders connection field marks test interviews in Dataverse and
-  // prefixes their SharePoint folder names. Changing it mid-interview splits
-  // that interview's files.
+  // The tagTestFolders connection field marks test interviews in Dataverse,
+  // prefixes their SharePoint folder names, and scopes interview lookups to
+  // DEV or production rows. Changing it mid-interview hides that interview
+  // from the connection.
   isDevInterview(data) {
     return String((data.auth && data.auth.tagTestFolders) || '').trim().toLowerCase() === 'true';
   },
