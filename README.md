@@ -17,4 +17,6 @@ Knowledge Retention agent sources, split by agent.
   - `skills/` — `knowledge-retention-contributing`, `debug-agent`
   - `integrations/coding-tools/` — promote / revert / sync / verify helpers
 
+- **`workflows/`** — scheduled Langdock workflows (manager completion notice, employee reminders) built on the Admin integration; see its README
+
 Skill folder names and action filenames match Langdock; do not rename them.

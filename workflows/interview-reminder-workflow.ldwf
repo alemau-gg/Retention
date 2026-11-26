@@ -1,0 +1,666 @@
+{
+  "schema": "ldwf",
+  "version": 1,
+  "name": "Interview reminder workflow",
+  "meta": {
+    "exportedAt": "2026-11-26T14:07:04.476Z",
+    "exporter": "client"
+  },
+  "graph": {
+    "nodes": [
+      {
+        "type": "code",
+        "data": {
+          "executionId": null,
+          "errorHandling": {
+            "strategy": "stop"
+          },
+          "disabled": false,
+          "name": "Code",
+          "slug": "code",
+          "language": "javascript",
+          "code": "const row = forEachInterview.output.currentItem;\nconst rawReminder = row.cr32c_reminder;\nconst reminderStage = (rawReminder === null || rawReminder === undefined) ? 0 : Number(rawReminder);\nconst status = row.ckr_interviewstatus;\nconst lang = (row.ckr_language || 'en').toLowerCase().slice(0, 2);\nconst totalQ = (row.ckr_totalquestions == null) ? null : Number(row.ckr_totalquestions);\nconst answeredQ = (row.ckr_answeredquestions == null) ? 0 : Number(row.ckr_answeredquestions);\nconst leftQ = (totalQ != null) ? Math.max(0, totalQ - answeredQ) : null;\nconst approxMin = (leftQ != null) ? (leftQ * 7) : null;\nfunction normalizeName(value) {\nreturn String(value || '').trim().replace(/\\s+/g, ' ').split(' ').map(function(part) {\nreturn part ? part.charAt(0).toUpperCase() + part.slice(1).toLowerCase() : part;\n}).join(' ');\n}\nconst fullName = normalizeName(row.ckr_employeedisplayname);\nconst firstName = fullName.split(' ')[0] || '';\nfunction qWord(n, l) {\nif (l === 'de') return n === 1 ? 'Frage' : 'Fragen';\nif (l === 'zh') return '\\u4E2A\\u95EE\\u9898';\nif (l === 'fr') return n === 1 ? 'question' : 'questions';\nif (l === 'es') return n === 1 ? 'pregunta' : 'preguntas';\nif (l === 'pt') return n === 1 ? 'pergunta' : 'perguntas';\nreturn n === 1 ? 'question' : 'questions';\n}\nfunction minuteWord(n, l) {\nif (l === 'de') return n === 1 ? 'Minute' : 'Minuten';\nif (l === 'zh') return '\\u5206\\u949F';\nif (l === 'fr') return n === 1 ? 'minute' : 'minutes';\nif (l === 'es') return n === 1 ? 'minuto' : 'minutos';\nif (l === 'pt') return n === 1 ? 'minuto' : 'minutos';\nreturn n === 1 ? 'minute' : 'minutes';\n}\nconst theLang = (['en','de','zh','fr','es','pt'].indexOf(lang) >= 0) ? lang : 'en';\nfunction greetingAndTeamIntro(name) {\nvar g = {\nen: 'Hi {n}! Knowledge Retention team here \\uD83D\\uDC4B',\nde: 'Hallo {n}! Hier ist das Knowledge Retention Team \\uD83D\\uDC4B',\nzh: '{n}\\uFF0C\\u4F60\\u597D\\uFF01Knowledge Retention \\u56E2\\u961F\\u5728\\u8FD9\\u91CC \\uD83D\\uDC4B',\nfr: 'Bonjour {n} ! C\\u2019est l\\u2019\\u00E9quipe Knowledge Retention \\uD83D\\uDC4B',\nes: '\\u00A1Hola {n}! Aqu\\u00ED el equipo de Knowledge Retention \\uD83D\\uDC4B',\npt: 'Ol\\u00E1 {n}! Aqui \\u00E9 a equipe Knowledge Retention \\uD83D\\uDC4B',\n};\nvar t = g[theLang] || g['en'];\nif (name) return t.replace('{n}', name);\nreturn t.replace('{n}', '').replace('!', '').trim() + '!';\n}\nfunction noticedText() {\nif (status === 60) {\nreturn t({\nen: 'We noticed your interview is almost done - just one last step!',\nde: 'Wir haben gesehen, dass dein Interview fast fertig ist - nur noch ein Schritt!',\nzh: '我们发现你的访谈快完成了 - 只剩最后一步！',\nfr: 'On a vu que ton entretien est presque terminé - plus qu\\'une étape !',\nes: 'Notamos que tu entrevista está casi lista - ¡solo un paso más!',\npt: 'Vimos que sua entrevista está quase pronta - só mais um passo!',\n});\n} else if (status === 10) {\nreturn t({\nen: 'We noticed you started your interview and stepped away. No worries - just pick up where you left off!',\nde: 'Wir haben gesehen, dass du dein Interview begonnen und dann unterbrochen hast. Kein Problem - mach einfach weiter!',\nzh: '我们发现你已经开始了访谈，但暂时离开了。别担心 - 从你停下的地方继续吧！',\nfr: 'On a vu que tu as commencé ton entretien, mais que tu as dû t\\'arrêter. Pas de souci - reprends là où tu en étais !',\nes: 'Notamos que empezaste tu entrevista y te fuiste. Sin problema - ¡retómala desde donde la dejaste!',\npt: 'Vimos que você começou sua entrevista, mas precisou parar. Sem problema - continue de onde parou!',\n});\n} else if (status === 20 || status === 25) {\nreturn t({\nen: 'We noticed your topics and questions are all set - ready to dive in?',\nde: 'Wir haben gesehen, dass deine Themen und Fragen bereit sind - bereit einzusteigen?',\nzh: '我们发现你的主题和问题都已就绪 - 准备开始了吗？',\nfr: 'On a vu que tes sujets et questions sont prêts - prêt à te lancer ?',\nes: 'Notamos que tus temas y preguntas están listos - ¿listo para empezar?',\npt: 'Vimos que seus tópicos e perguntas estão prontos - pronto para começar?',\n});\n} else if (status === 30) {\nif (reminderStage === 0) {\nreturn t({\nen: 'We noticed your interview is still in progress - don\\'t let your insights go to waste!',\nde: 'Wir haben gesehen, dass dein Interview noch läuft - lass deine Erkenntnisse nicht verfallen!',\nzh: '我们发现你的访谈仍在进行 - 别让你的见解白费了！',\nfr: 'On a vu que ton entretien est toujours en cours - ne laisse pas tes idées se perdre !',\nes: 'Notamos que tu entrevista aún está en curso - ¡no dejes que tus conocimientos se pierdan!',\npt: 'Vimos que sua entrevista ainda está em andamento - não deixe seus conhecimentos e experiências se perderem!',\n});\n} else if (reminderStage === 1) {\nreturn t({\nen: 'We noticed your interview is still open - your experience matters!',\nde: 'Wir haben gesehen, dass dein Interview noch offen ist - deine Erfahrung zählt!',\nzh: '我们发现你的访谈仍然开放 - 你的经验很重要！',\nfr: 'On a vu que ton entretien est toujours ouvert - ton expérience compte !',\nes: 'Notamos que tu entrevista sigue abierta - ¡tu experiencia importa!',\npt: 'Vimos que sua entrevista ainda está aberta - sua experiência é importante!',\n});\n} else {\nreturn t({\nen: 'We\\'ve noticed your interview is still unfinished - this is our last nudge!',\nde: 'Wir haben gesehen, dass dein Interview noch nicht abgeschlossen ist - das ist unser letzter Hinweis!',\nzh: '我们发现你的访谈仍未完成 - 这是我们最后一次提醒！',\nfr: 'On a vu que ton entretien n\\'est pas encore terminé - c\\'est notre dernier rappel !',\nes: 'Notamos que tu entrevista aún no está terminada - ¡este es nuestro último aviso!',\npt: 'Vimos que sua entrevista ainda não está terminada - este é nosso último lembrete!',\n});\n}\n}\nreturn '';\n}\nfunction t(obj) { return obj[theLang] || obj['en']; }\nvar effortLine = '';\nif (leftQ != null && leftQ > 0) {\nvar qCount = (theLang === 'zh' ? '' : ' ') + qWord(leftQ, theLang);\nqCount = leftQ + qCount;\nif (approxMin < 30) {\nvar qMin = approxMin + ' ' + minuteWord(approxMin, theLang);\neffortLine = t({\nen: 'Only ' + qCount + ' left - about ' + qMin + '. You\\'ve got this!',\nde: 'Nur noch ' + qCount + ', ungefähr ' + qMin + '. Du schaffst das!',\nzh: '只剩' + qCount + '，大约' + qMin + '。你能行！',\nfr: 'Plus que ' + qCount + ', environ ' + qMin + '. Tu vas y arriver !',\nes: 'Solo te quedan ' + qCount + ', unos ' + qMin + '. ¡Tú puedes!',\npt: 'Faltam ' + qCount + '. Você consegue!',\n});\n} else {\neffortLine = t({\nen: 'You have ' + qCount + ' to go. No rush - you can answer them across multiple sessions.',\nde: 'Du hast noch ' + qCount + '. Kein Stress - du kannst sie auf mehrere Sitzungen verteilen.',\nzh: '你还有' + qCount + '要回答。你可以分几次完成。',\nfr: 'Il te reste ' + qCount + '. Pas de pression - tu peux les répartir sur plusieurs sessions.',\nes: 'Te quedan ' + qCount + ' por responder. Sin prisas - puedes hacerlo en varias sesiones.',\npt: 'Você ainda tem ' + qCount + ' para responder. Você pode responder em várias sessões, sem pressa.',\n});\n}\n}\nvar subject = '', emoji = '', headline = '', body1 = '', cta = '', note = '';\nif (status === 60) {\nsubject = t({ en: 'One last thing!', de: 'Noch eine letzte Sache!', zh: '最后一件事！', fr: 'Une dernière chose !', es: '¡Una última cosa!', pt: 'Uma última coisa!' });\nemoji = '🏁';\nheadline = t({ en: 'You\\'re almost at the finish line!', de: 'Du bist fast am Ziel!', zh: '你快要到终点了！', fr: 'Tu es presque à la ligne d\\'arrivée !', es: '¡Ya casi estás en la meta!', pt: 'Você está quase na linha de chegada!' });\nbody1 = t({ en: 'The last step is for our AI to create a summary of everything you shared. You just need to review and approve it - it takes about 5 to 10 minutes.', de: 'Im letzten Schritt erstellt unsere KI eine Zusammenfassung deiner Antworten. Du musst sie nur noch prüfen und freigeben - die Prüfung und Freigabe dauern etwa 5 bis 10 Minuten.', zh: '最后一步，AI 会生成摘要，你只需查看和批准。只需 5 到 10 分钟。', fr: 'Notre IA va créer un résumé, il ne te reste plus qu\\'à le valider. Cela prend 5 à 10 minutes.', es: 'Nuestra IA creará un resumen, solo tienes que revisarlo y aprobarlo. Toma solo 5 a 10 minutos.', pt: 'Nossa IA vai criar um resumo, e você só precisa revisá-lo e aprová-lo. Isso leva de 5 a 10 minutos.' });\ncta = t({ en: 'Review your summary', de: 'Zusammenfassung prüfen', zh: '查看摘要', fr: 'Valider le résumé', es: 'Revisar resumen', pt: 'Revisar resumo' });\nnote = t({ en: 'You can split this across sessions if you prefer.', de: 'Du kannst die Prüfung und Freigabe auf mehrere Sitzungen verteilen.', zh: '你可以分几次完成。', fr: 'Tu peux le répartir sur plusieurs sessions.', es: 'Puedes dividirlo en varias sesiones si prefieres.', pt: 'Você pode fazer isso em várias sessões, se preferir.' });\n} else if (status === 10) {\nsubject = t({ en: 'Your interview is waiting!', de: 'Dein Interview wartet!', zh: '你的访谈在等你！', fr: 'Ton entretien t\\'attend !', es: '¡Tu entrevista te espera!', pt: 'Sua entrevista está esperando por você!' });\nemoji = '👋';\nheadline = t({ en: 'You\\'re on your way - keep going!', de: 'Du bist auf einem guten Weg - mach weiter!', zh: '你已经开始了，继续完成访谈吧！', fr: 'Tu es sur la bonne voie - continue !', es: 'Vas por buen camino - ¡sigue así!', pt: 'Você já começou - continue sua entrevista!' });\nbody1 = t({ en: 'Your progress is saved. Pick up where you left off.', de: 'Dein Fortschritt ist gespeichert. Mach einfach da weiter, wo du aufgehört hast.', zh: '你的进度已保存。从你停下的地方继续吧。', fr: 'Ta progression est sauvegardée. Reprends là où tu en étais.', es: 'Tu progreso está guardado. Sigue desde donde lo dejaste.', pt: 'Seu progresso está salvo. Continue de onde parou.' });\ncta = t({ en: 'Pick up where you left off', de: 'Weitermachen', zh: '继续', fr: 'Reprendre', es: 'Seguir desde donde lo dejaste', pt: 'Continuar de onde parou' });\nnote = '';\n} else if (status === 20 || status === 25) {\nsubject = t({ en: 'Ready when you are!', de: 'Bereit, wenn du es bist!', zh: '随时准备就绪！', fr: 'Prêt quand tu veux !', es: '¡Listo cuando tú quieras!', pt: 'Pronto quando você quiser!' });\nemoji = '🚀';\nheadline = t({ en: 'Your interview questions are ready!', de: 'Deine Interviewfragen sind bereit!', zh: '你的访谈问题已准备就绪！', fr: 'Tes questions d\\'entretien sont prêtes !', es: '¡Tus preguntas de la entrevista están listas!', pt: 'As perguntas da sua entrevista estão prontas!' });\nbody1 = t({ en: 'You crushed the first steps! Your topics and questions are all set up and ready to go.', de: 'Du hast die ersten Schritte gemeistert! Deine Themen und Fragen stehen bereit.', zh: '你已经完成了第一步！你的主题和问题都已准备好。', fr: 'Tu as géré les premières étapes ! Tes sujets et questions sont prêtes.', es: '¡Dominaste los primeros pasos! Tus temas y preguntas están listos para empezar.', pt: 'Você concluiu os primeiros passos! Seus tópicos e perguntas estão prontos.' });\ncta = t({ en: 'Start answering', de: 'Los geht\\'s', zh: '开始回答', fr: 'C\\'est parti', es: 'Empezar a responder', pt: 'Começar a responder' });\nnote = t({ en: 'Answer a few now and come back later. No rush.', de: 'Beantworte ein paar und komm später zurück.', zh: '先回答几个，稍后再回来。', fr: 'Réponds-en quelques-unes et reviens plus tard.', es: 'Responde algunas ahora y vuelve luego. Sin prisas.', pt: 'Responda a algumas agora e volte mais tarde. Sem pressa.' });\n} else if (status === 30) {\nif (reminderStage === 0) {\nsubject = t({ en: 'Your interview is waiting!', de: 'Dein Interview wartet!', zh: '你的访谈在等你！', fr: 'Ton entretien t\\'attend !', es: '¡Tu entrevista te espera!', pt: 'Sua entrevista está esperando por você!' });\nemoji = '⏳';\nheadline = t({ en: 'There\\'s more to share!', de: 'Es gibt noch mehr zu erzählen!', zh: '还有更多可以分享！', fr: 'Il y a encore des choses à partager !', es: '¡Hay más por compartir!', pt: 'Você ainda tem mais a compartilhar!' });\nbody1 = t({ en: 'Your insights are too valuable to leave half-finished - jump back in and finish strong!', de: 'Deine Erkenntnisse sind zu wertvoll, um sie halb fertig zu lassen - mach weiter und bring es zu Ende!', zh: '你的见解太宝贵了，不能半途而废。', fr: 'Tes idées sont trop précieuses pour rester à moitié finies !', es: 'Tus conocimientos son demasiado valiosos como para dejarlos a medias - ¡retómala y termina con fuerza!', pt: 'Seus conhecimentos e experiências são valiosos. Retome de onde parou e continue quando puder.' });\n} else if (reminderStage === 1) {\nsubject = t({ en: 'Still waiting - for you!', de: 'Wartet noch - auf dich!', zh: '还在等你！', fr: 'Toujours là pour toi !', es: '¡Sigue esperándote!', pt: 'Ainda esperando por você!' });\nemoji = '👌';\nheadline = t({ en: 'A friendly reminder ✨', de: 'Eine freundliche Erinnerung ✨', zh: '一个友好的提醒 ✨', fr: 'Un petit rappel amical ✨', es: 'Un recordatorio amistoso ✨', pt: 'Um lembrete amigável ✨' });\nbody1 = t({ en: 'Don\\'t let your experience go undocumented.', de: 'Lass deine Erfahrung nicht ungeteilt.', zh: '别让你的经验得不到记录。', fr: 'Ne laisse pas ton expérience sans témoignage.', es: 'No dejes que tu experiencia quede sin documentar.', pt: 'Não deixe sua experiência sem ser registrada.' });\n} else {\nsubject = t({ en: 'Last call!', de: 'Letzte Chance!', zh: '最后机会！', fr: 'Dernier appel !', es: '¡Última llamada!', pt: 'Última chamada!' });\nemoji = '🫂';\nheadline = t({ en: 'This is the last time we\\'ll reach out.', de: 'Wir melden uns kein weiteres Mal.', zh: '这是最后一次了。', fr: 'C\\'est la dernière fois qu\\'on t\\'écrit.', es: 'Esta es la última vez que te escribimos.', pt: 'Esta é a última vez que entraremos em contato.' });\nbody1 = t({ en: 'It would be a real shame to let your knowledge slip away unanswered. What you know matters - take a few minutes to finish your interview.', de: 'Es wäre eine echte Schande, dein Wissen unbeantwortet zu verlieren. Was du weißt, zählt - nimm dir ein paar Minuten, um dein Interview zu beenden.', zh: '让你的知识得不到回答而流失，将是一个真正的遗憾。你的知识很重要。', fr: 'Ce serait dommage de laisser tes connaissances disparaître sans réponse. Ce que tu sais compte - prends quelques minutes pour finir ton entretien.', es: 'Sería una pena que tu conocimiento se perdiera sin respuesta. Lo que sabes importa - tómate unos minutos para terminar tu entrevista.', pt: 'Seria uma pena deixar seu conhecimento se perder sem resposta. O que você sabe é importante - reserve alguns minutos para terminar sua entrevista.' });\n}\ncta = t({ en: 'Jump back in', de: 'Weitermachen', zh: '继续', fr: 'Reprendre', es: 'Continuar', pt: 'Continuar' });\n}\nvar bodySections = '';\nif (body1) bodySections += '<tr><td style=\"padding:0 40px 0;\"><p style=\"margin:0 0 16px;font-size:15px;line-height:1.7;color:#3d3d3d;\">' + body1 + '</p></td></tr>';\nif (effortLine) bodySections += '<tr><td style=\"padding:0 40px 0;\"><p style=\"margin:0 0 16px;font-size:15px;line-height:1.7;color:#3d3d3d;\">' + effortLine + '</p></td></tr>';\nvar greetingLine = greetingAndTeamIntro(firstName);\nvar noticed = noticedText();\nvar html = '<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><!--[if mso]><style type=\"text/css\">body,table,td,p,a{font-family:Helvetica,Arial,sans-serif!important}</style><![endif]--></head>' +\n'<body style=\"margin:0;padding:0;background-color:#f2f4f7;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;\">' +\n'<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#f2f4f7;\">' +\n'<tr><td align=\"center\" style=\"padding:40px 16px;\">' +\n'<table width=\"560\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#ffffff;border-radius:12px;overflow:hidden;max-width:560px;box-shadow:0 2px 12px rgba(0,0,0,0.06);\">' +\n'<tr><td style=\"background-color:#004a96;padding:28px 40px 22px;\">' +\n'<table width=\"100%\"><tr>' +\n'<td style=\"vertical-align:middle;color:#ffffff;font-size:14px;\">[Logo]</td>' +\n'</tr></table>' +\n'</td></tr>' +\n'<tr><td style=\"height:4px;background-color:#21a0d2;font-size:0;line-height:0;\">&nbsp;</td></tr>' +\n'<tr><td style=\"padding:36px 40px 0;font-size:48px;line-height:1;\">' + emoji + '</td></tr>' +\n'<tr><td style=\"padding:12px 40px 0;\"><h1 style=\"margin:0;font-size:22px;font-weight:700;color:#004a96;line-height:1.35;letter-spacing:-0.01em;\">' + headline + '</h1></td></tr>' +\n'<tr><td style=\"padding:16px 40px 0;\"><table cellpadding=\"0\" cellspacing=\"0\"><tr><td style=\"height:3px;width:40px;background-color:#21a0d2;border-radius:2px;font-size:0;line-height:0;\">&nbsp;</td></tr></table></td></tr>' +\n'<tr><td style=\"padding:18px 40px 0;\"><p style=\"margin:0;font-size:16px;font-weight:500;color:#1a1a1a;line-height:1.5;\">' + greetingLine + '</p></td></tr>' +\n'<tr><td style=\"padding:0 40px 12px;\"><p style=\"margin:0 0 16px;font-size:15px;line-height:1.7;color:#3d3d3d;\">' + noticed + '</p></td></tr>' +\nbodySections +\n'<tr><td style=\"padding:24px 40px 0;\"><table cellpadding=\"0\" cellspacing=\"0\" style=\"margin:0;\"><tr><td style=\"background-color:#004a96;border-radius:50px;padding:0;\"><a href=\"https://aisuite.basf.net/chat?a=ea66c669-a5d1-4c43-b998-5f306d9c4a58\" style=\"display:inline-block;padding:14px 32px;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;letter-spacing:0.01em;\">' + cta + ' &nbsp;→</a></td></tr></table></td></tr>' +\n(note ? '<tr><td style=\"padding:18px 40px 0;\"><p style=\"margin:0;font-size:13px;line-height:1.6;color:#8e929b;\">' + note + '</p></td></tr>' : '') +\n'<tr><td style=\"height:40px;font-size:0;line-height:0;\">&nbsp;</td></tr>' +\n'<tr><td style=\"background-color:#f7f9fb;padding:20px 40px;border-top:1px solid #e8ecf0;\">' +\n'<table width=\"100%\"><tr>' +\n'<td style=\"vertical-align:middle;\"><p style=\"margin:0;font-size:12px;color:#8e929b;line-height:1.5;\"><span style=\"font-weight:600;color:#6b6f78;\">Knowledge Retention</span></p></td>' +\n'</tr></table>' +\n'</td></tr>' +\n'</table>' +\n'</td></tr>' +\n'</table></body></html>';\nreturn {\nsubject: subject, html: html,\nemployeeEmail: row.ckr_employeeemail || '',\nemployeeFullName: fullName, employeeFirstName: firstName,\nlanguageUsed: theLang, interviewStatus: status,\nreminderStage: reminderStage, questionsLeft: leftQ, approximateMinutes: approxMin\n};",
+          "codeByLanguage": {
+            "javascript": "const row = forEachInterview.output.currentItem;\nconst rawReminder = row.cr32c_reminder;\nconst reminderStage = (rawReminder === null || rawReminder === undefined) ? 0 : Number(rawReminder);\nconst status = row.ckr_interviewstatus;\nconst lang = (row.ckr_language || 'en').toLowerCase().slice(0, 2);\nconst totalQ = (row.ckr_totalquestions == null) ? null : Number(row.ckr_totalquestions);\nconst answeredQ = (row.ckr_answeredquestions == null) ? 0 : Number(row.ckr_answeredquestions);\nconst leftQ = (totalQ != null) ? Math.max(0, totalQ - answeredQ) : null;\nconst approxMin = (leftQ != null) ? (leftQ * 7) : null;\nfunction normalizeName(value) {\nreturn String(value || '').trim().replace(/\\s+/g, ' ').split(' ').map(function(part) {\nreturn part ? part.charAt(0).toUpperCase() + part.slice(1).toLowerCase() : part;\n}).join(' ');\n}\nconst fullName = normalizeName(row.ckr_employeedisplayname);\nconst firstName = fullName.split(' ')[0] || '';\nfunction qWord(n, l) {\nif (l === 'de') return n === 1 ? 'Frage' : 'Fragen';\nif (l === 'zh') return '\\u4E2A\\u95EE\\u9898';\nif (l === 'fr') return n === 1 ? 'question' : 'questions';\nif (l === 'es') return n === 1 ? 'pregunta' : 'preguntas';\nif (l === 'pt') return n === 1 ? 'pergunta' : 'perguntas';\nreturn n === 1 ? 'question' : 'questions';\n}\nfunction minuteWord(n, l) {\nif (l === 'de') return n === 1 ? 'Minute' : 'Minuten';\nif (l === 'zh') return '\\u5206\\u949F';\nif (l === 'fr') return n === 1 ? 'minute' : 'minutes';\nif (l === 'es') return n === 1 ? 'minuto' : 'minutos';\nif (l === 'pt') return n === 1 ? 'minuto' : 'minutos';\nreturn n === 1 ? 'minute' : 'minutes';\n}\nconst theLang = (['en','de','zh','fr','es','pt'].indexOf(lang) >= 0) ? lang : 'en';\nfunction greetingAndTeamIntro(name) {\nvar g = {\nen: 'Hi {n}! Knowledge Retention team here \\uD83D\\uDC4B',\nde: 'Hallo {n}! Hier ist das Knowledge Retention Team \\uD83D\\uDC4B',\nzh: '{n}\\uFF0C\\u4F60\\u597D\\uFF01Knowledge Retention \\u56E2\\u961F\\u5728\\u8FD9\\u91CC \\uD83D\\uDC4B',\nfr: 'Bonjour {n} ! C\\u2019est l\\u2019\\u00E9quipe Knowledge Retention \\uD83D\\uDC4B',\nes: '\\u00A1Hola {n}! Aqu\\u00ED el equipo de Knowledge Retention \\uD83D\\uDC4B',\npt: 'Ol\\u00E1 {n}! Aqui \\u00E9 a equipe Knowledge Retention \\uD83D\\uDC4B',\n};\nvar t = g[theLang] || g['en'];\nif (name) return t.replace('{n}', name);\nreturn t.replace('{n}', '').replace('!', '').trim() + '!';\n}\nfunction noticedText() {\nif (status === 60) {\nreturn t({\nen: 'We noticed your interview is almost done - just one last step!',\nde: 'Wir haben gesehen, dass dein Interview fast fertig ist - nur noch ein Schritt!',\nzh: '我们发现你的访谈快完成了 - 只剩最后一步！',\nfr: 'On a vu que ton entretien est presque terminé - plus qu\\'une étape !',\nes: 'Notamos que tu entrevista está casi lista - ¡solo un paso más!',\npt: 'Vimos que sua entrevista está quase pronta - só mais um passo!',\n});\n} else if (status === 10) {\nreturn t({\nen: 'We noticed you started your interview and stepped away. No worries - just pick up where you left off!',\nde: 'Wir haben gesehen, dass du dein Interview begonnen und dann unterbrochen hast. Kein Problem - mach einfach weiter!',\nzh: '我们发现你已经开始了访谈，但暂时离开了。别担心 - 从你停下的地方继续吧！',\nfr: 'On a vu que tu as commencé ton entretien, mais que tu as dû t\\'arrêter. Pas de souci - reprends là où tu en étais !',\nes: 'Notamos que empezaste tu entrevista y te fuiste. Sin problema - ¡retómala desde donde la dejaste!',\npt: 'Vimos que você começou sua entrevista, mas precisou parar. Sem problema - continue de onde parou!',\n});\n} else if (status === 20 || status === 25) {\nreturn t({\nen: 'We noticed your topics and questions are all set - ready to dive in?',\nde: 'Wir haben gesehen, dass deine Themen und Fragen bereit sind - bereit einzusteigen?',\nzh: '我们发现你的主题和问题都已就绪 - 准备开始了吗？',\nfr: 'On a vu que tes sujets et questions sont prêts - prêt à te lancer ?',\nes: 'Notamos que tus temas y preguntas están listos - ¿listo para empezar?',\npt: 'Vimos que seus tópicos e perguntas estão prontos - pronto para começar?',\n});\n} else if (status === 30) {\nif (reminderStage === 0) {\nreturn t({\nen: 'We noticed your interview is still in progress - don\\'t let your insights go to waste!',\nde: 'Wir haben gesehen, dass dein Interview noch läuft - lass deine Erkenntnisse nicht verfallen!',\nzh: '我们发现你的访谈仍在进行 - 别让你的见解白费了！',\nfr: 'On a vu que ton entretien est toujours en cours - ne laisse pas tes idées se perdre !',\nes: 'Notamos que tu entrevista aún está en curso - ¡no dejes que tus conocimientos se pierdan!',\npt: 'Vimos que sua entrevista ainda está em andamento - não deixe seus conhecimentos e experiências se perderem!',\n});\n} else if (reminderStage === 1) {\nreturn t({\nen: 'We noticed your interview is still open - your experience matters!',\nde: 'Wir haben gesehen, dass dein Interview noch offen ist - deine Erfahrung zählt!',\nzh: '我们发现你的访谈仍然开放 - 你的经验很重要！',\nfr: 'On a vu que ton entretien est toujours ouvert - ton expérience compte !',\nes: 'Notamos que tu entrevista sigue abierta - ¡tu experiencia importa!',\npt: 'Vimos que sua entrevista ainda está aberta - sua experiência é importante!',\n});\n} else {\nreturn t({\nen: 'We\\'ve noticed your interview is still unfinished - this is our last nudge!',\nde: 'Wir haben gesehen, dass dein Interview noch nicht abgeschlossen ist - das ist unser letzter Hinweis!',\nzh: '我们发现你的访谈仍未完成 - 这是我们最后一次提醒！',\nfr: 'On a vu que ton entretien n\\'est pas encore terminé - c\\'est notre dernier rappel !',\nes: 'Notamos que tu entrevista aún no está terminada - ¡este es nuestro último aviso!',\npt: 'Vimos que sua entrevista ainda não está terminada - este é nosso último lembrete!',\n});\n}\n}\nreturn '';\n}\nfunction t(obj) { return obj[theLang] || obj['en']; }\nvar effortLine = '';\nif (leftQ != null && leftQ > 0) {\nvar qCount = (theLang === 'zh' ? '' : ' ') + qWord(leftQ, theLang);\nqCount = leftQ + qCount;\nif (approxMin < 30) {\nvar qMin = approxMin + ' ' + minuteWord(approxMin, theLang);\neffortLine = t({\nen: 'Only ' + qCount + ' left - about ' + qMin + '. You\\'ve got this!',\nde: 'Nur noch ' + qCount + ', ungefähr ' + qMin + '. Du schaffst das!',\nzh: '只剩' + qCount + '，大约' + qMin + '。你能行！',\nfr: 'Plus que ' + qCount + ', environ ' + qMin + '. Tu vas y arriver !',\nes: 'Solo te quedan ' + qCount + ', unos ' + qMin + '. ¡Tú puedes!',\npt: 'Faltam ' + qCount + '. Você consegue!',\n});\n} else {\neffortLine = t({\nen: 'You have ' + qCount + ' to go. No rush - you can answer them across multiple sessions.',\nde: 'Du hast noch ' + qCount + '. Kein Stress - du kannst sie auf mehrere Sitzungen verteilen.',\nzh: '你还有' + qCount + '要回答。你可以分几次完成。',\nfr: 'Il te reste ' + qCount + '. Pas de pression - tu peux les répartir sur plusieurs sessions.',\nes: 'Te quedan ' + qCount + ' por responder. Sin prisas - puedes hacerlo en varias sesiones.',\npt: 'Você ainda tem ' + qCount + ' para responder. Você pode responder em várias sessões, sem pressa.',\n});\n}\n}\nvar subject = '', emoji = '', headline = '', body1 = '', cta = '', note = '';\nif (status === 60) {\nsubject = t({ en: 'One last thing!', de: 'Noch eine letzte Sache!', zh: '最后一件事！', fr: 'Une dernière chose !', es: '¡Una última cosa!', pt: 'Uma última coisa!' });\nemoji = '🏁';\nheadline = t({ en: 'You\\'re almost at the finish line!', de: 'Du bist fast am Ziel!', zh: '你快要到终点了！', fr: 'Tu es presque à la ligne d\\'arrivée !', es: '¡Ya casi estás en la meta!', pt: 'Você está quase na linha de chegada!' });\nbody1 = t({ en: 'The last step is for our AI to create a summary of everything you shared. You just need to review and approve it - it takes about 5 to 10 minutes.', de: 'Im letzten Schritt erstellt unsere KI eine Zusammenfassung deiner Antworten. Du musst sie nur noch prüfen und freigeben - die Prüfung und Freigabe dauern etwa 5 bis 10 Minuten.', zh: '最后一步，AI 会生成摘要，你只需查看和批准。只需 5 到 10 分钟。', fr: 'Notre IA va créer un résumé, il ne te reste plus qu\\'à le valider. Cela prend 5 à 10 minutes.', es: 'Nuestra IA creará un resumen, solo tienes que revisarlo y aprobarlo. Toma solo 5 a 10 minutos.', pt: 'Nossa IA vai criar um resumo, e você só precisa revisá-lo e aprová-lo. Isso leva de 5 a 10 minutos.' });\ncta = t({ en: 'Review your summary', de: 'Zusammenfassung prüfen', zh: '查看摘要', fr: 'Valider le résumé', es: 'Revisar resumen', pt: 'Revisar resumo' });\nnote = t({ en: 'You can split this across sessions if you prefer.', de: 'Du kannst die Prüfung und Freigabe auf mehrere Sitzungen verteilen.', zh: '你可以分几次完成。', fr: 'Tu peux le répartir sur plusieurs sessions.', es: 'Puedes dividirlo en varias sesiones si prefieres.', pt: 'Você pode fazer isso em várias sessões, se preferir.' });\n} else if (status === 10) {\nsubject = t({ en: 'Your interview is waiting!', de: 'Dein Interview wartet!', zh: '你的访谈在等你！', fr: 'Ton entretien t\\'attend !', es: '¡Tu entrevista te espera!', pt: 'Sua entrevista está esperando por você!' });\nemoji = '👋';\nheadline = t({ en: 'You\\'re on your way - keep going!', de: 'Du bist auf einem guten Weg - mach weiter!', zh: '你已经开始了，继续完成访谈吧！', fr: 'Tu es sur la bonne voie - continue !', es: 'Vas por buen camino - ¡sigue así!', pt: 'Você já começou - continue sua entrevista!' });\nbody1 = t({ en: 'Your progress is saved. Pick up where you left off.', de: 'Dein Fortschritt ist gespeichert. Mach einfach da weiter, wo du aufgehört hast.', zh: '你的进度已保存。从你停下的地方继续吧。', fr: 'Ta progression est sauvegardée. Reprends là où tu en étais.', es: 'Tu progreso está guardado. Sigue desde donde lo dejaste.', pt: 'Seu progresso está salvo. Continue de onde parou.' });\ncta = t({ en: 'Pick up where you left off', de: 'Weitermachen', zh: '继续', fr: 'Reprendre', es: 'Seguir desde donde lo dejaste', pt: 'Continuar de onde parou' });\nnote = '';\n} else if (status === 20 || status === 25) {\nsubject = t({ en: 'Ready when you are!', de: 'Bereit, wenn du es bist!', zh: '随时准备就绪！', fr: 'Prêt quand tu veux !', es: '¡Listo cuando tú quieras!', pt: 'Pronto quando você quiser!' });\nemoji = '🚀';\nheadline = t({ en: 'Your interview questions are ready!', de: 'Deine Interviewfragen sind bereit!', zh: '你的访谈问题已准备就绪！', fr: 'Tes questions d\\'entretien sont prêtes !', es: '¡Tus preguntas de la entrevista están listas!', pt: 'As perguntas da sua entrevista estão prontas!' });\nbody1 = t({ en: 'You crushed the first steps! Your topics and questions are all set up and ready to go.', de: 'Du hast die ersten Schritte gemeistert! Deine Themen und Fragen stehen bereit.', zh: '你已经完成了第一步！你的主题和问题都已准备好。', fr: 'Tu as géré les premières étapes ! Tes sujets et questions sont prêtes.', es: '¡Dominaste los primeros pasos! Tus temas y preguntas están listos para empezar.', pt: 'Você concluiu os primeiros passos! Seus tópicos e perguntas estão prontos.' });\ncta = t({ en: 'Start answering', de: 'Los geht\\'s', zh: '开始回答', fr: 'C\\'est parti', es: 'Empezar a responder', pt: 'Começar a responder' });\nnote = t({ en: 'Answer a few now and come back later. No rush.', de: 'Beantworte ein paar und komm später zurück.', zh: '先回答几个，稍后再回来。', fr: 'Réponds-en quelques-unes et reviens plus tard.', es: 'Responde algunas ahora y vuelve luego. Sin prisas.', pt: 'Responda a algumas agora e volte mais tarde. Sem pressa.' });\n} else if (status === 30) {\nif (reminderStage === 0) {\nsubject = t({ en: 'Your interview is waiting!', de: 'Dein Interview wartet!', zh: '你的访谈在等你！', fr: 'Ton entretien t\\'attend !', es: '¡Tu entrevista te espera!', pt: 'Sua entrevista está esperando por você!' });\nemoji = '⏳';\nheadline = t({ en: 'There\\'s more to share!', de: 'Es gibt noch mehr zu erzählen!', zh: '还有更多可以分享！', fr: 'Il y a encore des choses à partager !', es: '¡Hay más por compartir!', pt: 'Você ainda tem mais a compartilhar!' });\nbody1 = t({ en: 'Your insights are too valuable to leave half-finished - jump back in and finish strong!', de: 'Deine Erkenntnisse sind zu wertvoll, um sie halb fertig zu lassen - mach weiter und bring es zu Ende!', zh: '你的见解太宝贵了，不能半途而废。', fr: 'Tes idées sont trop précieuses pour rester à moitié finies !', es: 'Tus conocimientos son demasiado valiosos como para dejarlos a medias - ¡retómala y termina con fuerza!', pt: 'Seus conhecimentos e experiências são valiosos. Retome de onde parou e continue quando puder.' });\n} else if (reminderStage === 1) {\nsubject = t({ en: 'Still waiting - for you!', de: 'Wartet noch - auf dich!', zh: '还在等你！', fr: 'Toujours là pour toi !', es: '¡Sigue esperándote!', pt: 'Ainda esperando por você!' });\nemoji = '👌';\nheadline = t({ en: 'A friendly reminder ✨', de: 'Eine freundliche Erinnerung ✨', zh: '一个友好的提醒 ✨', fr: 'Un petit rappel amical ✨', es: 'Un recordatorio amistoso ✨', pt: 'Um lembrete amigável ✨' });\nbody1 = t({ en: 'Don\\'t let your experience go undocumented.', de: 'Lass deine Erfahrung nicht ungeteilt.', zh: '别让你的经验得不到记录。', fr: 'Ne laisse pas ton expérience sans témoignage.', es: 'No dejes que tu experiencia quede sin documentar.', pt: 'Não deixe sua experiência sem ser registrada.' });\n} else {\nsubject = t({ en: 'Last call!', de: 'Letzte Chance!', zh: '最后机会！', fr: 'Dernier appel !', es: '¡Última llamada!', pt: 'Última chamada!' });\nemoji = '🫂';\nheadline = t({ en: 'This is the last time we\\'ll reach out.', de: 'Wir melden uns kein weiteres Mal.', zh: '这是最后一次了。', fr: 'C\\'est la dernière fois qu\\'on t\\'écrit.', es: 'Esta es la última vez que te escribimos.', pt: 'Esta é a última vez que entraremos em contato.' });\nbody1 = t({ en: 'It would be a real shame to let your knowledge slip away unanswered. What you know matters - take a few minutes to finish your interview.', de: 'Es wäre eine echte Schande, dein Wissen unbeantwortet zu verlieren. Was du weißt, zählt - nimm dir ein paar Minuten, um dein Interview zu beenden.', zh: '让你的知识得不到回答而流失，将是一个真正的遗憾。你的知识很重要。', fr: 'Ce serait dommage de laisser tes connaissances disparaître sans réponse. Ce que tu sais compte - prends quelques minutes pour finir ton entretien.', es: 'Sería una pena que tu conocimiento se perdiera sin respuesta. Lo que sabes importa - tómate unos minutos para terminar tu entrevista.', pt: 'Seria uma pena deixar seu conhecimento se perder sem resposta. O que você sabe é importante - reserve alguns minutos para terminar sua entrevista.' });\n}\ncta = t({ en: 'Jump back in', de: 'Weitermachen', zh: '继续', fr: 'Reprendre', es: 'Continuar', pt: 'Continuar' });\n}\nvar bodySections = '';\nif (body1) bodySections += '<tr><td style=\"padding:0 40px 0;\"><p style=\"margin:0 0 16px;font-size:15px;line-height:1.7;color:#3d3d3d;\">' + body1 + '</p></td></tr>';\nif (effortLine) bodySections += '<tr><td style=\"padding:0 40px 0;\"><p style=\"margin:0 0 16px;font-size:15px;line-height:1.7;color:#3d3d3d;\">' + effortLine + '</p></td></tr>';\nvar greetingLine = greetingAndTeamIntro(firstName);\nvar noticed = noticedText();\nvar html = '<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><!--[if mso]><style type=\"text/css\">body,table,td,p,a{font-family:Helvetica,Arial,sans-serif!important}</style><![endif]--></head>' +\n'<body style=\"margin:0;padding:0;background-color:#f2f4f7;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;\">' +\n'<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#f2f4f7;\">' +\n'<tr><td align=\"center\" style=\"padding:40px 16px;\">' +\n'<table width=\"560\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#ffffff;border-radius:12px;overflow:hidden;max-width:560px;box-shadow:0 2px 12px rgba(0,0,0,0.06);\">' +\n'<tr><td style=\"background-color:#004a96;padding:28px 40px 22px;\">' +\n'<table width=\"100%\"><tr>' +\n'<td style=\"vertical-align:middle;color:#ffffff;font-size:14px;\">[Logo]</td>' +\n'</tr></table>' +\n'</td></tr>' +\n'<tr><td style=\"height:4px;background-color:#21a0d2;font-size:0;line-height:0;\">&nbsp;</td></tr>' +\n'<tr><td style=\"padding:36px 40px 0;font-size:48px;line-height:1;\">' + emoji + '</td></tr>' +\n'<tr><td style=\"padding:12px 40px 0;\"><h1 style=\"margin:0;font-size:22px;font-weight:700;color:#004a96;line-height:1.35;letter-spacing:-0.01em;\">' + headline + '</h1></td></tr>' +\n'<tr><td style=\"padding:16px 40px 0;\"><table cellpadding=\"0\" cellspacing=\"0\"><tr><td style=\"height:3px;width:40px;background-color:#21a0d2;border-radius:2px;font-size:0;line-height:0;\">&nbsp;</td></tr></table></td></tr>' +\n'<tr><td style=\"padding:18px 40px 0;\"><p style=\"margin:0;font-size:16px;font-weight:500;color:#1a1a1a;line-height:1.5;\">' + greetingLine + '</p></td></tr>' +\n'<tr><td style=\"padding:0 40px 12px;\"><p style=\"margin:0 0 16px;font-size:15px;line-height:1.7;color:#3d3d3d;\">' + noticed + '</p></td></tr>' +\nbodySections +\n'<tr><td style=\"padding:24px 40px 0;\"><table cellpadding=\"0\" cellspacing=\"0\" style=\"margin:0;\"><tr><td style=\"background-color:#004a96;border-radius:50px;padding:0;\"><a href=\"https://aisuite.basf.net/chat?a=ea66c669-a5d1-4c43-b998-5f306d9c4a58\" style=\"display:inline-block;padding:14px 32px;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;letter-spacing:0.01em;\">' + cta + ' &nbsp;→</a></td></tr></table></td></tr>' +\n(note ? '<tr><td style=\"padding:18px 40px 0;\"><p style=\"margin:0;font-size:13px;line-height:1.6;color:#8e929b;\">' + note + '</p></td></tr>' : '') +\n'<tr><td style=\"height:40px;font-size:0;line-height:0;\">&nbsp;</td></tr>' +\n'<tr><td style=\"background-color:#f7f9fb;padding:20px 40px;border-top:1px solid #e8ecf0;\">' +\n'<table width=\"100%\"><tr>' +\n'<td style=\"vertical-align:middle;\"><p style=\"margin:0;font-size:12px;color:#8e929b;line-height:1.5;\"><span style=\"font-weight:600;color:#6b6f78;\">Knowledge Retention</span></p></td>' +\n'</tr></table>' +\n'</td></tr>' +\n'</table>' +\n'</td></tr>' +\n'</table></body></html>';\nreturn {\nsubject: subject, html: html,\nemployeeEmail: row.ckr_employeeemail || '',\nemployeeFullName: fullName, employeeFirstName: firstName,\nlanguageUsed: theLang, interviewStatus: status,\nreminderStage: reminderStage, questionsLeft: leftQ, approximateMinutes: approxMin\n};"
+          }
+        },
+        "id": "51974a27-a0db-4a51-9f16-9991faad4cd0",
+        "position": {
+          "x": 2100,
+          "y": 20
+        }
+      },
+      {
+        "type": "code",
+        "data": {
+          "executionId": null,
+          "errorHandling": {
+            "strategy": "stop"
+          },
+          "disabled": false,
+          "name": "Build Abandonment Email",
+          "slug": "buildAbandonmentEmail",
+          "language": "javascript",
+          "code": "const row = forEachAbandonedInterview.output.currentItem;\nconst fullName = row.ckr_employeedisplayname || '';\nconst firstName = fullName.split(' ')[0] || 'there';\nconst subject = 'We would love to hear from you';\nconst html = '<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"></head>' +\n'<body style=\"margin:0;padding:0;background-color:#f2f4f7;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;\">' +\n'<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#f2f4f7;\">' +\n'<tr><td align=\"center\" style=\"padding:40px 16px;\">' +\n'<table width=\"560\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#ffffff;border-radius:12px;overflow:hidden;max-width:560px;box-shadow:0 2px 12px rgba(0,0,0,0.06);\">' +\n'<tr><td style=\"background-color:#004a96;padding:28px 40px 22px;\">' +\n'<table width=\"100%\"><tr>' +\n'<td style=\"vertical-align:middle;color:#ffffff;font-size:14px;\">Knowledge Retention</td>' +\n'</tr></table>' +\n'</td></tr>' +\n'<tr><td style=\"padding:36px 40px 0;font-size:48px;line-height:1;\">\\uD83D\\uDC4B</td></tr>' +\n'<tr><td style=\"padding:16px 40px 0;\"><h1 style=\"margin:0;font-size:22px;font-weight:700;color:#004a96;line-height:1.35;\">We\\'re sad to see you go</h1></td></tr>' +\n'<tr><td style=\"padding:6px 40px 0;\"><p style=\"margin:0;font-size:16px;font-weight:500;color:#1a1a1a;line-height:1.5;\">Hi ' + firstName + ',</p></td></tr>' +\n'<tr><td style=\"padding:6px 40px 0;\"><p style=\"margin:0 0 16px;font-size:15px;line-height:1.7;color:#3d3d3d;\">Knowledge Retention team here \\uD83D\\uDE0A</p></td></tr>' +\n'<tr><td style=\"padding:0 40px 16px;\"><p style=\"margin:0 0 16px;font-size:15px;line-height:1.7;color:#3d3d3d;\">We noticed you stepped away from the Knowledge Retention interview. We would love to understand if we could have done something different.</p></td></tr>' +\n'<tr><td style=\"padding:0 40px 24px;\"><p style=\"margin:0 0 16px;font-size:15px;line-height:1.7;color:#3d3d3d;\">If anything went wrong or you have any feedback, we\\'d love to hear from you. Please take a minute to fill out the survey below!</p></td></tr>' +\n'<tr><td style=\"padding:0 40px 24px;\">' +\n'<table cellpadding=\"0\" cellspacing=\"0\" style=\"margin:0 auto;\">' +\n'<tr>' +\n'<td style=\"padding:0 6px 8px 0;\" align=\"center\">' +\n'<table cellpadding=\"0\" cellspacing=\"0\"><tr><td style=\"background-color:#004a96;border-radius:50px;padding:0;\"><a href=\"https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=aziq7N_I4EytAXQMvbW6VRV2gQ2iHTBAv86oCIMV_elUOVg1R0lLMEpIS1kwR0o0OVRHRVRNVzlKVC4u\" style=\"display:inline-block;padding:14px 28px;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;border-radius:50px;white-space:nowrap;\">Let us know what went wrong \\u00A0\\u2192</a></td></tr></table>' +\n'</td>' +\n'<td style=\"padding:0 0 8px 6px;\" align=\"center\">' +\n'<table cellpadding=\"0\" cellspacing=\"0\"><tr><td style=\"background-color:#ffffff;border:2px solid #004a96;border-radius:50px;padding:0;\"><a href=\"https://aisuite.basf.net/chat?a=ea66c669-a5d1-4c43-b998-5f306d9c4a58\" style=\"display:inline-block;padding:12px 28px;color:#004a96;font-size:14px;font-weight:600;text-decoration:none;border-radius:48px;white-space:nowrap;\">Start your interview again</a></td></tr></table>' +\n'</td>' +\n'</tr>' +\n'</table>' +\n'</td></tr>' +\n'<tr><td style=\"height:24px;font-size:0;\">&nbsp;</td></tr>' +\n'<tr><td style=\"background-color:#f7f9fb;padding:20px 40px;border-top:1px solid #e8ecf0;\">' +\n'<table width=\"100%\"><tr>' +\n'<td style=\"vertical-align:middle;\"><p style=\"margin:0;font-size:12px;color:#8e929b;line-height:1.5;\"><span style=\"font-weight:600;color:#6b6f78;\">Knowledge Retention Team</span></p></td>' +\n'</tr></table>' +\n'</td></tr>' +\n'</table>' +\n'</td></tr>' +\n'</table></body></html>';\nreturn {\nsubject: subject,\nhtml: html,\nemployeeEmail: row.ckr_employeeemail || ''\n};"
+        },
+        "id": "ad095215-84e8-4f5d-b6a0-3922b24f920d",
+        "position": {
+          "x": 2100,
+          "y": 400
+        }
+      },
+      {
+        "type": "delay",
+        "data": {
+          "executionId": null,
+          "errorHandling": {
+            "strategy": "stop"
+          },
+          "disabled": false,
+          "name": "Delay",
+          "slug": "delayAbandoned",
+          "duration": 1,
+          "unit": "seconds"
+        },
+        "id": "78345647-2bde-43b7-98af-da19553a5d09",
+        "position": {
+          "x": 2620,
+          "y": 400
+        }
+      },
+      {
+        "type": "loop",
+        "data": {
+          "executionId": null,
+          "errorHandling": {
+            "strategy": "stop"
+          },
+          "disabled": false,
+          "name": "For Each Interview",
+          "slug": "forEachInterview",
+          "loopArrayValue": "{{getUnfinishedInterviews.output.rows.filter(row => Number(row.ckr_interviewstatus) === 60 || (Number.isFinite(Number(row.cr32c_reminder ?? 0)) && Number(row.cr32c_reminder ?? 0) < 2))}}",
+          "maxIterations": 200,
+          "concurrency": false,
+          "collectOutputs": true
+        },
+        "id": "fecc7da6-9ec1-4729-8250-997588e4fec7",
+        "position": {
+          "x": 1580,
+          "y": 20
+        }
+      },
+      {
+        "type": "action",
+        "data": {
+          "executionId": null,
+          "errorHandling": {
+            "strategy": "stop"
+          },
+          "disabled": false,
+          "slug": "getAbandonedInterviews",
+          "actionId": "79af33e6-3f20-4ec8-8efa-211d8ae65006",
+          "actionVersion": 1,
+          "config": {
+            "connectionId": null,
+            "requiresConfirmation": false,
+            "modelId": "167f7823-e7c0-46ff-b505-4bcb68d3898c",
+            "fields": {
+              "top": {
+                "mode": "manual",
+                "value": "200"
+              },
+              "table": {
+                "mode": "manual",
+                "value": "ckr_interviews"
+              },
+              "select": {
+                "mode": "manual",
+                "value": "{{['ckr_interviewid','ckr_interviewnumber','ckr_employeedisplayname','ckr_employeeemail','ckr_interviewstatus','ckr_language','ckr_name','createdon','ckr_latinteractionon','ckr_lastcheckpointon','ckr_progress','ckr_answeredquestions','ckr_totalquestions','cr32c_reminder','cr32c_abandonedfeedback']}}"
+              },
+              "filters": {
+                "mode": "manual",
+                "value": "{{[{field:'cr32c_devinterview',operator:'eq',value:false},{field:'cr32c_abandonedfeedback',operator:'eq',value:false},{field:'ckr_interviewstatus',operator:'eq',value:80},{field:'ckr_name',operator:'startswith',value:'KR '},{field:'ckr_lastcheckpointon',operator:'lt',value:new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()}]}}"
+              },
+              "orderBy": {
+                "mode": "none"
+              },
+              "exportAsCsv": {
+                "mode": "manual",
+                "value": "{{false}}"
+              },
+              "orderDirection": {
+                "mode": "none"
+              }
+            }
+          }
+        },
+        "id": "8668afe4-c6a6-4dbf-8409-3a8672e8a985",
+        "position": {
+          "x": 1020,
+          "y": 585
+        }
+      },
+      {
+        "type": "trigger",
+        "data": {
+          "executionId": null,
+          "errorHandling": {
+            "strategy": "stop"
+          },
+          "disabled": false,
+          "slug": "scheduled1",
+          "name": "Scheduled",
+          "kind": "scheduled",
+          "cron": "0 8 * * 1-5"
+        },
+        "id": "8aa54f63-4849-4272-b000-54da2f3d68af",
+        "position": {
+          "x": 20,
+          "y": 210
+        }
+      },
+      {
+        "type": "loop",
+        "data": {
+          "executionId": null,
+          "errorHandling": {
+            "strategy": "stop"
+          },
+          "disabled": false,
+          "name": "For Each Abandoned Interview",
+          "slug": "forEachAbandonedInterview",
+          "loopArrayValue": "{{getAbandonedInterviews.output.rows.filter(row => Number.isFinite(Number(row.cr32c_reminder ?? 0)) && Number(row.cr32c_reminder ?? 0) < 2)}}",
+          "maxIterations": 200,
+          "concurrency": false,
+          "collectOutputs": true
+        },
+        "id": "db430d46-7dac-40ea-b3d9-694ec4acf1e8",
+        "position": {
+          "x": 1580,
+          "y": 400
+        }
+      },
+      {
+        "type": "action",
+        "data": {
+          "executionId": null,
+          "errorHandling": {
+            "strategy": "stop"
+          },
+          "disabled": false,
+          "slug": "getUnfinishedInterviews",
+          "actionId": "79af33e6-3f20-4ec8-8efa-211d8ae65006",
+          "actionVersion": 1,
+          "config": {
+            "connectionId": null,
+            "requiresConfirmation": false,
+            "modelId": "167f7823-e7c0-46ff-b505-4bcb68d3898c",
+            "fields": {
+              "top": {
+                "mode": "manual",
+                "value": "200"
+              },
+              "table": {
+                "mode": "manual",
+                "value": "ckr_interviews"
+              },
+              "select": {
+                "mode": "manual",
+                "value": "{{['ckr_interviewid','ckr_interviewnumber','ckr_employeedisplayname','ckr_employeeemail','ckr_interviewstatus','ckr_language','ckr_name','createdon','ckr_latinteractionon','ckr_lastcheckpointon','ckr_progress','ckr_answeredquestions','ckr_totalquestions','cr32c_reminder']}}"
+              },
+              "filters": {
+                "mode": "manual",
+                "value": "{{[{field:'cr32c_devinterview',operator:'eq',value:false},{field:'ckr_interviewstatus',operator:'ne',value:70},{field:'ckr_interviewstatus',operator:'lt',value:80},{field:'cr32c_reminder',operator:'ne',value:2},{field:'ckr_name',operator:'startswith',value:'KR '},{field:'ckr_lastcheckpointon',operator:'lt',value:new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()}]}}"
+              },
+              "orderBy": {
+                "mode": "none"
+              },
+              "exportAsCsv": {
+                "mode": "manual",
+                "value": "{{false}}"
+              },
+              "orderDirection": {
+                "mode": "none"
+              }
+            }
+          }
+        },
+        "id": "4da19c28-ae33-4f81-a6b8-ba6bbf26ff18",
+        "position": {
+          "x": 1065,
+          "y": -15
+        }
+      },
+      {
+        "type": "loop_end",
+        "data": {
+          "executionId": null,
+          "errorHandling": {
+            "strategy": "continue"
+          },
+          "disabled": false,
+          "name": "Loop end",
+          "slug": "forEachAbandonedInterviewEnd",
+          "loopEndSlug": "forEachAbandonedInterview"
+        },
+        "id": "35c76501-a682-4a23-b52a-12e95417c6c3",
+        "position": {
+          "x": 4180,
+          "y": 400
+        }
+      },
+      {
+        "type": "action",
+        "data": {
+          "executionId": null,
+          "errorHandling": {
+            "strategy": "stop"
+          },
+          "disabled": false,
+          "slug": "adminBulkWriteback",
+          "name": "Admin: bulk writeback",
+          "actionId": "99d9d240-4dc6-41fe-a35c-e6d1a1ac3fc1",
+          "actionVersion": 1,
+          "config": {
+            "connectionId": null,
+            "requiresConfirmation": false,
+            "modelId": "167f7823-e7c0-46ff-b505-4bcb68d3898c",
+            "fields": {
+              "rows": {
+                "mode": "manual",
+                "value": "{{(() => { const a = []; (forEachInterviewEnd?.output?.iterations || []).forEach(i => { (i.executions || []).forEach(e => { if (e.nodeSlug === 'trackReminderTest' && e.output?.writebackRow) a.push(e.output.writebackRow) }) }); (forEachAbandonedInterviewEnd?.output?.iterations || []).forEach(i => { (i.executions || []).forEach(e => { if (e.nodeSlug === 'trackAbandonmentTest' && e.output?.writebackRow) a.push(e.output.writebackRow) }) }); return a; })()}}"
+              },
+              "dryRun": {
+                "mode": "manual",
+                "value": "{{false}}"
+              }
+            }
+          }
+        },
+        "id": "ab65e165-e0fe-461e-afd5-40bee91b5baf",
+        "position": {
+          "x": 4700,
+          "y": 210
+        }
+      },
+      {
+        "type": "action",
+        "data": {
+          "executionId": null,
+          "errorHandling": {
+            "strategy": "stop"
+          },
+          "disabled": false,
+          "slug": "downloadBASFLogo",
+          "name": "Download BASF Logo",
+          "actionId": "92ca7505-a99c-4cc3-9a53-69546d6c122d",
+          "actionVersion": 1,
+          "config": {
+            "connectionId": null,
+            "requiresConfirmation": false,
+            "modelId": "167f7823-e7c0-46ff-b505-4bcb68d3898c",
+            "fields": {
+              "itemId": {
+                "mode": "manual",
+                "value": "01GEALFYYEXTQXI54TNBDYVJ2YNY373CJH"
+              },
+              "parent": {
+                "mode": "manual",
+                "value": "{{ {driveId: \"b!vZ_bW7Hw40iAIb9DwZsikNCALDWd2nVJo-NVFby6FScG4DGaMdL9RIh8LQuS1g7v\"} }}"
+              }
+            }
+          }
+        },
+        "id": "e017d706-e61c-4a1a-9b79-35d1f888e69f",
+        "position": {
+          "x": 540,
+          "y": 210
+        }
+      },
+      {
+        "type": "code",
+        "data": {
+          "executionId": null,
+          "errorHandling": {
+            "strategy": "stop"
+          },
+          "disabled": false,
+          "name": "Track Successful Reminder Test",
+          "slug": "trackReminderTest",
+          "language": "javascript",
+          "code": "const row = forEachInterview.output.currentItem;\nconst id = row.ckr_interviewid;\nif (!id) throw new Error('Missing ckr_interviewid');\nconst count = Number(row.cr32c_reminder ?? 0);\nif (!Number.isFinite(count) || count < 0) throw new Error('Invalid reminder counter');\nreturn {\nwritebackRow: {\nid,\ntable: 'ckr_interview',\nvalues: {\ncr32c_reminder: count + 1,\nckr_lastcheckpointon: new Date().toISOString()\n}\n},\ntestOnly: false\n};"
+        },
+        "id": "6e6d76bd-b340-4dcb-9ac6-a9c5ad31d3ad",
+        "position": {
+          "x": 3660,
+          "y": 20
+        }
+      },
+      {
+        "type": "delay",
+        "data": {
+          "executionId": null,
+          "errorHandling": {
+            "strategy": "stop"
+          },
+          "disabled": false,
+          "name": "Delay",
+          "slug": "delay",
+          "duration": 1,
+          "unit": "seconds"
+        },
+        "id": "31d3ea4a-5775-40e0-ba3d-0221adcbd23b",
+        "position": {
+          "x": 2620,
+          "y": 20
+        }
+      },
+      {
+        "type": "loop_end",
+        "data": {
+          "executionId": null,
+          "errorHandling": {
+            "strategy": "continue"
+          },
+          "disabled": false,
+          "name": "Loop end",
+          "slug": "forEachInterviewEnd",
+          "loopEndSlug": "forEachInterview"
+        },
+        "id": "8a3a9101-681c-4039-94c3-815c94f551d2",
+        "position": {
+          "x": 4180,
+          "y": 20
+        }
+      },
+      {
+        "type": "action",
+        "data": {
+          "executionId": null,
+          "errorHandling": {
+            "strategy": "stop"
+          },
+          "disabled": false,
+          "slug": "sendEmailFromSharedMailboxOrOtherUser2",
+          "actionId": "5abf1b30-cafb-4bde-96bf-8aa1955428e8",
+          "actionVersion": 1,
+          "config": {
+            "connectionId": null,
+            "requiresConfirmation": false,
+            "modelId": "167f7823-e7c0-46ff-b505-4bcb68d3898c",
+            "fields": {
+              "body": {
+                "mode": "manual",
+                "value": "{{buildAbandonmentEmail.output.html.replace(/(<body[^>]*>)/, '$1<div style=\"padding:16px;text-align:center;background:#fff3cd;color:#333;font-size:15px;font-weight:bold;\">This is an automated email from the Knowledge Retention workflow.</div>').replace('>Knowledge Retention</td>','><img src=\"cid:BASFo_wh100db_3c.png\" alt=\"BASF\" width=\"150\" style=\"display:block;max-width:100%;height:auto;\"></td>')}}"
+              },
+              "files": {
+                "mode": "manual",
+                "value": [
+                  "BASFo_wh100db_3c.png"
+                ]
+              },
+              "isHtml": {
+                "mode": "manual",
+                "value": "{{true}}"
+              },
+              "subject": {
+                "mode": "manual",
+                "value": "{{buildAbandonmentEmail.output.subject}}"
+              },
+              "ccRecipients": {
+                "mode": "none"
+              },
+              "toRecipients": {
+                "mode": "manual",
+                "value": "{{buildAbandonmentEmail.output.employeeEmail}}"
+              },
+              "bccRecipients": {
+                "mode": "none"
+              },
+              "fromUserEmail": {
+                "mode": "manual",
+                "value": "Knowledge-Retention@basf.com"
+              }
+            }
+          }
+        },
+        "id": "3c1117ea-bf2b-4a84-9e23-7cfb0e450d21",
+        "position": {
+          "x": 3140,
+          "y": 400
+        }
+      },
+      {
+        "type": "action",
+        "data": {
+          "executionId": null,
+          "errorHandling": {
+            "strategy": "stop"
+          },
+          "disabled": false,
+          "slug": "sendEmailFromSharedMailboxOrOtherUser",
+          "actionId": "5abf1b30-cafb-4bde-96bf-8aa1955428e8",
+          "actionVersion": 1,
+          "config": {
+            "connectionId": null,
+            "requiresConfirmation": false,
+            "modelId": "167f7823-e7c0-46ff-b505-4bcb68d3898c",
+            "fields": {
+              "body": {
+                "mode": "manual",
+                "value": "{{code.output.html.replace(/(<body[^>]*>)/, '$1<div style=\"padding:16px;text-align:center;background:#fff3cd;color:#333;font-size:15px;font-weight:bold;\">' + ({en:'This is an automated email from the Knowledge Retention workflow.',de:'Dies ist eine automatisch versendete E-Mail des Knowledge Retention Workflows.',zh:'这是一封由 Knowledge Retention 工作流自动发送的电子邮件。',fr:'Ceci est un e-mail envoyé automatiquement par le workflow Knowledge Retention.',es:'Este es un correo electrónico enviado automáticamente por el flujo de Knowledge Retention.',pt:'Este é um e-mail enviado automaticamente pelo workflow Knowledge Retention.'}[code.output.languageUsed] || 'This is an automated email from the Knowledge Retention workflow.') + '</div>').replace('[Logo]','<img src=\"cid:BASFo_wh100db_3c.png\" alt=\"BASF\" width=\"150\" style=\"display:block;max-width:100%;height:auto;\">')}}"
+              },
+              "files": {
+                "mode": "manual",
+                "value": [
+                  "BASFo_wh100db_3c.png"
+                ]
+              },
+              "isHtml": {
+                "mode": "manual",
+                "value": "{{true}}"
+              },
+              "subject": {
+                "mode": "manual",
+                "value": "{{code.output.subject}}"
+              },
+              "ccRecipients": {
+                "mode": "none"
+              },
+              "toRecipients": {
+                "mode": "manual",
+                "value": "{{code.output.employeeEmail}}"
+              },
+              "bccRecipients": {
+                "mode": "none"
+              },
+              "fromUserEmail": {
+                "mode": "manual",
+                "value": "Knowledge-Retention@basf.com"
+              }
+            }
+          }
+        },
+        "id": "b93e3d07-ab0d-46ef-a2ed-9d72fd9f07e5",
+        "position": {
+          "x": 3135,
+          "y": -135
+        }
+      },
+      {
+        "type": "code",
+        "data": {
+          "executionId": null,
+          "errorHandling": {
+            "strategy": "stop"
+          },
+          "disabled": false,
+          "name": "Track Successful Abandonment Test",
+          "slug": "trackAbandonmentTest",
+          "language": "javascript",
+          "code": "const row = forEachAbandonedInterview.output.currentItem;\nconst id = row.ckr_interviewid;\nif (!id) throw new Error('Missing ckr_interviewid');\nconst count = Number(row.cr32c_reminder ?? 0);\nif (!Number.isFinite(count) || count < 0) throw new Error('Invalid reminder counter');\nreturn {\nwritebackRow: {\nid,\ntable: 'ckr_interview',\nvalues: {\ncr32c_reminder: count + 1,\nckr_lastcheckpointon: new Date().toISOString(),\ncr32c_abandonedfeedback: true\n}\n},\ntestOnly: false\n};"
+        },
+        "id": "8df60bad-52ac-4102-ae93-9a53ef5e7a3e",
+        "position": {
+          "x": 3660,
+          "y": 400
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "64b31c7b-f5eb-40b5-b413-315e3ba56974",
+        "source": "fecc7da6-9ec1-4729-8250-997588e4fec7",
+        "target": "51974a27-a0db-4a51-9f16-9991faad4cd0",
+        "animated": false,
+        "sourceHandle": "output-success",
+        "targetHandle": "input-default",
+        "conditionId": null
+      },
+      {
+        "id": "7f795b82-3a3e-4cc3-aae3-bc5aeec7dc81",
+        "source": "51974a27-a0db-4a51-9f16-9991faad4cd0",
+        "target": "31d3ea4a-5775-40e0-ba3d-0221adcbd23b",
+        "animated": false,
+        "sourceHandle": "output-success",
+        "targetHandle": "input-default",
+        "conditionId": null
+      },
+      {
+        "id": "6f7d215e-9fd8-4cda-9a82-b03b77286d6d",
+        "source": "8668afe4-c6a6-4dbf-8409-3a8672e8a985",
+        "target": "db430d46-7dac-40ea-b3d9-694ec4acf1e8",
+        "animated": false,
+        "sourceHandle": "output-success",
+        "targetHandle": "input-default",
+        "conditionId": null
+      },
+      {
+        "id": "a09eef2a-8067-43eb-bf8e-fba878bd082b",
+        "source": "6e6d76bd-b340-4dcb-9ac6-a9c5ad31d3ad",
+        "target": "8a3a9101-681c-4039-94c3-815c94f551d2",
+        "animated": false,
+        "sourceHandle": "output-success",
+        "targetHandle": "input-default",
+        "conditionId": null
+      },
+      {
+        "id": "b97a13c4-35a2-4228-94f9-fd8c063b0926",
+        "source": "8df60bad-52ac-4102-ae93-9a53ef5e7a3e",
+        "target": "35c76501-a682-4a23-b52a-12e95417c6c3",
+        "animated": false,
+        "sourceHandle": "output-success",
+        "targetHandle": "input-default",
+        "conditionId": null
+      },
+      {
+        "id": "7095486c-4e15-4340-9d51-25502fab84f8",
+        "source": "8a3a9101-681c-4039-94c3-815c94f551d2",
+        "target": "ab65e165-e0fe-461e-afd5-40bee91b5baf",
+        "animated": false,
+        "sourceHandle": "output-success",
+        "targetHandle": "input-default",
+        "conditionId": null
+      },
+      {
+        "id": "49e40303-bc86-4541-9afe-f080ce212b0e",
+        "source": "3c1117ea-bf2b-4a84-9e23-7cfb0e450d21",
+        "target": "8df60bad-52ac-4102-ae93-9a53ef5e7a3e",
+        "animated": false,
+        "sourceHandle": "output-success",
+        "targetHandle": "input-default",
+        "conditionId": null
+      },
+      {
+        "id": "7a06c9c6-2804-47a0-8ff3-9c322b2d9828",
+        "source": "8aa54f63-4849-4272-b000-54da2f3d68af",
+        "target": "e017d706-e61c-4a1a-9b79-35d1f888e69f",
+        "animated": false,
+        "sourceHandle": "output-success",
+        "targetHandle": "input-default",
+        "conditionId": null
+      },
+      {
+        "id": "cb69691a-e93e-4349-b2e0-b18f425792f7",
+        "source": "4da19c28-ae33-4f81-a6b8-ba6bbf26ff18",
+        "target": "fecc7da6-9ec1-4729-8250-997588e4fec7",
+        "animated": false,
+        "sourceHandle": "output-success",
+        "targetHandle": "input-default",
+        "conditionId": null
+      },
+      {
+        "id": "de7707b9-adfc-471e-bac6-412a9c775a6b",
+        "source": "db430d46-7dac-40ea-b3d9-694ec4acf1e8",
+        "target": "ad095215-84e8-4f5d-b6a0-3922b24f920d",
+        "animated": false,
+        "sourceHandle": "output-success",
+        "targetHandle": "input-default",
+        "conditionId": null
+      },
+      {
+        "id": "03df9c33-56c1-4191-b963-aacb74dd28d7",
+        "source": "ad095215-84e8-4f5d-b6a0-3922b24f920d",
+        "target": "78345647-2bde-43b7-98af-da19553a5d09",
+        "animated": false,
+        "sourceHandle": "output-success",
+        "targetHandle": "input-default",
+        "conditionId": null
+      },
+      {
+        "id": "730875c4-6ef5-4b7f-97bb-7c011d4316a6",
+        "source": "e017d706-e61c-4a1a-9b79-35d1f888e69f",
+        "target": "4da19c28-ae33-4f81-a6b8-ba6bbf26ff18",
+        "animated": false,
+        "sourceHandle": "output-success",
+        "targetHandle": "input-default",
+        "conditionId": null
+      },
+      {
+        "id": "9b1696b7-6fd9-4868-a092-f59e2ddd6519",
+        "source": "e017d706-e61c-4a1a-9b79-35d1f888e69f",
+        "target": "8668afe4-c6a6-4dbf-8409-3a8672e8a985",
+        "animated": false,
+        "sourceHandle": "output-success",
+        "targetHandle": "input-default",
+        "conditionId": null
+      },
+      {
+        "id": "5b6a6b53-aba1-4eff-8d3f-099b5e0d4fcf",
+        "source": "35c76501-a682-4a23-b52a-12e95417c6c3",
+        "target": "ab65e165-e0fe-461e-afd5-40bee91b5baf",
+        "animated": false,
+        "sourceHandle": "output-success",
+        "targetHandle": "input-default",
+        "conditionId": null
+      },
+      {
+        "id": "de067b4b-90cf-48aa-9d9f-72063405d0ea",
+        "source": "78345647-2bde-43b7-98af-da19553a5d09",
+        "target": "3c1117ea-bf2b-4a84-9e23-7cfb0e450d21",
+        "animated": false,
+        "sourceHandle": "output-success",
+        "targetHandle": "input-default",
+        "conditionId": null
+      },
+      {
+        "id": "5a7701a1-ea71-46ef-96af-ebd655b74056",
+        "source": "31d3ea4a-5775-40e0-ba3d-0221adcbd23b",
+        "target": "b93e3d07-ab0d-46ef-a2ed-9d72fd9f07e5",
+        "animated": false,
+        "sourceHandle": "output-success",
+        "targetHandle": "input-default",
+        "conditionId": null
+      },
+      {
+        "id": "8934f987-c050-45e8-a1ac-c4e87e6b2ab8",
+        "source": "b93e3d07-ab0d-46ef-a2ed-9d72fd9f07e5",
+        "target": "6e6d76bd-b340-4dcb-9ac6-a9c5ad31d3ad",
+        "animated": false,
+        "sourceHandle": "output-success",
+        "targetHandle": "input-default",
+        "conditionId": null
+      }
+    ]
+  }
+}

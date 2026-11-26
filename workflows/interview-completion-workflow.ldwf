@@ -1,0 +1,359 @@
+{
+  "schema": "ldwf",
+  "version": 1,
+  "name": "Interview Completion Workflow",
+  "meta": {
+    "exportedAt": "2026-11-26T14:10:01.182Z",
+    "exporter": "client"
+  },
+  "graph": {
+    "nodes": [
+      {
+        "type": "trigger",
+        "data": {
+          "executionId": null,
+          "errorHandling": {
+            "strategy": "stop"
+          },
+          "disabled": false,
+          "slug": "dailyCheck",
+          "name": "Daily Check",
+          "kind": "scheduled",
+          "cron": "0 8 * * *"
+        },
+        "id": "9848574e-2132-4b42-a985-11674d0c4f39",
+        "position": {
+          "x": 20,
+          "y": 20
+        }
+      },
+      {
+        "type": "loop",
+        "data": {
+          "executionId": null,
+          "errorHandling": {
+            "strategy": "stop"
+          },
+          "disabled": false,
+          "name": "For each interview",
+          "slug": "forEachInterview",
+          "loopArrayValue": "{{queryRecords.output.rows}}",
+          "maxIterations": 200,
+          "concurrency": false,
+          "collectOutputs": true
+        },
+        "id": "1e3ba8f7-4fd7-4f6d-a574-a3686f1efe14",
+        "position": {
+          "x": 1580,
+          "y": 20
+        }
+      },
+      {
+        "type": "code",
+        "data": {
+          "executionId": null,
+          "errorHandling": {
+            "strategy": "stop"
+          },
+          "disabled": false,
+          "name": "Build manager notification email",
+          "slug": "buildManagerNotificationEmail",
+          "language": "javascript",
+          "code": "const row = forEachInterview.output.currentItem;\n\nfunction normalizeName(value) {\n  return String(value || '')\n    .trim()\n    .replace(/\\s+/g, ' ')\n    .split(' ')\n    .map(part => part ? part.charAt(0).toUpperCase() + part.slice(1).toLowerCase() : part)\n    .join(' ');\n}\n\nconst employeeName = normalizeName(row.ckr_employeedisplayname) || row.ckr_employeeemail || 'the employee';\nconst status = Number(row.ckr_interviewstatus);\nconst sharePointFolderUrl = row.ckr_sharepointfolderurl || '';\nconst logoFileName = getFile.output.result?._metadata?.name || 'BASFo_wh100db_3c.png';\n\nconst headline = 'Good news!';\nconst completionText = `${employeeName} has finished their Knowledge Retention interview.`;\nconst statusNote = status === 60\n  ? 'They have completed the interview, but still need to review and submit their final summary.'\n  : '';\nconst linkText = 'Open knowledge handover folder';\nconst button = sharePointFolderUrl\n  ? `<tr><td style=\"padding:8px 40px 0;\"><table cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\"><tr><td style=\"background-color:#004a96;border-radius:50px;\"><a href=\"${sharePointFolderUrl}\" target=\"_blank\" style=\"display:inline-block;padding:14px 32px;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;border-radius:50px;\">${linkText} &rarr;</a></td></tr></table></td></tr>`\n  : '';\nconst fallbackText = sharePointFolderUrl ? '' : '<p style=\"margin:0 0 16px;font-size:15px;line-height:1.7;color:#3d3d3d;\">The SharePoint folder link is not available for this interview.</p>';\n\n// Reference the attached logo with its Content-ID for Outlook rendering.\nconst logo = `<img src=\"cid:${logoFileName}\" alt=\"BASF\" width=\"100\" style=\"display:block;width:100px;height:auto;border:0;outline:none;text-decoration:none;\">`;\n\nconst html = `<!DOCTYPE html>\n<html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"></head>\n<body style=\"margin:0;padding:0;background-color:#f2f4f7;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"background-color:#f2f4f7;\"><tr><td align=\"center\" style=\"padding:40px 16px;\">\n<table width=\"560\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"background-color:#ffffff;border-radius:12px;overflow:hidden;max-width:560px;box-shadow:0 2px 12px rgba(0,0,0,0.06);\">\n<tr><td style=\"background-color:#004a96;padding:16px 40px;\"><table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\"><tr><td align=\"left\" style=\"vertical-align:middle;\">${logo}</td><td align=\"right\" style=\"vertical-align:middle;\"><span style=\"font-size:12px;line-height:1.5;color:#dcecff;\">Automated Knowledge Retention email</span></td></tr></table></td></tr>\n<tr><td style=\"height:4px;background-color:#21a0d2;font-size:0;line-height:0;\">&nbsp;</td></tr>\n<tr><td style=\"padding:36px 40px 0;font-size:48px;line-height:1;\">🎉</td></tr>\n<tr><td style=\"padding:12px 40px 0;\"><h1 style=\"margin:0;font-size:24px;font-weight:700;color:#004a96;line-height:1.35;\">${headline}</h1></td></tr>\n<tr><td style=\"padding:16px 40px 0;\"><table cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\"><tr><td style=\"height:3px;width:40px;background-color:#21a0d2;font-size:0;line-height:0;\">&nbsp;</td></tr></table></td></tr>\n<tr><td style=\"padding:22px 40px 0;\"><p style=\"margin:0 0 16px;font-size:15px;line-height:1.7;color:#3d3d3d;\">Hello,</p><p style=\"margin:0 0 16px;font-size:16px;font-weight:600;line-height:1.7;color:#1a1a1a;\">${completionText}</p>${statusNote ? '<p style=\"margin:0 0 16px;font-size:15px;line-height:1.7;color:#3d3d3d;\">' + statusNote + '</p>' : ''}<p style=\"margin:0 0 16px;font-size:15px;line-height:1.7;color:#3d3d3d;\">You can access the knowledge they handed over using the link below.</p>${fallbackText}</td></tr>\n${button}\n<tr><td style=\"height:40px;font-size:0;line-height:0;\">&nbsp;</td></tr>\n<tr><td style=\"background-color:#f7f9fb;padding:20px 40px;border-top:1px solid #e8ecf0;\"><p style=\"margin:0;font-size:12px;color:#8e929b;\"><span style=\"font-weight:600;color:#6b6f78;\">Knowledge Retention</span></p></td></tr>\n</table></td></tr></table></body></html>`;\n\nreturn {\n  subject: 'Knowledge Retention interview completed - ' + employeeName,\n  html,\n  interviewId: row.ckr_interviewid,\n  employeeFullName: employeeName,\n  managerEmail: row.cr32c_manageremail || '',\n  sharePointFolderUrl,\n  logoFileName,\n  interviewStatus: status\n};"
+        },
+        "id": "8083f0b4-471e-4973-b43f-4092e143c229",
+        "position": {
+          "x": 2100,
+          "y": 20
+        }
+      },
+      {
+        "type": "code",
+        "data": {
+          "executionId": null,
+          "errorHandling": {
+            "strategy": "stop"
+          },
+          "disabled": false,
+          "name": "Prepare successful send writeback",
+          "slug": "prepareSuccessfulSendWriteback",
+          "language": "javascript",
+          "code": "// Build writeback rows ONLY from loop iterations where the manager email sent successfully.\n// This preserves the exact records processed in this run instead of re-reading queryRecords.\nconst iterations = loopEnd.output.iterations || [];\n\nconst updates = iterations\n  .filter(iteration => {\n    const sendExecution = (iteration.executions || []).find(\n      execution => execution.nodeSlug === 'sendManagerNotification'\n    );\n    return sendExecution && sendExecution.output != null;\n  })\n  .map(iteration => ({\n    table: 'ckr_interviews',\n    id: iteration.item.ckr_interviewid,\n    values: {\n      cr32c_managernotified: true\n    }\n  }))\n  .filter(update => Boolean(update.id));\n\nreturn {\n  updates,\n  count: updates.length\n};"
+        },
+        "id": "6237fd47-8973-4e38-8a79-d0fabfa768ee",
+        "position": {
+          "x": 3660,
+          "y": 20
+        }
+      },
+      {
+        "type": "loop_end",
+        "data": {
+          "executionId": null,
+          "errorHandling": {
+            "strategy": "continue"
+          },
+          "disabled": false,
+          "name": "Loop end",
+          "slug": "loopEnd",
+          "loopEndSlug": "forEachInterview"
+        },
+        "id": "ed1fdf0b-11db-43a2-b975-862c6f5911f5",
+        "position": {
+          "x": 3140,
+          "y": 20
+        }
+      },
+      {
+        "type": "action",
+        "data": {
+          "errorHandling": {
+            "strategy": "stop"
+          },
+          "disabled": false,
+          "slug": "queryRecords",
+          "actionId": "79af33e6-3f20-4ec8-8efa-211d8ae65006",
+          "actionVersion": 1,
+          "config": {
+            "connectionId": null,
+            "requiresConfirmation": false,
+            "modelId": "167f7823-e7c0-46ff-b505-4bcb68d3898c",
+            "fields": {
+              "top": {
+                "mode": "manual",
+                "value": "200"
+              },
+              "table": {
+                "mode": "manual",
+                "value": "ckr_interviews"
+              },
+              "select": {
+                "mode": "manual",
+                "value": "{{['ckr_name','ckr_sharepointfolderurl','cr32c_manageremail','cr32c_managernotified','ckr_employeeemail','ckr_employeedisplayname','ckr_interviewstatus','ckr_interviewid','ckr_language','ckr_totalquestions','ckr_answeredquestions','cr32c_reminder','cr32c_devinterview']}}"
+              },
+              "filters": {
+                "mode": "manual",
+                "value": "{{[{field:'cr32c_devinterview',operator:'eq',value:false},{field:'cr32c_manageremail',operator:'contains',value:'@'},{field:'cr32c_managernotified',operator:'eq',value:false},{field:'ckr_name',operator:'startswith',value:'KR '},{field:'ckr_interviewstatus',operator:'ge',value:60},{field:'ckr_interviewstatus',operator:'ne',value:80}]}}"
+              },
+              "orderBy": {
+                "mode": "none"
+              },
+              "exportAsCsv": {
+                "mode": "manual",
+                "value": "{{false}}"
+              },
+              "orderDirection": {
+                "mode": "none"
+              }
+            }
+          }
+        },
+        "id": "39806372-d4bb-43b1-80fb-a1986a7f1aca",
+        "position": {
+          "x": 1060,
+          "y": 20
+        }
+      },
+      {
+        "type": "action",
+        "data": {
+          "executionId": null,
+          "errorHandling": {
+            "strategy": "stop"
+          },
+          "disabled": false,
+          "slug": "bulkUpdateManagerNotified",
+          "name": "Bulk update manager notified",
+          "actionId": "99d9d240-4dc6-41fe-a35c-e6d1a1ac3fc1",
+          "actionVersion": 1,
+          "config": {
+            "connectionId": null,
+            "requiresConfirmation": false,
+            "modelId": "167f7823-e7c0-46ff-b505-4bcb68d3898c",
+            "fields": {
+              "rows": {
+                "mode": "manual",
+                "value": "{{prepareSuccessfulSendWriteback.output.updates}}"
+              },
+              "dryRun": {
+                "mode": "manual",
+                "value": "{{false}}"
+              }
+            }
+          }
+        },
+        "id": "9df48b85-80a6-4286-abfe-ca9b8a9c06c9",
+        "position": {
+          "x": 4180,
+          "y": 20
+        }
+      },
+      {
+        "type": "action",
+        "data": {
+          "executionId": null,
+          "errorHandling": {
+            "strategy": "stop"
+          },
+          "disabled": false,
+          "slug": "getFile",
+          "name": "Get file",
+          "actionId": "92ca7505-a99c-4cc3-9a53-69546d6c122d",
+          "actionVersion": 1,
+          "config": {
+            "connectionId": null,
+            "requiresConfirmation": false,
+            "modelId": "167f7823-e7c0-46ff-b505-4bcb68d3898c",
+            "fields": {
+              "itemId": {
+                "mode": "manual",
+                "value": "01GEALFYYEXTQXI54TNBDYVJ2YNY373CJH",
+                "prompt": null
+              },
+              "parent": {
+                "mode": "manual",
+                "value": "{{ {driveId: \"b!vZ_bW7Hw40iAIb9DwZsikNCALDWd2nVJo-NVFby6FScG4DGaMdL9RIh8LQuS1g7v\"} }}",
+                "prompt": null
+              }
+            }
+          }
+        },
+        "id": "64149801-1fa6-48c1-941c-902d5df653fe",
+        "position": {
+          "x": 540,
+          "y": 20
+        }
+      },
+      {
+        "type": "action",
+        "data": {
+          "executionId": null,
+          "errorHandling": {
+            "strategy": "stop"
+          },
+          "disabled": false,
+          "slug": "sendManagerNotification",
+          "name": "Send manager notification",
+          "actionId": "5abf1b30-cafb-4bde-96bf-8aa1955428e8",
+          "actionVersion": 1,
+          "config": {
+            "connectionId": null,
+            "requiresConfirmation": false,
+            "modelId": "167f7823-e7c0-46ff-b505-4bcb68d3898c",
+            "fields": {
+              "body": {
+                "mode": "manual",
+                "value": "{{buildManagerNotificationEmail.output.html}}"
+              },
+              "files": {
+                "mode": "manual",
+                "value": "{{getFile.output.result._metadata.name}}"
+              },
+              "isHtml": {
+                "mode": "manual",
+                "value": "{{true}}"
+              },
+              "subject": {
+                "mode": "manual",
+                "value": "{{buildManagerNotificationEmail.output.subject}}"
+              },
+              "ccRecipients": {
+                "mode": "none"
+              },
+              "toRecipients": {
+                "mode": "manual",
+                "value": "{{buildManagerNotificationEmail.output.managerEmail}}"
+              },
+              "bccRecipients": {
+                "mode": "none"
+              },
+              "fromUserEmail": {
+                "mode": "manual",
+                "value": "Knowledge-Retention@basf.com"
+              }
+            }
+          }
+        },
+        "id": "cf474660-8541-47f8-a05a-954e81ffc554",
+        "position": {
+          "x": 2620,
+          "y": 20
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "25c2741b-f5a6-4bad-a23c-18958db69dfb",
+        "source": "39806372-d4bb-43b1-80fb-a1986a7f1aca",
+        "target": "1e3ba8f7-4fd7-4f6d-a574-a3686f1efe14",
+        "animated": false,
+        "sourceHandle": "output-success",
+        "targetHandle": "input-default",
+        "conditionId": null
+      },
+      {
+        "id": "d1bb3a6f-1918-4ad6-aba2-c4a13759dd21",
+        "source": "1e3ba8f7-4fd7-4f6d-a574-a3686f1efe14",
+        "target": "8083f0b4-471e-4973-b43f-4092e143c229",
+        "animated": false,
+        "sourceHandle": "output-success",
+        "targetHandle": "input-default",
+        "conditionId": null
+      },
+      {
+        "id": "6fb75d9c-e2e7-40aa-9507-6414a7f33957",
+        "source": "8083f0b4-471e-4973-b43f-4092e143c229",
+        "target": "cf474660-8541-47f8-a05a-954e81ffc554",
+        "animated": false,
+        "sourceHandle": "output-success",
+        "targetHandle": "input-default",
+        "conditionId": null
+      },
+      {
+        "id": "bc7c01bc-fa15-4b17-bc1d-02cdc898d288",
+        "source": "cf474660-8541-47f8-a05a-954e81ffc554",
+        "target": "ed1fdf0b-11db-43a2-b975-862c6f5911f5",
+        "animated": false,
+        "sourceHandle": "output-success",
+        "targetHandle": "input-default",
+        "conditionId": null
+      },
+      {
+        "id": "5895f037-3b47-442d-ad0f-acebd6e5eafb",
+        "source": "ed1fdf0b-11db-43a2-b975-862c6f5911f5",
+        "target": "6237fd47-8973-4e38-8a79-d0fabfa768ee",
+        "animated": false,
+        "sourceHandle": "output-success",
+        "targetHandle": "input-default",
+        "conditionId": null
+      },
+      {
+        "id": "dd86fd10-d95b-4407-b1f5-a01e98efa80b",
+        "source": "9848574e-2132-4b42-a985-11674d0c4f39",
+        "target": "64149801-1fa6-48c1-941c-902d5df653fe",
+        "animated": false,
+        "sourceHandle": "output-success",
+        "targetHandle": "input-default",
+        "conditionId": null
+      },
+      {
+        "id": "239defb6-6cba-4d0c-b933-77723f936ae6",
+        "source": "64149801-1fa6-48c1-941c-902d5df653fe",
+        "target": "39806372-d4bb-43b1-80fb-a1986a7f1aca",
+        "animated": false,
+        "sourceHandle": "output-success",
+        "targetHandle": "input-default",
+        "conditionId": null
+      },
+      {
+        "id": "c6f55989-1b94-4356-87da-7b48cca86844",
+        "source": "6237fd47-8973-4e38-8a79-d0fabfa768ee",
+        "target": "9df48b85-80a6-4286-abfe-ca9b8a9c06c9",
+        "animated": false,
+        "sourceHandle": "output-success",
+        "targetHandle": "input-default",
+        "conditionId": null
+      }
+    ]
+  }
+}
