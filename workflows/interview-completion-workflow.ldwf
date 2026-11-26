@@ -238,7 +238,7 @@
           "actionVersion": 1,
           "config": {
             "connectionId": null,
-            "requiresConfirmation": true,
+            "requiresConfirmation": false,
             "modelId": "167f7823-e7c0-46ff-b505-4bcb68d3898c",
             "fields": {
               "body": {

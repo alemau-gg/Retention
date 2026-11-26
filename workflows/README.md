@@ -86,20 +86,17 @@ When question counts are known it adds "N questions left – about N×7 minutes"
 
 ## Known issues / before going live
 
-Checked against the exported JSON and the current agent code. Already fixed in these files compared with the original exports: the completion email now goes to the manager instead of a hard-coded address; DEV interviews are excluded from both reminder queries; the abandoned query uses `eq 80` (it used `gt 70`, which matched the same rows) and skips interviews whose feedback email was already sent; the banner regex is `/(<body[^>]*>)/`; the Chinese question/minute words and the whitespace regex produce real characters; the reminder writeback passes `rows` as an array and `dryRun` as a boolean. Re-apply these if you re-import from an older export.
-
-**Completion workflow**
-1. **`requiresConfirmation: true` on the send step.** A scheduled run waits for a manual approval on every email. Set it to `false` for unattended runs.
+Checked against the exported JSON and the current agent code. Already fixed in these files compared with the original exports: the completion email now goes to the manager instead of a hard-coded address and no longer waits for a manual approval (`requiresConfirmation: false`); DEV interviews are excluded from both reminder queries; the abandoned query uses `eq 80` (it used `gt 70`, which matched the same rows) and skips interviews whose feedback email was already sent; the banner regex is `/(<body[^>]*>)/`; the Chinese question/minute words and the whitespace regex produce real characters; the reminder writeback passes `rows` as an array and `dryRun` as a boolean. Re-apply these if you re-import from an older export.
 
 **Reminder workflow**
-2. **The "Last call!" stage (reminder 3) can't be reached.** The query excludes `cr32c_reminder = 2` and the loop keeps `< 2`, so status `30` gets at most the 1st and 2nd templates.
-3. **The status 20 copy doesn't match status 20.** In the state machine, `20` is discovery (questions not generated yet) and `30` is when questions exist, but the `20`/`25` email says "your topics and questions are all set". Status `25` doesn't exist.
-4. **Null filters.** Dataverse `ne`/`eq` don't match null values. If `cr32c_reminder` has no default (null instead of 0), `cr32c_reminder ne 2` never picks up first-time reminders. The same applies to `cr32c_abandonedfeedback eq false` if that column has no default. Check both column defaults.
-5. **Reminders overwrite `ckr_lastcheckpointon`.** The agent doesn't read it back, so nothing breaks, but it no longer shows the employee's last real activity for reporting. A dedicated `cr32c_lastreminderon` would be cleaner.
-6. **The writeback node has two incoming edges** (one from each loop end). Check that Langdock runs it once after both branches, not once per branch.
-7. **`ckr_latinteractionon`** is selected in both queries but isn't used anywhere in the agent (likely a typo of a last-interaction field). If the column doesn't exist, `admin_query_records` fails the query.
+1. **The "Last call!" stage (reminder 3) can't be reached.** The query excludes `cr32c_reminder = 2` and the loop keeps `< 2`, so status `30` gets at most the 1st and 2nd templates.
+2. **The status 20 copy doesn't match status 20.** In the state machine, `20` is discovery (questions not generated yet) and `30` is when questions exist, but the `20`/`25` email says "your topics and questions are all set". Status `25` doesn't exist.
+3. **Null filters.** Dataverse `ne`/`eq` don't match null values. If `cr32c_reminder` has no default (null instead of 0), `cr32c_reminder ne 2` never picks up first-time reminders. The same applies to `cr32c_abandonedfeedback eq false` if that column has no default. Check both column defaults.
+4. **Reminders overwrite `ckr_lastcheckpointon`.** The agent doesn't read it back, so nothing breaks, but it no longer shows the employee's last real activity for reporting. A dedicated `cr32c_lastreminderon` would be cleaner.
+5. **The writeback node has two incoming edges** (one from each loop end). Check that Langdock runs it once after both branches, not once per branch.
+6. **`ckr_latinteractionon`** is selected in both queries but isn't used anywhere in the agent (likely a typo of a last-interaction field). If the column doesn't exist, `admin_query_records` fails the query.
 
 **Both workflows**
-8. **Empty days fail the run.** When nothing was sent, the writeback receives `[]`, and `admin_bulk_writeback` requires at least 1 row, so the run ends as failed (no rows are written, so no data is affected). The exports contain no condition node to copy a schema from, so there's no guard yet: add a condition in the editor that skips the writeback when the row count is 0.
-9. **A single failed send may stop the run.** Send steps use `errorHandling: stop`. If that aborts the run before the writeback, people already emailed in that run are not flagged and get the email again next run. Consider `continue` on the send steps (the writeback already only counts successful sends).
-10. **200-row cap** (`top` and `maxIterations`). Fine for now; anything beyond 200 rolls over to the next run.
+7. **Empty days fail the run.** When nothing was sent, the writeback receives `[]`, and `admin_bulk_writeback` requires at least 1 row, so the run ends as failed (no rows are written, so no data is affected). The exports contain no condition node to copy a schema from, so there's no guard yet: add a condition in the editor that skips the writeback when the row count is 0.
+8. **A single failed send may stop the run.** Send steps use `errorHandling: stop`. If that aborts the run before the writeback, people already emailed in that run are not flagged and get the email again next run. Consider `continue` on the send steps (the writeback already only counts successful sends).
+9. **200-row cap** (`top` and `maxIterations`). Fine for now; anything beyond 200 rolls over to the next run.
