@@ -262,7 +262,7 @@
               },
               "toRecipients": {
                 "mode": "manual",
-                "value": "U10171839@basfad.basf.net"
+                "value": "{{buildManagerNotificationEmail.output.managerEmail}}"
               },
               "bccRecipients": {
                 "mode": "none"
